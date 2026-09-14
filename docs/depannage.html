@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dépannage — Nova</title>
+<meta name="description" content="Solutions aux problèmes courants de Nova : checksum SHA-256 qui ne correspond pas, Gatekeeper qui refuse d'ouvrir l'app, SmartScreen sous Windows, micro muet."/>
+<link rel="stylesheet" href="style.css"/>
+<style>
+  .fix-wrap{max-width:820px;margin:0 auto}
+
+  /* ── accès rapide ── */
+  .fix-jump{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin:0 auto 34px}
+  .fix-jump a{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--panel-brd);
+    background:var(--panel);color:var(--muted);border-radius:999px;padding:8px 16px;
+    font-size:13.5px;text-decoration:none;transition:all .18s}
+  .fix-jump a:hover{color:var(--txt);border-color:var(--accent)}
+  .fix-jump svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+  /* ── une solution ── */
+  .fix{background:var(--panel);border:1px solid var(--panel-brd);border-radius:20px;
+    padding:30px 32px;margin-bottom:24px;scroll-margin-top:calc(var(--nav-h) + 20px)}
+  .fix-head{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  .fix-head .n{display:inline-flex;align-items:center;justify-content:center;flex:none;
+    width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#5a48e0);
+    color:#fff;font-weight:700;font-size:14px}
+  .fix-head svg{width:21px;height:21px;stroke:var(--accent2);fill:none;stroke-width:1.7;
+    stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .fix-head h2{font-size:19px;margin:0}
+  .fix p{color:var(--muted);font-size:14.8px;line-height:1.66;margin:0 0 14px}
+  .fix p b, .fix li b{color:var(--txt)}
+  .fix ol, .fix ul{color:var(--muted);font-size:14.8px;line-height:1.66;margin:0 0 14px;padding-left:22px}
+  .fix li{margin-bottom:7px}
+  .fix li::marker{color:var(--accent2);font-weight:600}
+  .fix code{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12.8px;
+    background:rgba(124,108,255,.13);border-radius:5px;padding:1.5px 6px;color:#c9c0ff}
+  .fix .why{border-left:3px solid var(--accent);background:rgba(124,108,255,.07);
+    border-radius:0 12px 12px 0;padding:10px 16px;font-size:13.8px;margin:0 0 14px}
+  .fix .why p{margin:0;font-size:13.8px}
+
+  /* ── bloc de commande, avec bouton copier ── */
+  .fix .term{margin:6px 0 16px;font-size:13.5px}
+  .fix .term pre{padding:18px 20px;color:#c9c4e8;line-height:1.75}
+  .fix .term .c{color:#6e6a8f}
+  .term-bar .copy-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;
+    background:none;border:none;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;
+    padding:2px 6px;border-radius:8px;transition:color .15s}
+  .term-bar .copy-btn:hover{color:var(--txt)}
+  .term-bar .copy-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round}
+  .term-bar .copy-btn.ok{color:#8fe6ad}
+
+  /* ── pied de page ── */
+  .fix-more{text-align:center;color:var(--muted);font-size:14px;margin:30px 0 8px}
+  .fix-more a{color:var(--accent2)}
+  .fix-note{display:flex;gap:14px;align-items:flex-start;background:var(--panel);
+    border:1px solid var(--panel-brd);border-radius:16px;padding:18px 20px;margin-top:26px}
+  .fix-note svg{width:20px;height:20px;flex:none;stroke:var(--accent2);fill:none;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+  .fix-note p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
+  .fix-note a{color:var(--accent2)}
+
+  @media (max-width:640px){
+    .fix{padding:22px 18px}
+    .fix-head h2{font-size:17px}
+  }
+</style>
+</head>
+<body data-page="depannage">
+
+<header class="page-head center" style="padding-top:calc(var(--nav-h) + 52px);max-width:1200px;margin:0 auto">
+  <h1 class="sec-title">Dépannage</h1>
+  <p class="sec-sub" style="max-width:640px;margin:0 auto 26px">Un souci ? Il est presque certainement
+  dans cette liste — et la solution tient en une commande ou deux.</p>
+</header>
+
+<main class="fix-wrap">
+
+  <nav class="fix-jump" aria-label="Accès rapide">
+    <a href="#checksum"><i data-ico="shield"></i>Checksum SHA-256</a>
+    <a href="#gatekeeper"><i data-ico="apple"></i>Gatekeeper (macOS)</a>
+    <a href="#windows"><i data-ico="windows"></i>SmartScreen (Windows)</a>
+    <a href="#micro"><i data-ico="mic"></i>Micro muet</a>
+  </nav>
+
+  <!-- ── 1. Checksum ─────────────────────────────────────────────── -->
+  <article class="fix" id="checksum">
+    <div class="fix-head">
+      <span class="n">1</span>
+      <i data-ico="shield"></i>
+      <h2>Le checksum SHA-256 ne correspond pas</h2>
+    </div>
+    <p><b>Ne lance pas le DMG ni l'exe.</b> La cause la plus fréquente est bénigne : un
+    téléchargement incomplet — un proxy ou un Wi-Fi captif peut tronquer les gros fichiers
+    sans prévenir. Retélécharge d'abord, remets <code>SHA256SUMS.txt</code> (téléchargeable
+    sur la page de la release) à côté du fichier, puis revérifie :</p>
+
+    <div class="term">
+      <div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
+        <button class="copy-btn" data-copy="shasum -a 256 -c SHA256SUMS.txt"><i data-ico="copy"></i>copier</button>
+      </div>
+      <pre>shasum -a 256 -c SHA256SUMS.txt   <span class="c"># macOS · sha256sum -c sur Linux</span></pre>
+    </div>
+
+    <ul>
+      <li><code>: OK</code> → c'était un téléchargement incomplet, tout va bien ;</li>
+      <li>encore différent → compare avec le bloc « Checksums SHA-256 » des
+      <a href="https://github.com/DmzGamingYT/nova/releases/latest" target="_blank" rel="noopener">notes de la release</a>
+      (et sur le site : la puce SHA-256 de la page Installation est cliquable pour copier l'empreinte complète), puis
+      <a href="https://github.com/DmzGamingYT/nova/issues" target="_blank" rel="noopener">ouvre une Issue</a>
+      avec la version, ton OS et le hash obtenu.</li>
+    </ul>
+    <div class="why"><p>Chaque release publie les checksums du DMG, de l'installeur Windows et du ZIP de mise à
+    jour — le même fichier <code>SHA256SUMS.txt</code> couvre tout, quelle que soit ta plateforme.</p></div>
+  </article>
+
+  <!-- ── 2. Gatekeeper ───────────────────────────────────────────── -->
+  <article class="fix" id="gatekeeper">
+    <div class="fix-head">
+      <span class="n">2</span>
+      <i data-ico="apple"></i>
+      <h2>macOS refuse d'ouvrir Nova (Gatekeeper)</h2>
+    </div>
+    <p>C'est le prix du build non signé — macOS protège par défaut. Trois leviers, du plus
+    simple au plus direct :</p>
+    <ol>
+      <li><b>Clic droit → Ouvrir</b> sur <code>Nova.app</code> (un vrai clic droit, pas un
+      double-clic), puis « Ouvrir » dans le dialogue — suffit dans la plupart des cas ;</li>
+      <li><b>Réglages Système → Confidentialité et sécurité</b> : descendre au bloc
+      « Nova a été bloqué… » → <b>Ouvrir quand même</b> ;</li>
+      <li>si le message dit « <b>Nova est endommagé</b> » (fréquent pour les builds ad-hoc
+      sur les macOS récents), retire l'attribut de quarantaine posé au téléchargement :</li>
+    </ol>
+
+    <div class="term">
+      <div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
+        <button class="copy-btn" data-copy="xattr -dr com.apple.quarantine /Applications/Nova.app"><i data-ico="copy"></i>copier</button>
+      </div>
+      <pre>xattr -dr com.apple.quarantine /Applications/Nova.app</pre>
+    </div>
+
+    <div class="why"><p>La commande ne contourne rien : elle dit juste à Gatekeeper que tu as choisi cette app
+    toi-même. Quand l'app sera signée et notariée (secrets Apple en CI), tout ce paragraphe disparaîtra.</p></div>
+  </article>
+
+  <!-- ── 3. Windows ──────────────────────────────────────────────── -->
+  <article class="fix" id="windows">
+    <div class="fix-head">
+      <span class="n">3</span>
+      <i data-ico="windows"></i>
+      <h2>Windows signale Nova (SmartScreen)</h2>
+    </div>
+    <p>Même logique que macOS : l'installeur n'étant pas signé, <b>Microsoft Defender
+    SmartScreen</b> affiche « Windows a protégé votre ordinateur ». Pour lancer quand même :</p>
+    <ol>
+      <li>dans le dialogue SmartScreen, clique <b>Informations complémentaires</b> ;</li>
+      <li>puis <b>Exécuter quand même</b> — l'installeur reprend son cours normal ;</li>
+      <li>si ton antivirus met l'installeur en quarantaine, restaure-le et vérifie d'abord
+      son checksum (point 1) : si le hash correspond à celui de la release, le fichier est
+      intact — l'alerte vient uniquement de l'absence de signature.</li>
+    </ol>
+    <div class="why"><p>L'app n'a pas besoin des droits administrateur : elle s'installe dans ton profil
+    utilisateur et son serveur interne n'écoute que sur <code>127.0.0.1</code>, jamais sur le réseau.</p></div>
+  </article>
+
+  <!-- ── 4. Micro ────────────────────────────────────────────────── -->
+  <article class="fix" id="micro">
+    <div class="fix-head">
+      <span class="n">4</span>
+      <i data-ico="mic"></i>
+      <h2>Le micro ne fonctionne pas</h2>
+    </div>
+    <ol>
+      <li><b>Permission macOS</b> : Réglages Système → Confidentialité et sécurité →
+      <b>Micro</b> → active Nova. Si elle n'apparaît pas dans la liste, lance l'app et tente
+      un tour de micro : macOS l'inscrit alors automatiquement.</li>
+      <li><b>Permission refusée avant ?</b> macOS ne repose jamais la question — remets-la
+      à zéro, puis relance Nova et accepte la demande :</li>
+    </ol>
+
+    <div class="term">
+      <div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
+        <button class="copy-btn" data-copy="tccutil reset Microphone app.nova.assistant"><i data-ico="copy"></i>copier</button>
+      </div>
+      <pre>tccutil reset Microphone app.nova.assistant</pre>
+    </div>
+
+    <ol start="3">
+      <li><b>Lancé via <code>npm start</code> en dev ?</b> C'est le terminal (ou Electron) qui
+      détient la permission, pas « Nova » — cherche le nom de ton terminal dans la liste du
+      point 1.</li>
+      <li><b>Démo web dans le navigateur ?</b> Le micro dépend des permissions du <i>site</i> :
+      icône cadenas ou micro dans la barre d'adresse → Autoriser, puis recharge la page.</li>
+    </ol>
+  </article>
+
+  <p class="fix-more">Toujours bloqué ?
+    <a href="https://github.com/DmzGamingYT/nova/issues" target="_blank" rel="noopener">Ouvre une Issue</a> —
+    précise la version (menu de l'app), ton OS et ce que tu observes.</p>
+
+  <div class="fix-note">
+    <i data-ico="sparkle"></i>
+    <p>Astuce : la page <a href="nouveautes.html">Nouveautés</a> liste toutes les versions avec
+    leurs notes ; le <a href="https://github.com/DmzGamingYT/nova/blob/main/tools/gen-release-notes.sh"
+    target="_blank" rel="noopener">script de release</a> montre exactement d'où viennent les checksums.</p>
+  </div>
+</main>
+
+<script src="icons.js"></script>
+<script src="site.js"></script>
+<script>
+/* Boutons « copier » des blocs de commande */
+(function(){
+  document.querySelectorAll('.copy-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var text = btn.getAttribute('data-copy') || '';
+      function ok(){
+        btn.classList.add('ok');
+        var label = btn.lastChild;
+        var old = label.textContent;
+        label.textContent = ' copié ✓';
+        setTimeout(function(){ btn.classList.remove('ok'); label.textContent = old; }, 1600);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(ok, function(){ fallback(); });
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand('copy'); ok(); } catch(_){}
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
