@@ -15,7 +15,7 @@ Elle t'écoute, réfléchit avec Groq, et te répond **à voix haute** — le to
 ![tests](https://img.shields.io/badge/tests-68%20%2B%20sport-7c6cff)
 ![licence](https://img.shields.io/badge/licence-MIT-blue)
 
-[🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App macOS](#-application-macos-native) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🗣️ Commandes vocales](https://dmzgamingyt.github.io/nova/commandes.html) · [⚡ **Démo live**](https://dmzgamingyt.github.io/nova/demo.html) · [🌐 Site web](https://dmzgamingyt.github.io/nova/) · [🏗️ Architecture](#-architecture)
+[🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App macOS](#-application-macos-native) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🗣️ Commandes vocales](https://dmzgamingyt.github.io/nova/commandes.html) · [⚡ **Démo live**](https://dmzgamingyt.github.io/nova/demo.html) · [📰 Nouveautés](https://dmzgamingyt.github.io/nova/nouveautes.html) · [🌐 Site web](https://dmzgamingyt.github.io/nova/) · [🏗️ Architecture](#-architecture)
 
 </div>
 
