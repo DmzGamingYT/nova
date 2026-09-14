@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="320" viewBox="0 0 560 320">
+  <defs>
+    <linearGradient id="spbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#171233"/><stop offset="1" stop-color="#0e0b1e"/>
+    </linearGradient>
+  </defs>
+  <rect width="560" height="320" fill="url(#spbg)"/>
+
+  <g font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif">
+    <!-- semaine : 7 jours, progression animée -->
+    <g>
+      <rect x="40" y="40" width="56" height="34" rx="10" fill="rgba(47,191,155,.16)" stroke="rgba(47,191,155,.55)"/>
+      <text x="68" y="62" text-anchor="middle" font-size="11" fill="#9defd8">lun ✓</text>
+      <rect x="106" y="40" width="56" height="34" rx="10" fill="rgba(47,191,155,.16)" stroke="rgba(47,191,155,.55)"/>
+      <text x="134" y="62" text-anchor="middle" font-size="11" fill="#9defd8">mar ✓</text>
+      <rect x="172" y="40" width="56" height="34" rx="10" fill="rgba(47,191,155,.16)" stroke="rgba(47,191,155,.55)"/>
+      <text x="200" y="62" text-anchor="middle" font-size="11" fill="#9defd8">mer ✓</text>
+      <rect x="238" y="40" width="56" height="34" rx="10" fill="rgba(124,108,255,.2)" stroke="#7c6cff" stroke-width="1.6">
+        <animate attributeName="stroke-opacity" values="1;0.4;1" dur="1.8s" repeatCount="indefinite"/>
+      </rect>
+      <text x="266" y="62" text-anchor="middle" font-size="11" fill="#cdc6ff">auj.</text>
+      <rect x="304" y="40" width="56" height="34" rx="10" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.16)"/>
+      <text x="332" y="62" text-anchor="middle" font-size="11" fill="#6e6a8f">ven</text>
+      <rect x="370" y="40" width="56" height="34" rx="10" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.16)"/>
+      <text x="398" y="62" text-anchor="middle" font-size="11" fill="#6e6a8f">sam</text>
+      <rect x="436" y="40" width="56" height="34" rx="10" fill="rgba(245,168,60,.08)" stroke="rgba(245,168,60,.35)"/>
+      <text x="464" y="62" text-anchor="middle" font-size="11" fill="#ffd9a0">dim ·repos</text>
+    </g>
+
+    <!-- séance du jour : exercices cochés -->
+    <g>
+      <rect x="40" y="96" width="290" height="132" rx="16" fill="rgba(255,255,255,.05)" stroke="rgba(255,255,255,.12)"/>
+      <text x="62" y="124" font-size="13.5" font-weight="600" fill="#eae7f7">Séance du jour — Haut du corps</text>
+      <g stroke="#2fbf9b" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M62 146 l5 5 9 -11"><animate attributeName="stroke-dasharray" values="0 30;30 0" dur="1.2s" repeatCount="indefinite"/></path>
+        <path d="M62 176 l5 5 9 -11"><animate attributeName="stroke-dasharray" values="0 30;30 0" dur="1.2s" begin="0.3s" repeatCount="indefinite"/></path>
+        <path d="M62 206 l5 5 9 -11"><animate attributeName="stroke-dasharray" values="0 30;30 0" dur="1.2s" begin="0.6s" repeatCount="indefinite"/></path>
+      </g>
+      <text x="86" y="151" font-size="12" fill="#cfcbe8">pompes × 12 · 3 séries</text>
+      <text x="86" y="181" font-size="12" fill="#cfcbe8">dips chaise × 10 · 3 séries</text>
+      <text x="86" y="211" font-size="12" fill="#cfcbe8">planche 45 s · 3 passages</text>
+    </g>
+
+    <!-- série / niveau -->
+    <g>
+      <rect x="352" y="96" width="168" height="132" rx="16" fill="rgba(124,108,255,.1)" stroke="rgba(124,108,255,.4)"/>
+      <text x="374" y="126" font-size="12" fill="#a49ec4">série en cours</text>
+      <text x="374" y="158" font-size="30" font-weight="750" fill="#cdc6ff">4 jours</text>
+      <rect x="374" y="172" width="124" height="7" rx="3.5" fill="rgba(255,255,255,.1)"/>
+      <rect x="374" y="172" width="86" height="7" rx="3.5" fill="#7c6cff">
+        <animate attributeName="width" values="70;86;70" dur="2.6s" repeatCount="indefinite"/>
+      </rect>
+      <text x="374" y="204" font-size="12" fill="#a49ec4">objectif semaine : 4/5 · niveau 6</text>
+    </g>
+
+    <!-- commande vocale -->
+    <g>
+      <rect x="150" y="252" width="260" height="40" rx="20" fill="rgba(47,191,155,.1)" stroke="rgba(47,191,155,.45)"/>
+      <text x="280" y="277" text-anchor="middle" font-size="13" fill="#9defd8">« Nova, séance terminée » → validée</text>
+      <animate attributeName="opacity" values="0.65;1;0.65" dur="2.4s" repeatCount="indefinite"/>
+    </g>
+
+    <text x="280" y="36" text-anchor="middle" font-size="0" fill="none"> </text>
+  </g>
+</svg>

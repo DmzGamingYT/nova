@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="320" viewBox="0 0 560 320">
+  <defs>
+    <linearGradient id="mbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#171233"/><stop offset="1" stop-color="#0e0b1e"/>
+    </linearGradient>
+  </defs>
+  <rect width="560" height="320" fill="url(#mbg)"/>
+
+  <!-- conversation écrite → fichier -->
+  <g font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif">
+    <!-- bulles de conversation -->
+    <g>
+      <rect x="30" y="46" width="128" height="30" rx="15" fill="rgba(124,108,255,.28)" stroke="rgba(124,108,255,.5)"/>
+      <text x="46" y="66" font-size="12.5" fill="#e6e2ff">quelle heure… ?</text>
+      <animate attributeName="opacity" values="1;0.55;1" dur="3s" repeatCount="indefinite"/>
+    </g>
+    <g>
+      <rect x="30" y="92" width="128" height="30" rx="15" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.16)"/>
+      <text x="46" y="112" font-size="12.5" fill="#cfcbe8">il est 14 h 32 ✦</text>
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+    </g>
+    <g>
+      <rect x="30" y="138" width="128" height="30" rx="15" fill="rgba(124,108,255,.28)" stroke="rgba(124,108,255,.5)"/>
+      <text x="46" y="158" font-size="12.5" fill="#e6e2ff">et ma séance ?</text>
+      <animate attributeName="opacity" values="1;0.5;1" dur="3.4s" repeatCount="indefinite"/>
+    </g>
+
+    <!-- flux vers la puce -->
+    <path d="M170 110 C 205 110, 205 160, 236 160" stroke="#7c6cff" stroke-width="2" fill="none" stroke-dasharray="5 7" opacity="0.7">
+      <animate attributeName="stroke-dashoffset" values="0;-24" dur="1s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- puce mémoire -->
+    <g>
+      <rect x="238" y="120" width="110" height="80" rx="14" fill="rgba(124,108,255,.12)" stroke="#7c6cff" stroke-width="1.6"/>
+      <rect x="258" y="140" width="70" height="40" rx="8" fill="none" stroke="#b3a7ff" stroke-width="1.4"/>
+      <text x="270" y="165" font-size="11" fill="#b3a7ff" font-family="'SF Mono',Menlo,monospace">.json</text>
+      <!-- broches -->
+      <g stroke="#7c6cff" stroke-width="2">
+        <line x1="252" y1="112" x2="252" y2="120"/><line x1="272" y1="112" x2="272" y2="120"/>
+        <line x1="292" y1="112" x2="292" y2="120"/><line x1="312" y1="112" x2="312" y2="120"/>
+        <line x1="252" y1="200" x2="252" y2="208"/><line x1="272" y1="200" x2="272" y2="208"/>
+        <line x1="292" y1="200" x2="292" y2="208"/><line x1="312" y1="200" x2="312" y2="208"/>
+      </g>
+      <!-- écriture clignotante -->
+      <rect x="264" y="146" width="4" height="28" fill="#e6e2ff">
+        <animate attributeName="opacity" values="1;0;1" dur="0.9s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <!-- flux retour (restauration au démarrage) -->
+    <path d="M348 160 C 400 160, 400 80, 448 80" stroke="#2fbf9b" stroke-width="2" fill="none" stroke-dasharray="5 7" opacity="0.7">
+      <animate attributeName="stroke-dashoffset" values="0;-24" dur="1.4s" repeatCount="indefinite"/>
+    </path>
+
+    <!-- conversation restaurée -->
+    <g>
+      <rect x="450" y="56" width="86" height="48" rx="12" fill="rgba(47,191,155,.12)" stroke="rgba(47,191,155,.55)"/>
+      <text x="462" y="76" font-size="11" fill="#9defd8">au démarrage,</text>
+      <text x="462" y="92" font-size="11" fill="#9defd8">tout est là</text>
+      <animate attributeName="opacity" values="0.55;1;0.55" dur="2.8s" repeatCount="indefinite"/>
+    </g>
+
+    <text x="280" y="266" text-anchor="middle" font-size="13.5" fill="#a49ec4">6 conversations réinjectées dans son contexte, à chaque discussion</text>
+  </g>
+</svg>

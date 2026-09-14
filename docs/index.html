@@ -5,459 +5,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Nova — Assistante IA vocale sur Mac</title>
 <meta name="description" content="Nova : une assistante vocale française 100 % locale sur Mac. Groq, voix macOS, mémoire persistante, sandbox sécurisée. Open source."/>
-<style>
-  :root{
-    --bg:#0e0b1e; --bg2:#171233;
-    --panel:rgba(255,255,255,.055); --panel-brd:rgba(255,255,255,.12);
-    --txt:#eae7f7; --muted:#a49ec4; --accent:#7c6cff; --accent2:#b3a7ff;
-    --teal:#2fbf9b; --amber:#f5a83c;
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
-  body{
-    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-    background:linear-gradient(160deg,var(--bg) 0%,var(--bg2) 55%,#241a4f 100%);
-    color:var(--txt); overflow-x:hidden; min-height:100vh;
-  }
-  ::selection{background:rgba(124,108,255,.4)}
-
-  /* ---------- nav ---------- */
-  nav{
-    position:fixed;top:0;left:0;right:0;z-index:50;
-    display:flex;align-items:center;justify-content:space-between;
-    padding:14px 32px;
-    background:rgba(14,11,30,.55);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-    border-bottom:1px solid rgba(255,255,255,.07);
-  }
-  nav .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:.5px}
-  nav .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);animation:pulse 2.4s ease-in-out infinite}
-  nav a{color:var(--muted);text-decoration:none;font-size:14.5px;margin-left:22px;transition:color .2s}
-  nav a:hover{color:var(--txt)}
-  nav a.cta{color:#fff;background:linear-gradient(135deg,var(--accent),#5a48e0);padding:8px 18px;border-radius:20px;font-weight:600}
-  @media(max-width:760px){nav a:not(.cta){display:none}}
-
-  /* ---------- hero ---------- */
-  header{
-    min-height:100vh;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;
-    max-width:1200px;margin:0 auto;padding:120px 32px 60px;
-  }
-  @media(max-width:900px){header{grid-template-columns:1fr;text-align:center;padding-top:110px}}
-  .hero-copy h1{font-size:clamp(42px,6vw,76px);font-weight:800;letter-spacing:2px;line-height:1.05;
-    background:linear-gradient(180deg,#fff 30%,#cdc6ff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .hero-copy .tag{font-size:clamp(17px,2vw,22px);color:var(--muted);margin:18px 0 8px;max-width:520px}
-  @media(max-width:900px){.hero-copy .tag{margin:18px auto 8px}}
-  .hero-copy .tag b{color:var(--txt)}
-  .hero-badges{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 34px}
-  @media(max-width:900px){.hero-badges{justify-content:center}}
-  .chip{border:1px solid rgba(124,108,255,.45);background:rgba(124,108,255,.14);color:#cfc7ff;
-    padding:7px 16px;border-radius:20px;font-size:13.5px;font-weight:500}
-  .hero-actions{display:flex;gap:14px;flex-wrap:wrap}
-  @media(max-width:900px){.hero-actions{justify-content:center}}
-  .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:26px;font-weight:600;
-    font-size:15.5px;text-decoration:none;transition:transform .15s,box-shadow .2s}
-  .btn:hover{transform:translateY(-2px)}
-  .btn.primary{color:#fff;background:linear-gradient(135deg,var(--accent),#5a48e0);box-shadow:0 8px 30px rgba(124,108,255,.35)}
-  .btn.ghost{color:var(--txt);border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
-  .btn.ghost:hover{background:rgba(255,255,255,.1)}
-
-  /* ---------- orb ---------- */
-  .orb-stage{position:relative;display:flex;align-items:center;justify-content:center;min-height:440px}
-  #orbCanvas{width:min(420px,80vw);height:min(420px,80vw);cursor:pointer}
-  .orb-hint{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);color:var(--muted);
-    font-size:13.5px;opacity:.75;white-space:nowrap}
-  #orbState{position:absolute;top:14px;left:50%;transform:translateX(-50%);
-    font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);
-    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);
-    padding:6px 14px;border-radius:16px;backdrop-filter:blur(8px);transition:color .4s}
-
-  /* ---------- sections ---------- */
-  section{max-width:1200px;margin:0 auto;padding:90px 32px}
-  .sec-title{font-size:clamp(28px,3.6vw,40px);font-weight:750;margin-bottom:10px;text-align:center}
-  .sec-sub{color:var(--muted);text-align:center;margin-bottom:48px;font-size:16.5px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
-  .card{
-    background:var(--panel);border:1px solid var(--panel-brd);border-radius:22px;padding:28px;
-    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    transition:transform .2s,border-color .2s,box-shadow .25s;
-  }
-  .card:hover{transform:translateY(-5px);border-color:rgba(124,108,255,.5);box-shadow:0 18px 50px rgba(124,108,255,.16)}
-  .card .ico{font-size:30px;margin-bottom:14px}
-  .card h3{font-size:18.5px;margin-bottom:9px}
-  .card p{color:var(--muted);font-size:14.8px;line-height:1.6}
-
-  /* ---------- demo ---------- */
-  .demo-wrap{max-width:780px;margin:0 auto;background:var(--panel);border:1px solid var(--panel-brd);
-    border-radius:26px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);overflow:hidden;
-    box-shadow:0 24px 70px rgba(0,0,0,.4)}
-  .demo-head{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;
-    border-bottom:1px solid rgba(255,255,255,.08)}
-  .demo-head .t{font-weight:650;font-size:15px}
-  .demo-head .t .st{font-weight:400;color:var(--muted);margin-left:8px;transition:color .3s}
-  .demo-clear{color:var(--muted);background:none;border:1px solid rgba(255,255,255,.16);border-radius:14px;
-    padding:6px 14px;font-size:13px;cursor:pointer;transition:all .2s}
-  .demo-clear:hover{color:var(--txt);border-color:rgba(255,255,255,.35)}
-  #demoLog{padding:22px;min-height:320px;max-height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
-  #demoLog::-webkit-scrollbar{width:8px}
-  #demoLog::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:4px}
-  .msg{max-width:78%;padding:12px 17px;border-radius:19px;font-size:14.8px;line-height:1.55;white-space:pre-wrap}
-  .msg.user{align-self:flex-end;background:rgba(124,108,255,.24);border:1px solid rgba(124,108,255,.4);border-bottom-right-radius:6px}
-  .msg.nova{align-self:flex-start;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-bottom-left-radius:6px}
-  .msg.nova.streaming::after{content:'▍';color:var(--accent);animation:blink 1s steps(1) infinite}
-  @keyframes blink{50%{opacity:0}}
-  .demo-input{display:flex;gap:10px;padding:16px 22px;border-top:1px solid rgba(255,255,255,.08)}
-  #demoText{flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:22px;
-    color:var(--txt);padding:12px 18px;font-size:15px;outline:none;font-family:inherit;transition:border-color .2s}
-  #demoText:focus{border-color:rgba(124,108,255,.6)}
-  #demoText::placeholder{color:rgba(164,158,196,.6)}
-  #demoSend{background:linear-gradient(135deg,var(--accent),#5a48e0);border:none;color:#fff;border-radius:50%;
-    width:46px;height:46px;font-size:18px;cursor:pointer;transition:transform .15s;flex-shrink:0}
-  #demoSend:hover{transform:scale(1.08)}
-  .demo-note{text-align:center;color:var(--muted);font-size:13px;margin-top:14px}
-
-  /* ---------- install ---------- */
-  .term{max-width:720px;margin:0 auto;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.12);
-    border-radius:18px;overflow:hidden;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:14px}
-  .term-bar{display:flex;gap:7px;padding:13px 16px;background:rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.08)}
-  .term-bar i{width:12px;height:12px;border-radius:50%;display:block}
-  .term pre{padding:22px 24px;color:#c9c4e8;line-height:1.8;overflow-x:auto}
-  .term .c{color:#6e6a8f}
-  .term .k{color:var(--accent2)}
-
-  /* ---------- footer ---------- */
-  footer{border-top:1px solid rgba(255,255,255,.08);padding:44px 32px;text-align:center;color:var(--muted);font-size:14px}
-  footer .f-brand{font-weight:700;color:var(--txt);font-size:16px;margin-bottom:8px}
-  footer a{color:var(--accent2);text-decoration:none}
-  footer a:hover{text-decoration:underline}
-
-  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.6}}
-  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
-  .reveal.in{opacity:1;transform:none}
-</style>
+<link rel="stylesheet" href="style.css"/>
 </head>
-<body>
+<body data-page="index">
 
-<nav>
-  <div class="brand"><span class="dot"></span>NOVA</div>
-  <div>
-    <a href="#features">Fonctions</a>
-    <a href="#demo">Démo</a>
-    <a href="#install">Installation</a>
-    <a href="https://github.com/DmzGamingYT/nova" class="cta">GitHub ↗</a>
-  </div>
-</nav>
-
-<header>
+<header class="hero">
   <div class="hero-copy">
     <h1>NOVA</h1>
     <p class="tag">Une assistante vocale française qui vit sur ton Mac.
       Elle t'écoute, réfléchit avec <b>Groq</b>, et te répond <b>à voix haute</b> — le tout en local.</p>
-    <div class="hero-badges">
-      <span class="chip">🎤 Voix macOS</span>
-      <span class="chip">⚡ 0 dépendance npm</span>
-      <span class="chip">🛡️ Sandbox sécurisée</span>
-      <span class="chip">🌙 Mot d'activation</span>
-      <span class="chip">🏋️ Coach sportif</span>
+    <div class="badges">
+      <span class="chip"><i data-ico="mic"></i>Voix macOS</span>
+      <span class="chip"><i data-ico="bolt"></i>0 dépendance npm</span>
+      <span class="chip"><i data-ico="shield"></i>Sandbox sécurisée</span>
+      <span class="chip"><i data-ico="moon"></i>Mot d'activation</span>
+      <span class="chip"><i data-ico="dumbbell"></i>Coach sportif</span>
     </div>
-    <div class="hero-actions">
-      <a class="btn primary" href="#install">Installer sur mon Mac</a>
-      <a class="btn ghost" href="#demo">Essayer la démo ↓</a>
+    <div class="actions">
+      <a class="btn primary" href="installation.html"><i data-ico="download"></i>Installer sur mon Mac</a>
+      <a class="btn ghost" href="fonctions.html">Découvrir les fonctions<i data-ico="arrow"></i></a>
     </div>
   </div>
   <div class="orb-stage">
-    <div id="orbState">prête</div>
-    <canvas id="orbCanvas" width="840" height="840" aria-label="Orbe Nova interactive"></canvas>
+    <div class="orb-state" id="heroOrbState">prête</div>
+    <canvas id="heroOrb" width="840" height="840" aria-label="Orbe Nova interactive"></canvas>
     <div class="orb-hint">✦ clique sur l'orbe : elle écoute, réfléchit, parle</div>
   </div>
 </header>
 
-<section id="features" class="reveal">
-  <h2 class="sec-title">Pourquoi Nova</h2>
-  <p class="sec-sub">Conçue pour vivre sur ta machine — pas dans un nuage.</p>
-  <div class="grid">
-    <div class="card"><div class="ico">🗣️</div><h3>Voix naturelle</h3>
-      <p>Parle, elle répond. Les voix françaises de macOS, et la lecture démarre phrase par phrase pendant que le modèle écrit encore.</p></div>
-    <div class="card"><div class="ico">🧠</div><h3>Mémoire réelle</h3>
-      <p>Conversations, profil, programme de sport : tout est sauvegardé localement et réinjecté dans son contexte — même après redémarrage.</p></div>
-    <div class="card"><div class="ico">🛡️</div><h3>Sandbox sécurisée</h3>
-      <p>Liste blanche d'actions, arguments validés, exécution sans shell. Chaque action sur le Mac affiche une carte <i>Autoriser / Ignorer</i>.</p></div>
-    <div class="card"><div class="ico">⚡</div><h3>Zéro dépendance</h3>
-      <p>Le serveur est du Node.js pur : pas de framework, pas de <code>npm install</code>. 68 tests couvrent la sécurité et le moteur sport.</p></div>
-    <div class="card"><div class="ico">🌙</div><h3>Mot d'activation</h3>
-      <p>Dis « Nova » comme tu dirais « Siri » : elle s'éveille, écoute ta question, répond, puis se rendort toute seule.</p></div>
-    <div class="card"><div class="ico">🏋️</div><h3>Coach sportif</h3>
-      <p>Elle lit ton programme Pulse : séance du jour, technique d'un mouvement, progression — « Nova, séance terminée » valide d'un mot.</p></div>
-    <div class="card"><div class="ico">🖥️</div><h3>Contrôle du Mac</h3>
-      <p>Ouvrir une app, régler le volume, notifier, capturer l'écran, lire batterie, météo, disque — données réelles, jamais inventées.</p></div>
-    <div class="card"><div class="ico">📱</div><h3>Vraie app macOS</h3>
-      <p>Compilée pour Apple Silicon : fenêtre vibrance, icône dans le Dock, permissions micro intégrées. DMG arm64 prêt à installer.</p></div>
+<section class="section center reveal">
+  <h2 class="sec-title">Une compagne, pas un chatbot</h2>
+  <p class="sec-sub" style="max-width:640px;margin:0 auto 44px">Conçue pour vivre sur ta machine — pas dans un nuage.</p>
+  <div class="grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+    <div class="card"><div class="ico"><i data-ico="mic"></i></div><h3>Voix naturelle</h3>
+      <p>La lecture démarre phrase par phrase pendant que le modèle écrit. Coupe-la en parlant.</p></div>
+    <div class="card"><div class="ico"><i data-ico="memory"></i></div><h3>Mémoire réelle</h3>
+      <p>Conversations et profil sauvegardés localement, réinjectés à chaque discussion.</p></div>
+    <div class="card"><div class="ico"><i data-ico="shield"></i></div><h3>Sandbox</h3>
+      <p>Liste blanche d'actions, carte « Autoriser » avant chaque geste sur ton Mac.</p></div>
+    <div class="card"><div class="ico"><i data-ico="orb"></i></div><h3>Orbe vivante</h3>
+      <p>Verte quand tu parles, violette quand elle réfléchit, ambre quand elle parle.</p></div>
+  </div>
+  <div style="margin-top:40px">
+    <a class="btn ghost" href="fonctions.html">Voir toutes les fonctions en détail<i data-ico="arrow"></i></a>
   </div>
 </section>
 
-<section id="demo" class="reveal">
-  <h2 class="sec-title">Essaye-la tout de suite</h2>
-  <p class="sec-sub">Démo hors-ligne — les réponses sont pré-écrites, mais l'orbe et le streaming sont les vrais.</p>
-  <div class="demo-wrap">
-    <div class="demo-head">
-      <div class="t">Nova<span class="st" id="demoState">— prête</span></div>
-      <button class="demo-clear" id="demoClear">Effacer</button>
-    </div>
-    <div id="demoLog"></div>
-    <div class="demo-input">
-      <input id="demoText" type="text" placeholder="Écris à Nova… (Entrée pour envoyer)" autocomplete="off"/>
-      <button id="demoSend" aria-label="Envoyer">➤</button>
-    </div>
-  </div>
-  <p class="demo-note">Sur ton Mac, elle répondrait à voix haute — avec de vraies données (heure, météo, batterie…).</p>
-</section>
-
-<section id="install" class="reveal">
-  <h2 class="sec-title">Installer</h2>
-  <p class="sec-sub">Trois commandes et une clé gratuite.</p>
-  <div class="term">
-    <div class="term-bar">
-      <i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
-    </div>
-    <pre><span class="c"># 1. le projet</span>
-<span class="k">git</span> clone https://github.com/DmzGamingYT/nova.git && <span class="k">cd</span> nova
-
-<span class="c"># 2. ta clé Groq (gratuite — console.groq.com/keys)</span>
-<span class="k">cp</span> .env.example .env    <span class="c"># puis GROQ_API_KEY=gsk_…</span>
-
-<span class="c"># 3. lance</span>
-<span class="k">./</span>start.command         <span class="c"># → http://localhost:8787</span></pre>
-  </div>
-  <p class="sec-sub" style="margin-top:26px">
-    Ou l'app native : <code style="color:var(--accent2)">cd desktop && npm install && npm run dist</code> → <b>Nova.app</b> (DMG arm64).
-  </p>
-</section>
-
-<footer>
-  <div class="f-brand">✦ Nova</div>
-  <p>Fait avec ✦ sur un MacBook Air M4 · <a href="https://github.com/DmzGamingYT/nova">GitHub</a> ·
-     <a href="https://github.com/DmzGamingYT/nova/releases">App macOS</a> · licence MIT · propulsé par <a href="https://groq.com">Groq</a></p>
-</footer>
-
-<script>
-/* ============================================================
-   Orbe Nova — canvas, 3 états (repos / écoute / réflexion / parole)
-   Clic : cycle écoute → réflexion → parole → repos
-   ============================================================ */
-(function(){
-  const cv = document.getElementById('orbCanvas');
-  const ctx = cv.getContext('2d');
-  const stateEl = document.getElementById('orbState');
-  const S = cv.width;               // 840
-  const C = S/2;
-
-  const PALETTES = {
-    ready:   { hi:'#b3a7ff', mid:'#7c6cff', lo:'#33249e', glow:'124,108,255',  label:'prête' },
-    listen:  { hi:'#9defd8', mid:'#2fbf9b', lo:'#177a63', glow:'47,191,155',   label:'elle écoute' },
-    think:   { hi:'#b3a7ff', mid:'#7c6cff', lo:'#33249e', glow:'124,108,255',  label:'elle réfléchit' },
-    speak:   { hi:'#ffd9a0', mid:'#f5a83c', lo:'#b06a12', glow:'245,168,60',   label:'elle parle' },
-  };
-  let state = 'ready', t = 0, wavePhase = 0;
-  let blobs = [];
-  for (let i=0;i<5;i++) blobs.push({ a:Math.random()*Math.PI*2, sp:.003+Math.random()*.006, r:60+Math.random()*120, off:Math.random()*Math.PI*2 });
-
-  function setState(s){
-    state = s;
-    stateEl.textContent = PALETTES[s].label;
-    stateEl.style.color = 'rgb('+PALETTES[s].glow+')';
-    stateEl.style.borderColor = 'rgba('+PALETTES[s].glow+',.5)';
-  }
-  cv.addEventListener('click', () => {
-    setState(state==='ready' ? 'listen' : state==='listen' ? 'think' : state==='think' ? 'speak' : 'ready');
-  });
-
-  /* déformation organique de l'orbe (rayon modulé par des sinusoïdes) */
-  function orbRadius(ang){
-    const breathe = state==='ready' ? 6 : state==='listen' ? 12 : state==='think' ? 7 : 16;
-    return 250
-      + Math.sin(ang*3 + t*.021) * breathe
-      + Math.sin(ang*5 - t*.017) * breathe*.6
-      + Math.sin(ang*2 + t*.011) * breathe*.8;
-  }
-
-  function drawOrb(){
-    const p = PALETTES[state];
-    /* halo */
-    const g0 = ctx.createRadialGradient(C,C,40,C,C,390);
-    g0.addColorStop(0,'rgba('+p.glow+',.32)');
-    g0.addColorStop(1,'rgba('+p.glow+',0)');
-    ctx.fillStyle = g0;
-    ctx.fillRect(0,0,S,S);
-
-    /* corps : dégradé radial décalé (reflet en haut à gauche) */
-    const gx = C-70, gy = C-90;
-    const g1 = ctx.createRadialGradient(gx,gy,20,C,C,255);
-    g1.addColorStop(0,p.hi); g1.addColorStop(.4,p.mid); g1.addColorStop(1,p.lo);
-    ctx.fillStyle = g1;
-    ctx.beginPath();
-    for (let a=0;a<=Math.PI*2+.02;a+=.02){
-      const r = orbRadius(a);
-      const x = C+Math.cos(a)*r, y = C+Math.sin(a)*r;
-      a===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    }
-    ctx.closePath(); ctx.fill();
-
-    /* reflet */
-    const g2 = ctx.createRadialGradient(gx,gy,4,gx,gy,90);
-    g2.addColorStop(0,'rgba(255,255,255,.85)'); g2.addColorStop(1,'rgba(255,255,255,0)');
-    ctx.fillStyle = g2;
-    ctx.beginPath(); ctx.ellipse(gx,gy,62,42,-.4,0,Math.PI*2); ctx.fill();
-  }
-
-  /* satellites + orbites */
-  function drawOrbits(){
-    const p = PALETTES[state];
-    ctx.strokeStyle = 'rgba('+p.glow+',.25)'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(C,C,330,0,Math.PI*2); ctx.stroke();
-    ctx.strokeStyle = 'rgba('+p.glow+',.1)';
-    ctx.beginPath(); ctx.arc(C,C,280,0,Math.PI*2); ctx.stroke();
-
-    for (let k=0;k<2;k++){
-      const sp = k===0 ? .004 : -.0028;
-      const R = k===0 ? 330 : 280;
-      const xs = C+Math.cos(t*sp + k*2.4)*R, ys = C+Math.sin(t*sp + k*2.4)*R;
-      ctx.fillStyle = k===0 ? 'rgba('+p.glow+',.95)' : 'rgba(179,167,255,.8)';
-      ctx.beginPath(); ctx.arc(xs,ys, k===0?9:6, 0,Math.PI*2); ctx.fill();
-    }
-  }
-
-  /* anneaux d'onde en écoute */
-  function drawListenWaves(){
-    for (let i=0;i<2;i++){
-      const ph = (wavePhase*.35 + i*.5) % 1;
-      const r = 255 + ph*150;
-      ctx.strokeStyle = 'rgba(47,191,155,'+(0.5*(1-ph))+')';
-      ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(C,C,r,0,Math.PI*2); ctx.stroke();
-    }
-  }
-
-  /* equalizer en parole */
-  function drawEqualizer(){
-    const bars = 9, bw = 12, gap = 10;
-    const total = bars*bw + (bars-1)*gap;
-    const x0 = C - total/2;
-    for (let i=0;i<bars;i++){
-      const h = 26 + Math.abs(Math.sin(t*.11 + i*1.1))*72 * (1 - Math.abs(i-(bars-1)/2)/(bars));
-      const x = x0 + i*(bw+gap);
-      const y = C - h/2 + 320;
-      ctx.fillStyle = 'rgba(245,168,60,.9)';
-      ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x,y,bw,h,6) : ctx.rect(x,y,bw,h); ctx.fill();
-    }
-  }
-
-  function frame(){
-    t++;
-    if (state==='listen') wavePhase += .012;
-    ctx.clearRect(0,0,S,S);
-    drawOrbits();
-    if (state==='listen') drawListenWaves();
-    drawOrb();
-    if (state==='speak') drawEqualizer();
-    requestAnimationFrame(frame);
-  }
-  frame();
-  window.__novaOrb = { setState };   // la démo pilote l'orbe
-})();
-
-/* ============================================================
-   Démo conversationnelle hors-ligne (réponses pré-écrites)
-   ============================================================ */
-(function(){
-  const log = document.getElementById('demoLog');
-  const input = document.getElementById('demoText');
-  const send = document.getElementById('demoSend');
-  const clear = document.getElementById('demoClear');
-  const stateEl = document.getElementById('demoState');
-  const orb = window.__novaOrb;
-
-  const SCRIPT = [
-    { re:/bonjour|salut|hello|coucou|hey/i,
-      txt:"Bonjour ! Moi c'est Nova. Ici je suis en mode démo — sur ton Mac, je répondrais à voix haute, avec de vraies réponses." },
-    { re:/heure|il est/i,
-      txt:"Ici, je n'ai pas d'horloge — mais sur ton Mac, je lis l'heure réelle en une passe, sans même passer par le modèle. Essaie : « quelle heure est-il ? » chez toi affichera l'heure exacte, avec la pastille verte « donnée réelle »." },
-    { re:/m[ée]t[ée]o/i,
-      txt:"Sur ton Mac : « il fait quel temps à Namur ? » interroge wttr.in en direct — sans clé d'API. La démo, elle, reste sagement hors-ligne. 🌤️" },
-    { re:/sport|s[ée]ance|muscu|programme/i,
-      txt:"Je connais ton programme Pulse : « Quelle séance j'ai aujourd'hui ? » te donne exercices, séries et repos. Et « Nova, séance terminée » valide la séance d'un seul souffle." },
-    { re:/qui es[- ]tu|pr[ée]sente/i,
-      txt:"Je suis une assistante vocale qui vit entièrement sur ta machine : ma voix est celle de ton Mac, ma mémoire est un fichier local, et mes actions passent par une sandbox avec ta confirmation. Propulsée par Groq pour le cerveau." },
-    { re:/volume|lumi[èe]re|capture|[ée]cran/i,
-      txt:"Je peux régler le volume (« mets le volume à 40 »), ouvrir une app, afficher une notification, prendre une capture d'écran… Toujours avec une carte « Autoriser » avant d'agir." },
-    { re:/merci/i,
-      txt:"Avec grand plaisir ! Sur ton Mac, je te répondrais en vrai — et à voix haute. ✦" },
-  ];
-  const FALLBACK = "Ici je tourne en mode démo avec quelques réponses pré-écrites. Sur ton Mac — trois commandes plus une clé Groq gratuite — je réponds vraiment à tout, en voix haute : heure, météo, sport, contrôle du Mac… Essaie « bonjour », « quelle heure est-il ? » ou « parle-moi du sport ».";
-
-  function bubble(cls, txt){
-    const d = document.createElement('div');
-    d.className = 'msg '+cls;
-    if (txt) d.textContent = txt;
-    log.appendChild(d);
-    log.scrollTop = log.scrollHeight;
-    return d;
-  }
-
-  function respond(userTxt){
-    if (orb) orb.setState('think');
-    stateEl.textContent = '— réfléchit…'; stateEl.style.color = '#cdc6ff';
-    const hit = SCRIPT.find(s => s.re.test(userTxt));
-    const full = hit ? hit.txt : FALLBACK;
-    const delay = 500 + Math.random()*500;
-    setTimeout(() => {
-      if (orb) orb.setState('speak');
-      stateEl.textContent = '— répond'; stateEl.style.color = '#ffd9a0';
-      const b = bubble('nova streaming','');
-      let i = 0;
-      const tick = setInterval(() => {
-        b.textContent = full.slice(0, i += 1 + Math.floor(Math.random()*3));
-        log.scrollTop = log.scrollHeight;
-        if (i >= full.length){
-          clearInterval(tick);
-          b.classList.remove('streaming');
-          if (orb) orb.setState('ready');
-          stateEl.textContent = '— prête'; stateEl.style.color = '';
-        }
-      }, 22);
-    }, delay);
-  }
-
-  function submit(){
-    const v = input.value.trim();
-    if (!v) return;
-    input.value = '';
-    bubble('user', v);
-    if (orb) orb.setState('listen');
-    stateEl.textContent = '— écoute'; stateEl.style.color = '#9defd8';
-    respond(v);
-  }
-
-  send.addEventListener('click', submit);
-  input.addEventListener('keydown', e => { if (e.key==='Enter') submit(); });
-  clear.addEventListener('click', () => { log.innerHTML=''; input.focus(); });
-
-  /* accueil */
-  setTimeout(() => {
-    const b = bubble('nova','');
-    const hello = "Bonjour ✦ — écris-moi : « bonjour », « quelle heure est-il ? », « parle-moi du sport »… Et regarde l'orbe changer d'état.";
-    let i = 0;
-    const tk = setInterval(() => {
-      b.textContent = hello.slice(0, i += 2);
-      if (i >= hello.length) clearInterval(tk);
-    }, 24);
-  }, 700);
-})();
-
-/* reveal au scroll */
-(function(){
-  const io = new IntersectionObserver(es => es.forEach(e => {
-    if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
-  }), { threshold:.12 });
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-})();
-</script>
+<script src="icons.js"></script>
+<script src="orb.js"></script>
+<script src="site.js"></script>
 </body>
 </html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Démo — Nova</title>
+<meta name="description" content="Essaye Nova directement dans ton navigateur : démo hors-ligne avec réponses pré-écrites et streaming réel."/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body data-page="demo">
+
+<header class="page-head center" style="padding-top:calc(var(--nav-h) + 52px);max-width:1200px;margin:0 auto">
+  <h1 class="sec-title">Essaye-la tout de suite</h1>
+  <p class="sec-sub" style="max-width:620px;margin:0 auto 30px">Démo hors-ligne — les réponses sont pré-écrites,
+  mais le streaming, les états et l'orbe sont les vrais.</p>
+</header>
+
+<main class="section" style="padding-top:0">
+  <div class="suggest" role="group" aria-label="Suggestions">
+    <button data-say="Bonjour Nova">Bonjour</button>
+    <button data-say="Quelle heure est-il ?">Quelle heure est-il ?</button>
+    <button data-say="Parle-moi du sport">Parle-moi du sport</button>
+    <button data-say="Qui es-tu ?">Qui es-tu ?</button>
+    <button data-say="Peux-tu contrôler mon Mac ?">Contrôler mon Mac ?</button>
+    <button data-say="Il fait quel temps ?">La météo</button>
+  </div>
+
+  <div class="demo-wrap">
+    <div class="demo-head">
+      <div class="t">Nova<span class="st" id="demoState">— prête</span></div>
+      <button class="demo-clear" id="demoClear">Effacer</button>
+    </div>
+    <div class="demo-log" id="demoLog"></div>
+    <div class="demo-input">
+      <input id="demoText" type="text" placeholder="Écris à Nova… (Entrée pour envoyer)" autocomplete="off"/>
+      <button id="demoSend" aria-label="Envoyer">➤</button>
+    </div>
+  </div>
+  <p class="demo-note">Sur ton Mac, elle répondrait à voix haute — avec de vraies données (heure, météo, batterie…).
+  L'orbe ci-dessous suit la conversation : clique-la pour la voir changer d'état.</p>
+
+  <div class="orb-stage" id="orbStage" style="min-height:340px;margin-top:26px">
+    <div class="orb-state" id="orbState">prête</div>
+    <canvas id="orbCanvas" width="840" height="840" style="width:min(300px,70vw);height:min(300px,70vw)"></canvas>
+  </div>
+</main>
+
+<script src="icons.js"></script>
+<script src="orb.js"></script>
+<script src="site.js"></script>
+</body>
+</html>

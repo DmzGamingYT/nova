@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Installation — Nova</title>
+<meta name="description" content="Installe Nova sur ton Mac en trois commandes : git clone, clé Groq gratuite, start.command. Ou l'app native DMG arm64."/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body data-page="installation">
+
+<header class="page-head center" style="padding-top:calc(var(--nav-h) + 52px);max-width:1200px;margin:0 auto">
+  <h1 class="sec-title">Installer Nova</h1>
+  <p class="sec-sub">Trois commandes et une clé gratuite — ou l'app native.</p>
+</header>
+
+<main class="section" style="padding-top:6px">
+
+  <div class="term">
+    <div class="term-bar">
+      <i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
+    </div>
+    <pre><span class="c"># 1. le projet</span>
+<span class="k">git</span> clone https://github.com/DmzGamingYT/nova.git && <span class="k">cd</span> nova
+
+<span class="c"># 2. ta clé Groq (gratuite — console.groq.com/keys)</span>
+<span class="k">cp</span> .env.example .env    <span class="c"># puis GROQ_API_KEY=gsk_…</span>
+
+<span class="c"># 3. lance</span>
+<span class="k">./</span>start.command         <span class="c"># → http://localhost:8787</span></pre>
+  </div>
+
+  <div class="step-cards">
+    <div class="step-card reveal">
+      <span class="n">1</span>
+      <h4>Récupère le projet</h4>
+      <p>Un simple <code>git clone</code>. Aucune dépendance npm côté serveur : Node.js ≥ 20 suffit.</p>
+    </div>
+    <div class="step-card reveal">
+      <span class="n">2</span>
+      <h4>Ta clé Groq</h4>
+      <p>Crée une clé gratuite sur <a href="https://console.groq.com/keys">console.groq.com/keys</a>.
+      Elle reste sur ta machine. Sans clé, Nova tourne en mode démo.</p>
+    </div>
+    <div class="step-card reveal">
+      <span class="n">3</span>
+      <h4>Double-clique</h4>
+      <p><code>start.command</code> lance le serveur et ouvre ton navigateur.
+      Maintiens la barre espace et parle.</p>
+    </div>
+  </div>
+
+  <section class="reveal" style="margin-top:70px;max-width:760px;margin-left:auto;margin-right:auto">
+    <h2 class="sec-title" style="font-size:26px">Ou l'app native</h2>
+    <p class="sec-sub" style="margin-bottom:22px">Fenêtre vibrance, icône Dock, permissions micro intégrées — build Apple Silicon par la CI.</p>
+    <div class="term">
+      <div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+      <pre><span class="c"># compiler toi-même</span>
+<span class="k">cd</span> desktop && <span class="k">npm</span> install && <span class="k">npm</span> run dist
+<span class="c"># → release/Nova-1.0.0-arm64.dmg</span>
+
+<span class="c"># ou télécharger le DMG construit par la CI</span>
+<span class="k">open</span> https://github.com/DmzGamingYT/nova/releases</pre>
+    </div>
+    <p class="sec-sub" style="margin-top:18px;font-size:14px">
+      Le DMG n'est pas signé (build personnel) : au premier lancement, <b style="color:var(--txt)">clic droit → Ouvrir</b>.
+    </p>
+  </section>
+
+</main>
+
+<script src="icons.js"></script>
+<script src="orb.js"></script>
+<script src="site.js"></script>
+</body>
+</html>

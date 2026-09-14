@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="320" viewBox="0 0 560 320">
+  <defs>
+    <linearGradient id="sbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#171233"/><stop offset="1" stop-color="#0e0b1e"/>
+    </linearGradient>
+  </defs>
+  <rect width="560" height="320" fill="url(#sbg)"/>
+
+  <g font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif">
+    <!-- demande -->
+    <rect x="30" y="52" width="190" height="40" rx="18" fill="rgba(124,108,255,.24)" stroke="rgba(124,108,255,.45)"/>
+    <text x="48" y="77" font-size="13" fill="#e6e2ff">ouvre le volume à 40</text>
+
+    <!-- flèche -->
+    <path d="M235 72 h34" stroke="#7c6cff" stroke-width="2" marker-end="none" stroke-dasharray="5 6">
+      <animate attributeName="stroke-dashoffset" values="0;-22" dur="0.9s" repeatCount="indefinite"/>
+    </path>
+    <path d="M265 66 l10 6 -10 6" stroke="#7c6cff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- carte de confirmation -->
+    <g>
+      <rect x="286" y="40" width="244" height="140" rx="18" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.16)"/>
+      <circle cx="312" cy="70" r="11" fill="rgba(245,168,60,.18)" stroke="#f5a83c"/>
+      <text x="308" y="74.5" font-size="13" fill="#f5a83c">!</text>
+      <text x="332" y="75" font-size="14.5" font-weight="600" fill="#eae7f7">Nova veut agir</text>
+      <text x="312" y="102" font-size="12.5" fill="#a49ec4">volume → 40</text>
+      <rect x="312" y="116" width="92" height="30" rx="15" fill="#7c6cff">
+        <animate attributeName="opacity" values="1;0.75;1" dur="2s" repeatCount="indefinite"/>
+      </rect>
+      <text x="336" y="136" font-size="12.5" fill="#ffffff">Autoriser</text>
+      <rect x="416" y="116" width="80" height="30" rx="15" fill="none" stroke="rgba(255,255,255,.25)"/>
+      <text x="436" y="136" font-size="12.5" fill="#a49ec4">Ignorer</text>
+      <text x="312" y="168" font-size="11" fill="#6e6a8f">exécution sans shell · argument validé</text>
+    </g>
+
+    <!-- résultat -->
+    <g>
+      <rect x="150" y="212" width="260" height="52" rx="16" fill="rgba(47,191,155,.1)" stroke="rgba(47,191,155,.5)"/>
+      <path d="M172 238 l7 7 12 -14" stroke="#2fbf9b" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <animate attributeName="stroke-dasharray" values="0 40;40 0" dur="1.6s" repeatCount="indefinite"/>
+      </path>
+      <text x="204" y="234" font-size="12.5" fill="#9defd8">volume réglé à 40 %</text>
+      <text x="204" y="252" font-size="11" fill="#6e6a8f">exécuté uniquement après ton clic</text>
+    </g>
+
+    <text x="280" y="300" text-anchor="middle" font-size="13.5" fill="#a49ec4">rien ne s'exécute tout seul — chaque action passe par ta confirmation</text>
+  </g>
+</svg>

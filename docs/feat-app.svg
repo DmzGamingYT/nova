@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="320" viewBox="0 0 560 320">
+  <defs>
+    <linearGradient id="abg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#171233"/><stop offset="1" stop-color="#0e0b1e"/>
+    </linearGradient>
+    <radialGradient id="aorb" cx="0.4" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#b3a7ff"/><stop offset="0.45" stop-color="#7c6cff"/><stop offset="1" stop-color="#33249e"/>
+    </radialGradient>
+  </defs>
+  <rect width="560" height="320" fill="url(#abg)"/>
+
+  <g font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif">
+    <!-- fenêtre macOS -->
+    <g>
+      <rect x="80" y="36" width="400" height="248" rx="16" fill="rgba(20,16,42,.92)" stroke="rgba(255,255,255,.16)"/>
+      <!-- feu tricolore -->
+      <circle cx="106" cy="60" r="6" fill="#ff5f57"/>
+      <circle cx="126" cy="60" r="6" fill="#febc2e"/>
+      <circle cx="146" cy="60" r="6" fill="#28c840"/>
+      <rect x="170" y="52" width="220" height="16" rx="8" fill="rgba(255,255,255,.08)"/>
+      <text x="280" y="64" text-anchor="middle" font-size="10.5" fill="#a49ec4">Nova</text>
+
+      <!-- orbe dans la fenêtre -->
+      <circle cx="280" cy="160" r="42" fill="url(#aorb)">
+        <animate attributeName="r" values="42;47;42" dur="2.4s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="280" cy="160" r="66" fill="none" stroke="rgba(124,108,255,.35)" stroke-width="1.4"/>
+      <circle cx="346" cy="160" r="4" fill="#8f7dff">
+        <animateTransform attributeName="transform" type="rotate" from="0 280 160" to="360 280 160" dur="8s" repeatCount="indefinite"/>
+      </circle>
+      <ellipse cx="264" cy="143" rx="14" ry="9" fill="#fff" opacity="0.75"/>
+
+      <!-- champ de saisie -->
+      <rect x="130" y="232" width="300" height="30" rx="15" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.14)"/>
+      <text x="146" y="252" font-size="11" fill="#6e6a8f">Écris à Nova…</text>
+
+      <!-- vibrance : liseré lumineux -->
+      <rect x="80" y="36" width="400" height="248" rx="16" fill="none" stroke="rgba(124,108,255,.35)" stroke-width="1">
+        <animate attributeName="stroke-opacity" values="0.15;0.5;0.15" dur="3s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+
+    <!-- Dock : icône qui rebondit -->
+    <g>
+      <rect x="238" y="292" width="84" height="10" rx="5" fill="rgba(255,255,255,.1)"/>
+      <g>
+        <rect x="264" y="268" width="32" height="32" rx="8" fill="url(#aorb)" stroke="rgba(255,255,255,.4)"/>
+        <animateTransform attributeName="transform" type="translate" values="0 0;0 -14;0 0" keyTimes="0;0.3;0.6" dur="2.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.3 0 0.4 1;0.6 0 0.7 1"/>
+      </g>
+    </g>
+
+    <text x="480" y="160" text-anchor="middle" font-size="12" fill="#a49ec4" transform="rotate(0)">DMG arm64</text>
+    <text x="480" y="178" text-anchor="middle" font-size="12" fill="#a49ec4">Apple Silicon</text>
+  </g>
+</svg>

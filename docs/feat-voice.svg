@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="320" viewBox="0 0 560 320">
+  <defs>
+    <linearGradient id="vbg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#171233"/><stop offset="1" stop-color="#0e0b1e"/>
+    </linearGradient>
+    <radialGradient id="vorbg" cx="0.4" cy="0.35" r="0.8">
+      <stop offset="0" stop-color="#9defd8"/><stop offset="0.45" stop-color="#2fbf9b"/><stop offset="1" stop-color="#177a63"/>
+    </radialGradient>
+  </defs>
+  <rect width="560" height="320" fill="url(#vbg)"/>
+
+  <!-- ondes entrantes (tu parles) -->
+  <g stroke="#2fbf9b" stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M40 130 q10 20 0 40"><animate attributeName="opacity" values="0;1;0" dur="1.8s" repeatCount="indefinite"/></path>
+    <path d="M62 120 q16 30 0 60"><animate attributeName="opacity" values="0;1;0" dur="1.8s" begin="0.2s" repeatCount="indefinite"/></path>
+    <path d="M84 110 q22 40 0 80"><animate attributeName="opacity" values="0;1;0" dur="1.8s" begin="0.4s" repeatCount="indefinite"/></path>
+  </g>
+  <text x="46" y="232" font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif" font-size="13" fill="#2fbf9b">ta voix</text>
+
+  <!-- orbe au centre -->
+  <circle cx="280" cy="160" r="64" fill="url(#vorbg)">
+    <animate attributeName="r" values="64;70;64" dur="1.6s" repeatCount="indefinite"/>
+  </circle>
+  <ellipse cx="258" cy="136" rx="20" ry="13" fill="#ffffff" opacity="0.75"/>
+
+  <!-- equalizer sous l'orbe (elle répond) -->
+  <g fill="#f5a83c">
+    <rect x="228" y="252" width="7" height="22" rx="3.5"><animate attributeName="height" values="22;40;12;30;22" dur="0.9s" repeatCount="indefinite"/><animate attributeName="y" values="252;243;262;248;252" dur="0.9s" repeatCount="indefinite"/></rect>
+    <rect x="242" y="246" width="7" height="34" rx="3.5"><animate attributeName="height" values="34;16;42;24;34" dur="0.8s" repeatCount="indefinite"/><animate attributeName="y" values="246;254;238;251;246" dur="0.8s" repeatCount="indefinite"/></rect>
+    <rect x="256" y="254" width="7" height="18" rx="3.5"><animate attributeName="height" values="18;42;14;32;18" dur="1s" repeatCount="indefinite"/><animate attributeName="y" values="254;242;264;248;254" dur="1s" repeatCount="indefinite"/></rect>
+    <rect x="270" y="248" width="7" height="30" rx="3.5"><animate attributeName="height" values="30;44;18;36;30" dur="0.85s" repeatCount="indefinite"/><animate attributeName="y" values="248;241;256;247;248" dur="0.85s" repeatCount="indefinite"/></rect>
+    <rect x="284" y="253" width="7" height="20" rx="3.5"><animate attributeName="height" values="20;38;42;12;20" dur="1.05s" repeatCount="indefinite"/><animate attributeName="y" values="253;246;242;264;253" dur="1.05s" repeatCount="indefinite"/></rect>
+    <rect x="298" y="247" width="7" height="32" rx="3.5"><animate attributeName="height" values="32;14;38;26;32" dur="0.75s" repeatCount="indefinite"/><animate attributeName="y" values="247;256;242;250;247" dur="0.75s" repeatCount="indefinite"/></rect>
+    <rect x="312" y="252" width="7" height="22" rx="3.5"><animate attributeName="height" values="22;40;16;32;22" dur="0.95s" repeatCount="indefinite"/><animate attributeName="y" values="252;243;260;248;252" dur="0.95s" repeatCount="indefinite"/></rect>
+  </g>
+  <text x="330" y="232" font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif" font-size="13" fill="#f5a83c">sa réponse, phrase par phrase</text>
+
+  <!-- trait de liaison animé -->
+  <path d="M120 160 C 180 120, 200 200, 216 160" stroke="#7c6cff" stroke-width="2" fill="none" opacity="0.6" stroke-dasharray="6 8">
+    <animate attributeName="stroke-dashoffset" values="0;-28" dur="1.2s" repeatCount="indefinite"/>
+  </path>
+  <path d="M344 160 C 360 200, 380 120, 440 160" stroke="#7c6cff" stroke-width="2" fill="none" opacity="0.6" stroke-dasharray="6 8">
+    <animate attributeName="stroke-dashoffset" values="0;-28" dur="1.2s" repeatCount="indefinite"/>
+  </path>
+</svg>
