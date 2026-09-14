@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script>try{var t=localStorage.getItem('nova.site.theme');if(t===null){if(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';}if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <title>Dépannage — Nova</title>
 <meta name="description" content="Solutions aux problèmes courants de Nova : checksum SHA-256 qui ne correspond pas, Gatekeeper qui refuse d'ouvrir l'app, SmartScreen sous Windows, micro muet."/>
 <link rel="stylesheet" href="style.css"/>
@@ -40,8 +41,8 @@
 
   /* ── bloc de commande, avec bouton copier ── */
   .fix .term{margin:6px 0 16px;font-size:13.5px}
-  .fix .term pre{padding:18px 20px;color:#c9c4e8;line-height:1.75}
-  .fix .term .c{color:#6e6a8f}
+  .fix .term pre{padding:18px 20px;color:var(--term-txt);line-height:1.75}
+  .fix .term .c{color:var(--term-c)}
   .term-bar .copy-btn{margin-left:auto;display:inline-flex;align-items:center;gap:6px;
     background:none;border:none;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;
     padding:2px 6px;border-radius:8px;transition:color .15s}
@@ -59,6 +60,11 @@
     stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
   .fix-note p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
   .fix-note a{color:var(--accent2)}
+
+  /* thème clair : blocs de commande déjà lisibles via les vars du
+     terminal (style.css) ; seul le <code> inline violet clair doit
+     s'assombrir pour rester lisible sur fond clair */
+  html[data-theme="light"] .fix code{color:var(--accent2)}
 
   @media (max-width:640px){
     .fix{padding:22px 18px}

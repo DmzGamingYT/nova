@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script>try{var t=localStorage.getItem('nova.site.theme');if(t===null){if(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';}if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <title>Démo live — Nova</title>
 <meta name="description" content="Parle vraiment à Nova depuis ton navigateur : elle utilise ta Nova locale si elle tourne, ou ta clé Groq (restée dans ton navigateur), sinon le mode hors-ligne."/>
 <link rel="stylesheet" href="style.css"/>
@@ -63,6 +64,12 @@
   .mic-btn.listening{background:rgba(47,191,155,.18);border-color:#2fbf9b;color:#6fe0c3;animation:mic-pulse 1.4s ease-in-out infinite}
   @keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(47,191,155,.35)}50%{box-shadow:0 0 0 8px rgba(47,191,155,0)}}
   @media (prefers-reduced-motion: reduce){.mic-btn.listening{animation:none}}
+
+  /* thème clair : couleurs sombres codées en dur surchargées */
+  html[data-theme="light"] .mode-chip{background:var(--panel-soft);border-color:var(--line-strong)}
+  html[data-theme="light"] .mic-btn{background:var(--panel-soft);border-color:var(--line-strong)}
+  html[data-theme="light"] .mic-btn:hover{border-color:var(--muted)}
+  html[data-theme="light"] .skills button{background:var(--accent-soft);border-color:var(--accent-line);color:var(--accent2)}
 
   /* puces « compétences de ta Nova locale » */
   .skills{max-width:780px;margin:0 auto 18px;display:none;flex-wrap:wrap;gap:9px;justify-content:center;align-items:center}

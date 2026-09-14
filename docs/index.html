@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script>try{var t=localStorage.getItem('nova.site.theme');if(t===null){if(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';}if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <title>Nova — Assistante IA vocale sur Mac</title>
 <meta name="description" content="Nova : une assistante vocale française 100 % locale sur Mac. Groq, voix macOS, mémoire persistante, sandbox sécurisée. Open source."/>
 <link rel="stylesheet" href="style.css"/>
@@ -35,6 +36,11 @@
   @media (prefers-reduced-motion: reduce){
     .new-badge,.new-badge::after{animation:none}
   }
+
+  /* thème clair : reflet du badge et ombre des captures ajustés */
+  .shot{box-shadow:0 18px 50px rgba(0,0,0,.35)}
+  html[data-theme="light"] .new-badge::after{background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.9) 50%,transparent 70%)}
+  html[data-theme="light"] .shot{box-shadow:var(--shadow-card)!important}
 </style>
 </head>
 <body data-page="index">
@@ -106,12 +112,12 @@
   <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;max-width:1080px;margin:0 auto">
     <figure style="margin:0">
       <img src="screenshot-light.png" alt="Nova en thème clair : conversation sur la séance du jour et la météo"
-           loading="lazy" style="width:100%;border-radius:18px;border:1px solid var(--panel-brd);box-shadow:0 18px 50px rgba(0,0,0,.35)"/>
+           loading="lazy" class="shot" style="width:100%;border-radius:18px;border:1px solid var(--panel-brd)"/>
       <figcaption style="color:var(--muted);font-size:13px;margin-top:10px">Thème clair</figcaption>
     </figure>
     <figure style="margin:0">
       <img src="screenshot-dark.png" alt="Nova en thème sombre : la même conversation en thème sombre"
-           loading="lazy" style="width:100%;border-radius:18px;border:1px solid var(--panel-brd);box-shadow:0 18px 50px rgba(0,0,0,.35)"/>
+           loading="lazy" class="shot" style="width:100%;border-radius:18px;border:1px solid var(--panel-brd)"/>
       <figcaption style="color:var(--muted);font-size:13px;margin-top:10px">Thème sombre</figcaption>
     </figure>
   </div>

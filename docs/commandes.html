@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script>try{var t=localStorage.getItem('nova.site.theme');if(t===null){if(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';}if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <title>Commandes vocales — Nova</title>
 <meta name="description" content="Toutes les commandes vocales de Nova : conversation, voix, minuteurs, veille, mémoire, sport, contrôle du Mac. Recherche instantanée, variantes comprises."/>
 <link rel="stylesheet" href="style.css"/>
@@ -59,6 +60,12 @@
   .cmd-note svg{width:20px;height:20px;flex:none;stroke:var(--accent2);fill:none;stroke-width:1.8;stroke-linecap:round;margin-top:2px}
   .cmd-note p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
   .cmd-note a{color:var(--accent2)}
+
+  /* thème clair : couleurs sombres codées en dur surchargées */
+  html[data-theme="light"] .cmd-table thead th{background:var(--panel-soft)}
+  html[data-theme="light"] .cmd-table td{border-bottom-color:var(--line)}
+  html[data-theme="light"] .cmd-table tr{border-bottom-color:var(--line)}
+  html[data-theme="light"] .cmd-note svg{stroke:var(--accent)}
 
   @media (max-width:720px){
     .cmd-table thead{display:none}

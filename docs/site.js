@@ -4,6 +4,52 @@
 (function(){
   const REPO = 'https://github.com/DmzGamingYT/nova';
 
+  /* ---------- thème clair / sombre ----------
+     Chaque page applique le thème dès le <head> (mini-script inline,
+     anti-flash) ; ici : bouton de la nav + mémorisation. Absent de
+     localStorage = suit les préférences du système. */
+  function applyTheme(t){
+    if (t === 'light' || t === 'dark') {
+      document.documentElement.setAttribute('data-theme', t);
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }
+  function currentTheme(){
+    return document.documentElement.getAttribute('data-theme') || 'dark';
+  }
+  function initThemeToggle(){
+    const btn = document.querySelector('.theme-toggle');
+    if (!btn) return;
+    const ICONS = {
+      sun:  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M4.9 4.9l1.9 1.9M17.2 17.2l1.9 1.9M19.1 4.9l-1.9 1.9M6.8 17.2l-1.9 1.9"/></svg>',
+      moon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 13.5A8.5 8.5 0 1 1 10.5 3 6.8 6.8 0 0 0 21 13.5z"/></svg>'
+    };
+    function paint(){
+      const t = currentTheme();
+      btn.innerHTML = t === 'dark' ? ICONS.sun : ICONS.moon;   // propose l'autre
+      btn.title = t === 'dark' ? 'Passer en thème clair' : 'Passer en thème sombre';
+      btn.setAttribute('aria-label', btn.title);
+    }
+    btn.addEventListener('click', () => {
+      const next = currentTheme() === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      try { localStorage.setItem('nova.site.theme', next); } catch(_){}
+      paint();
+    });
+    paint();
+    /* si l'utilisateur n'a pas choisi, suivre le système en direct */
+    try {
+      const mq = window.matchMedia('(prefers-color-scheme: light)');
+      const onChange = (e) => {
+        if (localStorage.getItem('nova.site.theme')) return;
+        applyTheme(e.matches ? 'light' : 'dark');
+        paint();
+      };
+      if (mq.addEventListener) mq.addEventListener('change', onChange);
+    } catch(_){}
+  }
+
   /* ---------- navigation commune ---------- */
   function buildNav(active){
     const nav = document.createElement('nav');
@@ -22,8 +68,10 @@
         '<a href="nouveautes.html"' + (page==='nouveautes'?' class="active"':'') + '>Nouveautés</a>' +
         '<a class="gh" href="' + REPO + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true">' +
           '<path d="M12 2C6.5 2 2 6.6 2 12.2c0 4.5 2.9 8.3 6.8 9.7.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.4-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5 4-1.4 6.8-5.2 6.8-9.7C22 6.6 17.5 2 12 2z"/></svg>GitHub</a>' +
+        '<button class="theme-toggle" type="button" aria-label="Changer de thème"></button>' +
       '</div>';
     document.body.prepend(nav);
+    initThemeToggle();
   }
 
   /* ---------- footer commun ---------- */

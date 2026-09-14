@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script>try{var t=localStorage.getItem('nova.site.theme');if(t===null){if(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';}if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <title>Installation — Nova</title>
 <meta name="description" content="Télécharge l'app Nova pour macOS (Apple Silicon) ou installe-la en trois commandes : git clone, clé Groq gratuite, start.command."/>
 <link rel="stylesheet" href="style.css"/>
@@ -49,6 +50,10 @@
   .dl-note{margin-top:14px;font-size:14px;color:var(--muted)}
   .dl-note a{color:var(--accent2)}
   .dl-note b{color:var(--txt)}
+
+  /* thème clair : ombre du bouton principal ajustée */
+  html[data-theme="light"] .dl-btn{box-shadow:0 10px 34px rgba(106,88,240,.3), inset 0 1px 0 rgba(255,255,255,.35)}
+  html[data-theme="light"] .dl-btn:hover{box-shadow:0 16px 42px rgba(106,88,240,.4), inset 0 1px 0 rgba(255,255,255,.35)}
 </style>
 </head>
 <body data-page="installation">
