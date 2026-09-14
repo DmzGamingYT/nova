@@ -47,7 +47,12 @@ jobs:
       APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     steps:
+      # Historique complet + tags : nécessaire pour retrouver le tag
+      # précédent et générer le changelog de la release.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       - uses: actions/setup-node@v4
         with:
@@ -112,6 +117,17 @@ jobs:
             npx electron-builder --mac --arm64 --config electron-builder.yml --publish never
           fi
 
+      # Checksums SHA-256 + notes de release (changelog depuis le tag
+      # précédent). Seulement pour les tags : sur main il n'y a pas de
+      # bornes de comparaison — l'artefact reste DMG + ZIP seuls.
+      - name: Generate SHA-256 checksums & release notes
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          NOVA_SIGNED: ${{ steps.flag.outputs.signed }}
+        run: |
+          chmod +x tools/gen-release-notes.sh
+          ./tools/gen-release-notes.sh "${GITHUB_REF_NAME}" desktop/release
+
       - name: Upload artifact (every build)
         uses: actions/upload-artifact@v4
         with:
@@ -119,15 +135,36 @@ jobs:
           path: |
             desktop/release/*.dmg
             desktop/release/*.zip
+            desktop/release/SHA256SUMS.txt
+            desktop/release/release-notes.md
           if-no-files-found: error
           retention-days: 30
 
-      # Release « simple » (DMG seul) uniquement pour les builds non signés :
-      # quand electron-builder publie lui-même, il crée le brouillon complet
+      # Release « simple » uniquement pour les builds non signés : quand
+      # electron-builder publie lui-même, il crée le brouillon complet
       # (DMG + ZIP + latest-mac.yml) et softprops ne doit pas entrer en conflit.
+      # Les notes (changelog + checksums) sont dans release-notes.md ; les
+      # notes auto de GitHub (« Full Changelog ») sont ajoutées après.
       - name: Attach to GitHub Release (unsigned tags only)
         if: startsWith(github.ref, 'refs/tags/v') && steps.flag.outputs.signed == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          files: desktop/release/*.dmg
+          files: |
+            desktop/release/*.dmg
+            desktop/release/SHA256SUMS.txt
+          body_path: desktop/release/release-notes.md
           generate_release_notes: true
+
+      # Build signé : electron-builder a déjà publié le brouillon
+      # (DMG + ZIP + latest-mac.yml, ce que lit electron-updater). On
+      # enrichit ce brouillon : notes (changelog + checksums) + fichier
+      # SHA256SUMS.txt en pièce jointe.
+      - name: Enrich signed draft release (checksums + changelog)
+        if: startsWith(github.ref, 'refs/tags/v') && steps.flag.outputs.signed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${GITHUB_REF_NAME}" desktop/release/SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" --clobber
+          gh release edit "${GITHUB_REF_NAME}" --repo "$GITHUB_REPOSITORY" --draft \
+            --notes-file desktop/release/release-notes.md
