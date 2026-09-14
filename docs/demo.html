@@ -50,6 +50,19 @@
   .voice-btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 10px}
   .voice-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .voice-btn.on{color:var(--accent2);border-color:rgba(124,108,255,.45)}
+
+  /* bouton micro (dans la barre de saisie) */
+  .mic-btn{
+    flex:none;width:42px;height:42px;border-radius:50%;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:var(--muted);
+    transition:all .18s;
+  }
+  .mic-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .mic-btn:hover{color:var(--txt);border-color:rgba(255,255,255,.32)}
+  .mic-btn.listening{background:rgba(47,191,155,.18);border-color:#2fbf9b;color:#6fe0c3;animation:mic-pulse 1.4s ease-in-out infinite}
+  @keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(47,191,155,.35)}50%{box-shadow:0 0 0 8px rgba(47,191,155,0)}}
+  @media (prefers-reduced-motion: reduce){.mic-btn.listening{animation:none}}
 </style>
 </head>
 <body data-page="demo" data-live-demo="1">
@@ -93,6 +106,9 @@
     </div>
     <div class="demo-log" id="demoLog"></div>
     <div class="demo-input">
+      <button class="mic-btn" id="micBtn" aria-label="Parler à Nova" title="Parler à Nova">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21"/></svg>
+      </button>
       <input id="demoText" type="text" placeholder="Écris à Nova… (Entrée pour envoyer, Échap pour interrompre)" autocomplete="off"/>
       <button id="demoSend" aria-label="Envoyer">➤</button>
     </div>
@@ -105,10 +121,10 @@
   </div>
 
   <p class="demo-note" style="max-width:680px;margin:26px auto 0">
-    En mode <b style="color:var(--txt)">local</b>, c'est la vraie app qui répond (heure, météo, mémoire, sport).
-    En mode <b style="color:var(--txt)">clé Groq</b>, le vrai modèle répond depuis ton navigateur.
-    Le bouton <b style="color:var(--txt)">haut-parleur</b> active la voix : le navigateur lit les réponses
-    à voix haute, phrase par phrase — comme Nova sur ton Mac.
+    Le bouton <b style="color:var(--txt)">micro</b> : clique, parle, il envoie au silence — et coupe Nova si elle
+    parle encore (barge-in). Le <b style="color:var(--txt)">haut-parleur</b> lit les réponses à voix haute,
+    phrase par phrase. En mode <b style="color:var(--txt)">local</b>, c'est la vraie app qui répond ;
+    en mode <b style="color:var(--txt)">clé Groq</b>, le vrai modèle répond depuis ton navigateur.
   </p>
 </main>
 
@@ -476,6 +492,10 @@
       setState('— interrompu', '#f5a83c');
       if (orb) orb.set('ready');
     }
+    if (e.key === 'Escape' && typeof listening !== 'undefined' && listening && recog){
+      recogWanted = false;
+      try { recog.stop(); } catch (_) {}
+    }
   });
 
   chips.forEach(c => c.addEventListener('click', () => {
@@ -527,6 +547,78 @@
     }
     renderVoiceBtn();
   });
+
+  /* ---------- micro : Web Speech API ----------
+     Clic pour parler, re-clic pour envoyer. Transcription en direct
+     dans le champ, puis envoi automatique au silence — comme l'app.
+     Si Nova est en train de parler, le micro la coupe (barge-in). */
+  const micBtn = document.getElementById('micBtn');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recog = null, listening = false, finalHeard = '', recogWanted = false;
+
+  if (!SR){
+    micBtn.style.display = 'none'; /* Firefox et autres : saisie clavier */
+  } else {
+    recog = new SR();
+    recog.lang = 'fr-FR';
+    recog.interimResults = true;
+    recog.continuous = false;
+    recog.maxAlternatives = 1;
+
+    recog.onstart = () => {
+      listening = true;
+      micBtn.classList.add('listening');
+      micBtn.title = 'J\'écoute… clique pour arrêter';
+      if (orb) orb.set('listen');
+      setState('— écoute', '#9defd8');
+      finalHeard = '';
+      input.placeholder = 'Parle… je t\'écoute';
+    };
+
+    recog.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++){
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalHeard += t; else interim += t;
+      }
+      input.value = (finalHeard + interim).trimStart();
+      scrollLog();
+    };
+
+    recog.onerror = (e) => {
+      listening = false;
+      micBtn.classList.remove('listening');
+      input.placeholder = 'Écris à Nova… (Entrée pour envoyer, Échap pour interrompre)';
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed'){
+        bubble('nova', '🎙️ Micro refusé : autorise le microphone pour ce site (icône à gauche de l\'adresse), puis réessaie.');
+      } else if (e.error === 'network'){
+        bubble('nova', '🎙️ La reconnaissance vocale du navigateur demande le réseau — réessaie, ou écris-moi.');
+      } else if (e.error !== 'aborted' && e.error !== 'no-speech'){
+        bubble('nova', '🎙️ Reconnaissance vocale indisponible (' + e.error + '). Écris-moi en attendant.');
+      }
+    };
+
+    recog.onend = () => {
+      listening = false;
+      micBtn.classList.remove('listening');
+      micBtn.title = 'Parler à Nova';
+      input.placeholder = 'Écris à Nova… (Entrée pour envoyer, Échap pour interrompre)';
+      const v = input.value.trim();
+      if (recogWanted && v) submit(v);
+      else if (!busy) setState('— prête', '');
+      if (orb && !busy) orb.set('ready');
+      recogWanted = false;
+    };
+
+    micBtn.addEventListener('click', () => {
+      if (listening){ recogWanted = false; try { recog.stop(); } catch (_) {} return; }
+      /* barge-in : si Nova parle ou réfléchit, on la coupe comme dans l'app */
+      if (busy && aborter){ aborter.abort(); busy = false; }
+      TTS.stop();
+      recogWanted = true;
+      try { recog.start(); } catch (_) {}
+    });
+  }
 
   /* ---------- démarrage ---------- */
   TTS.init();
