@@ -61,6 +61,13 @@ html[data-theme='light'] {
 
   --shadow-lg: 0 24px 60px rgba(46, 58, 120, 0.18);
   --shadow-md: 0 12px 32px rgba(46, 58, 120, 0.12);
+
+  /* Bannière « mise à jour disponible » : ambre lisible sur fond clair */
+  --ub-bg: rgba(217, 119, 6, 0.08);
+  --ub-brd: rgba(217, 119, 6, 0.35);
+  --ub-ink: #92610a;
+  --ub-dot: #d97706;
+  --ub-dot-glow: rgba(217, 119, 6, 0.45);
 }
 
 /* Surfaces blanches translucides à la place des blanches translucides nocturnes */
@@ -1257,6 +1264,82 @@ html[data-theme='light'] .sport-card { background: linear-gradient(160deg, rgba(
   .msg { max-width: 92%; }
   .brand-sub { display: none; }
 }
+
+/* ============================================================
+   Nouveautés & mise à jour — bannière discrète + liens Réglages
+   (remplies par le module NovaNews, actif dans l'app desktop)
+   ============================================================ */
+.update-banner {
+  position: relative;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px auto 0;
+  max-width: 680px;
+  padding: 9px 10px 9px 16px;
+  border: 1px solid rgba(255, 180, 92, 0.32);
+  border-radius: 999px;
+  background: rgba(255, 180, 92, 0.10);
+  color: #ffd9a3;
+  font-size: 13px;
+  animation: banner-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.update-banner[hidden] { display: none; }
+.ub-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--speak);
+  box-shadow: 0 0 10px 2px rgba(255, 180, 92, 0.55);
+  animation: ub-pulse 1.6s ease-in-out infinite;
+}
+.update-banner a { color: #ffd9a3; font-weight: 600; white-space: nowrap; }
+.update-banner a:hover { color: #fff; }
+.ub-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin-left: auto;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  opacity: 0.65;
+  cursor: pointer;
+}
+.ub-close:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
+.ub-close .ic { width: 14px; height: 14px; }
+@keyframes banner-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes ub-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.72); opacity: 0.65; }
+}
+.news-links { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 2px 0 0; font-size: 12.5px; }
+.news-links a { color: #9db4ff; }
+.news-links a:hover { text-decoration: underline; }
+
+@media (max-width: 560px) {
+  .update-banner { flex-wrap: wrap; border-radius: 16px; }
+}
+
+html[data-theme='light'] .update-banner {
+  border-color: var(--ub-brd);
+  background: var(--ub-bg);
+  color: var(--ub-ink);
+}
+html[data-theme='light'] .update-banner a { color: var(--ub-ink); }
+html[data-theme='light'] .update-banner a:hover { color: var(--ink); }
+html[data-theme='light'] .ub-dot {
+  background: var(--ub-dot);
+  box-shadow: 0 0 10px 2px var(--ub-dot-glow);
+}
+html[data-theme='light'] .news-links a { color: var(--accent-2); }
 
 @media (prefers-reduced-motion: reduce) {
   .grain, .orbit, .mic-btn.listening, .set-pane { animation: none !important; }

@@ -65,6 +65,16 @@
       </div>
     </header>
 
+    <!-- Bannière « mise à jour disponible » (remplie par NovaNews, app desktop) -->
+    <div class="update-banner" id="update-banner" hidden>
+      <span class="ub-dot" aria-hidden="true"></span>
+      <span id="update-banner-text">…</span>
+      <a id="update-banner-link" href="https://github.com/DmzGamingYT/nova/releases" target="_blank" rel="noopener">Découvrir les nouveautés ↗</a>
+      <button class="ub-close" id="update-banner-close" title="Masquer jusqu'à la prochaine version" aria-label="Masquer la bannière">
+        <svg class="ic"><use href="#i-x" /></svg>
+      </button>
+    </div>
+
     <!-- Conversation -->
     <section class="chat" id="chat" aria-live="polite">
       <div class="chat-inner" id="chat-inner">
@@ -175,6 +185,17 @@
           </select>
           <p class="set-help" style="margin-top:8px">
             Le bouton soleil/lune de la barre du haut fait défiler Auto → Clair → Sombre.
+          </p>
+        </section>
+
+        <section class="set-block" id="news-block" hidden>
+          <label class="set-label">Nouveautés &amp; aide</label>
+          <p class="set-help" id="news-version-line">Version en cours de vérification…</p>
+          <p class="set-ok" id="news-update" hidden></p>
+          <p class="news-links">
+            <a href="https://dmzgamingyt.github.io/nova/nouveautes.html" target="_blank" rel="noopener">Nouveautés du projet</a> ·
+            <a href="https://dmzgamingyt.github.io/nova/depannage.html" target="_blank" rel="noopener">Dépannage</a> ·
+            <a href="https://github.com/DmzGamingYT/nova/issues" target="_blank" rel="noopener">Signaler un problème</a>
           </p>
         </section>
         </div>
@@ -587,6 +608,116 @@
   <script src="markdown.js"></script>
   <script src="orb.js"></script>
   <script src="wake.js"></script>
+  <script>
+    /* ============================================================
+       Nouveautés & mise à jour — actif uniquement dans l'app desktop
+       (window.novaDesktop, posé par preload.js). Vérifie la dernière
+       release GitHub (cache 24 h), affiche la bannière si plus récent
+       et remplit le bloc « Nouveautés & aide » des Réglages.
+       ============================================================ */
+    window.NovaNews = (function () {
+      var KEY_CACHE = 'nova.update.cache';
+      var KEY_DISMISS = 'nova.update.dismissed';
+      var RELEASES = 'https://github.com/DmzGamingYT/nova/releases';
+
+      function cmp(a, b) {
+        function p(v) {
+          var m = String(v || '').trim().replace(/^v/i, '').match(/(\d+)\.(\d+)\.(\d+)/);
+          return m ? [+m[1], +m[2], +m[3]] : [0, 0, 0];
+        }
+        var A = p(a), B = p(b);
+        for (var i = 0; i < 3; i++) if (A[i] !== B[i]) return A[i] > B[i] ? 1 : -1;
+        return 0;
+      }
+
+      function el(id) { return document.getElementById(id); }
+
+      function currentVersion() {
+        /* l'app passe sa version en paramètre d'URL (?appv=…, posé par
+           desktop/main.js) — fiable et disponible immédiatement */
+        try {
+          var m = (location.search || '').match(/[?&]appv=([^&]+)/);
+          if (m) return decodeURIComponent(m[1]);
+        } catch (_) {}
+        try { return (window.novaDesktop && window.novaDesktop.appVersion) || ''; }
+        catch (_) { return ''; }
+      }
+
+      function showBanner(tag) {
+        var b = el('update-banner');
+        if (!b) return;
+        el('update-banner-text').textContent = 'Nova ' + tag + ' est disponible (tu as la ' + currentVersion() + ')';
+        el('update-banner-link').href = RELEASES + '/tag/' + tag;
+        b.hidden = false;
+      }
+
+      function renderBlock(latest, outdated) {
+        var block = el('news-block');
+        if (!block) return;
+        block.hidden = false;
+        var v = currentVersion();
+        el('news-version-line').textContent = v
+          ? 'Version installée : ' + v + (latest ? ' · dernière publiée : ' + latest : '')
+          : 'Version installée : (inconnue)' + (latest ? ' · dernière publiée : ' + latest : '');
+        var ok = el('news-update');
+        if (outdated && latest) {
+          ok.textContent = '↗ Mise à jour disponible : ' + latest + ' — voir la release pour le détail des nouveautés.';
+          ok.hidden = false;
+        } else if (latest) {
+          ok.textContent = '✓ Nova est à jour.';
+          ok.hidden = false;
+        }
+      }
+
+      function cached() {
+        try {
+          var j = JSON.parse(localStorage.getItem(KEY_CACHE) || 'null');
+          if (j && j.tag && Date.now() - j.at < 24 * 3600e3) return j.tag;
+        } catch (_) {}
+        return null;
+      }
+
+      async function check(force) {
+        var v = currentVersion();
+        if (!v) return;
+        var latest = cached();
+        if (!latest || force) {
+          try {
+            var r = await fetch('https://api.github.com/repos/DmzGamingYT/nova/releases/latest',
+              { headers: { Accept: 'application/vnd.github+json' } });
+            if (r.ok) {
+              var j = await r.json();
+              latest = j.tag_name || null;
+              try { localStorage.setItem(KEY_CACHE, JSON.stringify({ tag: latest, at: Date.now() })); } catch (_) {}
+            }
+          } catch (_) { /* hors-ligne : on reste discret */ }
+        }
+        var outdated = latest && cmp(latest, v) > 0;
+        var dismissed = null;
+        try { dismissed = localStorage.getItem(KEY_DISMISS); } catch (_) {}
+        if (outdated && dismissed !== latest) showBanner(latest);
+        renderBlock(latest, outdated);
+      }
+
+      /* câblage de la bannière (fermer = ne plus la montrer pour cette version) */
+      document.addEventListener('DOMContentLoaded', function () {
+        var close = el('update-banner-close');
+        if (close) close.addEventListener('click', function () {
+          el('update-banner').hidden = true;
+          try {
+            var link = el('update-banner-link').href || '';
+            var m = link.match(/tag\/([^/]+)$/);
+            if (m) localStorage.setItem(KEY_DISMISS, m[1]);
+          } catch (_) {}
+        });
+      });
+
+      return { check: check, cmp: cmp, currentVersion: currentVersion };
+    })();
+    /* démarre dès qu'une version d'app est connue (?appv=… de main.js,
+       ou window.novaDesktop.appVersion) — pas de bannière côté web */
+    if (window.NovaNews && window.NovaNews.currentVersion()) NovaNews.check();
+  </script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -23,6 +23,9 @@ const isWin = process.platform === 'win32';
 
 let serverChild = null;
 let serverPort = 0;
+/* Site du projet — cible des liens « Nouveautés / Dépannage » du menu */
+const SITE = 'https://dmzgamingyt.github.io/nova';
+const SITE_GH = 'https://github.com/DmzGamingYT/nova';
 /* Packagé : serveur embarqué (port libre). En dev : le serveur du dépôt
    sur :8787 (start.command), workflow inchangé — NOVA_EMBEDDED=1 ou
    NOVA_URL permettent de tester l'embarqué / une autre instance. */
@@ -37,6 +40,17 @@ function coreDir() {
   const root = path.join(app.getAppPath(), '..');
   if (fs.existsSync(path.join(root, 'server.js'))) return root;
   return app.getAppPath();
+}
+
+/* URL de l'UI, avec la version de l'app en paramètre : la page web
+   l'affiche et compare à la dernière release GitHub (Nouveautés). */
+function novaUiUrl() {
+  try {
+    const v = app.getVersion();
+    return v ? NOVA_URL + '?appv=' + encodeURIComponent(v) : NOVA_URL;
+  } catch (_) {
+    return NOVA_URL;
+  }
 }
 
 function httpProbe(url) {
@@ -156,7 +170,7 @@ function createPanel() {
     /* visible sur tous les espaces, même en plein écran */
     win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   }
-  win.loadURL(NOVA_URL);
+  win.loadURL(novaUiUrl());
 
   /* clic ailleurs → le panneau se replie (comme Spotlight) */
   win.on('blur', () => {
@@ -215,7 +229,7 @@ function openFullWindow() {
     },
   });
   fullWin.once('ready-to-show', () => fullWin.show());
-  fullWin.loadURL(NOVA_URL);
+  fullWin.loadURL(novaUiUrl());
   fullWin.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:/i.test(url) && !url.startsWith(NOVA_URL)) {
       shell.openExternal(url);
@@ -318,6 +332,19 @@ function rebuildTrayMenu() {
     {
       label: 'Ouvrir dans le navigateur',
       click: () => shell.openExternal(NOVA_URL),
+    },
+    { type: 'separator' },
+    {
+      label: 'Nouveautés du projet',
+      click: () => shell.openExternal(SITE + '/nouveautes.html'),
+    },
+    {
+      label: 'Dépannage & aide',
+      click: () => shell.openExternal(SITE + '/depannage.html'),
+    },
+    {
+      label: 'Page GitHub',
+      click: () => shell.openExternal(SITE_GH),
     },
     { type: 'separator' },
     updaterMenuLabel(),
