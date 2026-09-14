@@ -99,7 +99,7 @@ même dossier que le DMG téléchargé, puis :
 ```bash
 # macOS
 shasum -a 256 -c SHA256SUMS.txt
-# → Nova-1.2.1-arm64.dmg: OK
+# → Nova-1.3.0-arm64.dmg: OK
 ```
 
 ```bash
@@ -109,7 +109,7 @@ sha256sum -c SHA256SUMS.txt
 
 ```powershell
 # Windows (PowerShell) — comparer à la ligne du SHA256SUMS.txt
-Get-FileHash Nova-1.2.1-arm64.dmg -Algorithm SHA256
+Get-FileHash Nova-1.3.0-arm64.dmg -Algorithm SHA256
 ```
 
 <details>
