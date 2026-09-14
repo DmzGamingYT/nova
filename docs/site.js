@@ -58,7 +58,10 @@
     const page = active || (document.body.getAttribute('data-page') || 'index');
     nav.innerHTML =
       '<a class="brand" href="index.html"><span class="dot"></span>NOVA</a>' +
-      '<div class="links">' +
+      '<button class="nav-menu-toggle" type="button" aria-expanded="false" aria-controls="site-links" aria-label="Ouvrir le menu">' +
+        '<span></span><span></span><span></span>' +
+      '</button>' +
+      '<div class="links" id="site-links">' +
         '<a href="index.html"' + (page==='index'?' class="active"':'') + '>Accueil</a>' +
         '<a href="fonctions.html"' + (page==='fonctions'?' class="active"':'') + '>Fonctions</a>' +
         '<a href="demo.html"' + (page==='demo'?' class="active"':'') + '>Démo</a>' +
@@ -72,6 +75,25 @@
         '<button class="theme-toggle" type="button" aria-label="Changer de thème"></button>' +
       '</div>';
     document.body.prepend(nav);
+    const menuButton = nav.querySelector('.nav-menu-toggle');
+    const links = nav.querySelector('.links');
+    function closeMenu(){
+      nav.classList.remove('nav-open');
+      menuButton.setAttribute('aria-expanded', 'false');
+      menuButton.setAttribute('aria-label', 'Ouvrir le menu');
+    }
+    menuButton.addEventListener('click', () => {
+      const open = nav.classList.toggle('nav-open');
+      menuButton.setAttribute('aria-expanded', String(open));
+      menuButton.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
+    });
+    links.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+    document.addEventListener('click', event => {
+      if (!nav.contains(event.target)) closeMenu();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') closeMenu();
+    });
     initThemeToggle();
   }
 
