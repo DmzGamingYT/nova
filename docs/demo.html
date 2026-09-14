@@ -44,6 +44,12 @@
   .mode-banner.local b{color:#6fe0c3}
   .mode-banner.groq b{color:#b3a7ff}
   .mode-banner.err b{color:#f5a83c}
+
+  /* bouton voix (dans l'en-tête de la démo) */
+  .demo-head .head-actions{display:flex;gap:8px;align-items:center}
+  .voice-btn{display:inline-flex;align-items:center;justify-content:center;padding:8px 10px}
+  .voice-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .voice-btn.on{color:var(--accent2);border-color:rgba(124,108,255,.45)}
 </style>
 </head>
 <body data-page="demo" data-live-demo="1">
@@ -77,7 +83,13 @@
   <div class="demo-wrap">
     <div class="demo-head">
       <div class="t">Nova<span class="st" id="demoState">— prête</span></div>
-      <button class="demo-clear" id="demoClear">Effacer</button>
+      <div class="head-actions">
+        <button class="demo-clear voice-btn on" id="voiceBtn" aria-pressed="true" aria-label="Activer ou couper la voix" title="Voix activée — clique pour couper">
+          <svg id="voiceOn" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+          <svg id="voiceOff" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M4 9v6h4l5 4V5L8 9H4z"/><line x1="16.5" y1="9.5" x2="21.5" y2="14.5"/><line x1="21.5" y1="9.5" x2="16.5" y2="14.5"/></svg>
+        </button>
+        <button class="demo-clear" id="demoClear">Effacer</button>
+      </div>
     </div>
     <div class="demo-log" id="demoLog"></div>
     <div class="demo-input">
@@ -95,7 +107,8 @@
   <p class="demo-note" style="max-width:680px;margin:26px auto 0">
     En mode <b style="color:var(--txt)">local</b>, c'est la vraie app qui répond (heure, météo, mémoire, sport).
     En mode <b style="color:var(--txt)">clé Groq</b>, le vrai modèle répond depuis ton navigateur.
-    Sur ton Mac, Nova dirait aussi tout cela <b>à voix haute</b>.
+    Le bouton <b style="color:var(--txt)">haut-parleur</b> active la voix : le navigateur lit les réponses
+    à voix haute, phrase par phrase — comme Nova sur ton Mac.
   </p>
 </main>
 
@@ -135,6 +148,70 @@
   let history  = [];            // [{role, content}]
   let busy     = false;
   let aborter  = null;
+
+  /* ---------- voix : synthèse vocale du navigateur ----------
+     Lit les réponses phrase par phrase, comme Nova sur ton Mac.
+     Le bouton haut-parleur coupe/active (préférence mémorisée). */
+  const TTS = {
+    enabled: localStorage.getItem('nova.demo.voice') !== 'off',
+    supported: ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window),
+    voice: null,
+    spoken: 0,
+    init(){
+      if (!this.supported) return;
+      const pick = () => {
+        const fr = speechSynthesis.getVoices().filter(v => (v.lang || '').toLowerCase().startsWith('fr'));
+        /* une voix française qui sonne bien en priorité, sinon la première dispo */
+        this.voice = fr.find(v => /am[ée]lie|aurelie|thomas|audrey|marie|jauge|french/i.test(v.name)) || fr[0] || null;
+      };
+      pick();
+      speechSynthesis.onvoiceschanged = pick; /* chargement asynchrone (Chrome) */
+    },
+    say(chunk){
+      if (!this.supported || !chunk) return;
+      const u = new SpeechSynthesisUtterance(chunk);
+      u.lang = 'fr-FR';
+      if (this.voice) u.voice = this.voice;
+      u.rate = 1.03;
+      speechSynthesis.speak(u);
+    },
+    /* appelé pendant le streaming avec le texte accumulé : prononce
+       les phrases terminées, garde le reste pour la prochaine fois */
+    feed(acc){
+      if (!this.enabled || !this.supported) return;
+      const tail = acc.slice(this.spoken);
+      const m = tail.match(/[\s\S]*[.!?…](?:\s|$)/);
+      if (m){ this.spoken += m[0].length; this.say(m[0].trim()); }
+    },
+    /* fin du streaming : prononce ce qui reste ; true si la voix est active */
+    end(full){
+      if (!this.enabled || !this.supported) return false;
+      const rest = full.slice(this.spoken).trim();
+      this.spoken = full.length;
+      if (rest) this.say(rest);
+      return true;
+    },
+    start(){
+      this.spoken = 0;
+      if (this.supported) speechSynthesis.cancel();
+    },
+    stop(){
+      this.spoken = 0;
+      if (this.supported) speechSynthesis.cancel();
+    },
+  };
+
+  let voiceWatch = null;
+  function watchSpeaking(){
+    if (!TTS.supported || voiceWatch) return;
+    voiceWatch = setInterval(() => {
+      const active = TTS.enabled && (speechSynthesis.speaking || speechSynthesis.pending);
+      if (!active){
+        clearInterval(voiceWatch); voiceWatch = null;
+        if (!busy) setState('— prête', '');
+      }
+    }, 400);
+  }
 
   /* ---------- état visuel ---------- */
   function setState(txt, color){
@@ -237,7 +314,9 @@
       let i = 0;
       const tick = setInterval(() => {
         i += 1 + Math.floor(Math.random()*3);
-        el.textContent = full.slice(0, i);
+        const acc = full.slice(0, i);
+        el.textContent = acc;
+        TTS.feed(acc);
         scrollLog();
         if (i >= full.length){
           clearInterval(tick);
@@ -294,6 +373,7 @@
       return consumeSSE(res, (acc2) => {
         acc = acc2;
         el.textContent = acc;
+        TTS.feed(acc2);
         scrollLog();
       });
     })
@@ -324,7 +404,7 @@
           throw new Error(msg);
         });
       }
-      return consumeSSE(res, (acc2) => { acc = acc2; el.textContent = acc; scrollLog(); });
+      return consumeSSE(res, (acc2) => { acc = acc2; el.textContent = acc; TTS.feed(acc2); scrollLog(); });
     })
     .then((final) => {
       el.classList.remove('streaming');
@@ -353,6 +433,10 @@
       if (answer === null){ /* erreur déjà affichée */ }
       else if (typeof answer === 'string' && answer){
         history.push({ role:'assistant', content: answer });
+        if (TTS.end(answer)){
+          setState('— parle', '#ffd9a0');
+          watchSpeaking();
+        }
       }
       if (orb) orb.set('ready');
       setState('— prête', '');
@@ -369,6 +453,7 @@
     history.push({ role:'user', content: v });
     if (orb) orb.set('listen');
     setState('— écoute', '#9defd8');
+    TTS.start(); /* coupe la voix précédente, prépare la nouvelle */
     busy = true;
     respond(v);
   }
@@ -376,11 +461,17 @@
   /* ---------- interactions ---------- */
   send.addEventListener('click', () => submit());
   input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
-  clearBtn.addEventListener('click', () => { log.innerHTML = ''; history = []; input.focus(); });
+  clearBtn.addEventListener('click', () => {
+    log.innerHTML = ''; history = []; input.focus();
+    TTS.stop();
+    if (voiceWatch){ clearInterval(voiceWatch); voiceWatch = null; }
+    if (!busy) setState('— prête', '');
+  });
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && busy && aborter){
       aborter.abort();
+      TTS.stop();
       busy = false;
       setState('— interrompu', '#f5a83c');
       if (orb) orb.set('ready');
@@ -417,7 +508,30 @@
     }, 22);
   }, 500);
 
+  /* ---------- bouton voix ---------- */
+  const voiceBtn = document.getElementById('voiceBtn');
+  function renderVoiceBtn(){
+    voiceBtn.classList.toggle('on', TTS.enabled);
+    voiceBtn.setAttribute('aria-pressed', String(TTS.enabled));
+    voiceBtn.title = TTS.enabled ? 'Voix activée — clique pour couper' : 'Voix coupée — clique pour activer';
+    document.getElementById('voiceOn').hidden = !TTS.enabled;
+    document.getElementById('voiceOff').hidden = TTS.enabled;
+  }
+  voiceBtn.addEventListener('click', () => {
+    TTS.enabled = !TTS.enabled;
+    localStorage.setItem('nova.demo.voice', TTS.enabled ? 'on' : 'off');
+    if (!TTS.enabled){
+      TTS.stop();
+      if (voiceWatch){ clearInterval(voiceWatch); voiceWatch = null; }
+      if (!busy) setState('— prête', '');
+    }
+    renderVoiceBtn();
+  });
+
   /* ---------- démarrage ---------- */
+  TTS.init();
+  if (!TTS.supported) voiceBtn.style.display = 'none';
+  else renderVoiceBtn();
   if (groqKey && mode === 'groq') keyInput.placeholder = 'clé enregistrée ✓ — colle-en une autre pour la remplacer';
   refreshChips();
   detectLocal();
