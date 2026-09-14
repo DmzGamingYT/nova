@@ -33,6 +33,24 @@
   </div>
 </header>
 
+<section class="section center reveal" id="latest" style="padding-top:0">
+  <div class="card" style="max-width:720px;margin:0 auto;display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:space-between;text-align:left;padding:22px 26px">
+    <div style="display:flex;align-items:center;gap:16px;min-width:0">
+      <div class="ico" style="flex:none"><i data-ico="package"></i></div>
+      <div style="min-width:0">
+        <h3 style="margin:0 0 3px;font-size:16px">Dernière version <span id="lvVer" style="color:var(--accent2)">…</span></h3>
+        <p style="margin:0;color:var(--muted);font-size:13.5px" id="lvMeta">interrogation des releases GitHub…</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <a class="btn primary" id="lvBtn" href="https://github.com/DmzGamingYT/nova/releases/latest" style="padding:10px 18px;font-size:14px">
+        <i data-ico="download"></i>Télécharger le DMG
+      </a>
+      <a href="https://github.com/DmzGamingYT/nova/releases" style="color:var(--muted);font-size:13px" id="lvNotes">notes de version →</a>
+    </div>
+  </div>
+</section>
+
 <section class="section center reveal">
   <h2 class="sec-title">Une compagne, pas un chatbot</h2>
   <p class="sec-sub" style="max-width:640px;margin:0 auto 44px">Conçue pour vivre sur ta machine — pas dans un nuage.</p>
@@ -54,5 +72,35 @@
 <script src="icons.js"></script>
 <script src="orb.js"></script>
 <script src="site.js"></script>
+<script>
+/* Encart « Dernière version » — releases GitHub (releases/latest). */
+(function(){
+  const ver  = document.getElementById('lvVer');
+  const meta = document.getElementById('lvMeta');
+  const btn  = document.getElementById('lvBtn');
+  if (!ver) return;
+
+  fetch('https://api.github.com/repos/DmzGamingYT/nova/releases/latest',
+        { headers: { Accept: 'application/vnd.github+json' } })
+    .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+    .then(rel => {
+      ver.textContent = rel.tag_name || '';
+      const dmg = (rel.assets || []).find(a => /\.dmg$/i.test(a.name));
+      if (dmg){
+        btn.href = dmg.browser_download_url;
+        const mo = (dmg.size / 1e6).toFixed(0);
+        meta.textContent = 'app barre de menus · DMG ' + mo + ' Mo · macOS Apple Silicon';
+      } else {
+        meta.textContent = 'app barre de menus · macOS Apple Silicon';
+      }
+      if (rel.html_url) document.getElementById('lvNotes').href = rel.html_url;
+    })
+    .catch(() => {
+      /* API indisponible (quota, réseau) : lien vers la page des releases. */
+      ver.textContent = '';
+      meta.textContent = 'voir la dernière version sur GitHub';
+    });
+})();
+</script>
 </body>
 </html>
