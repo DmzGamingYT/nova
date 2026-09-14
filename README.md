@@ -86,11 +86,41 @@ npm run dist       # → release/Nova-<version>-arm64.dmg (build universel : npm
 
 > 🔓 Le DMG n'est pas signé (build personnel) : au premier lancement, clic droit → **Ouvrir**.
 
-**Téléchargement direct** : chaque tag `v*` produit un DMG en [release GitHub](https://github.com/DmzGamingYT/nova/releases/latest) — avec `SHA256SUMS.txt` et le changelog automatiques. Vérifie ton téléchargement :
+**Téléchargement direct** : chaque tag `v*` produit un DMG en [release GitHub](https://github.com/DmzGamingYT/nova/releases/latest) — avec `SHA256SUMS.txt` et le changelog automatiques.
+
+### 🔒 Vérifier ton DMG (SHA-256)
+
+Chaque release publie un fichier **`SHA256SUMS.txt`** généré par la CI. Place-le dans le
+même dossier que le DMG téléchargé, puis :
 
 ```bash
-shasum -a 256 -c SHA256SUMS.txt   # → Nova-x.y.z-arm64.dmg: OK
+# macOS
+shasum -a 256 -c SHA256SUMS.txt
+# → Nova-1.2.1-arm64.dmg: OK
 ```
+
+```bash
+# Linux
+sha256sum -c SHA256SUMS.txt
+```
+
+```powershell
+# Windows (PowerShell) — comparer à la ligne du SHA256SUMS.txt
+Get-FileHash Nova-1.2.1-arm64.dmg -Algorithm SHA256
+```
+
+<details>
+<summary><b>❌ Le hash ne correspond pas ?</b></summary>
+
+Ne lance pas le DMG. Deux causes possibles :
+
+- **Téléchargement incomplet** — retélécharge (un proxy ou un réseau captif peut tronquer
+  les gros fichiers) et revérifie ;
+- si ça diffère encore, compare le hash affiché avec celui de la **page de la release**
+  (le bloc « Checksums SHA-256 » des notes) et [signale-le dans les Issues](https://github.com/DmzGamingYT/nova/issues)
+  en précisant la version, ton OS et le hash obtenu.
+
+</details>
 
 <br/>
 
