@@ -57,13 +57,17 @@ if [ -z "$CHANGES" ]; then
 fi
 
 # ── 3. Tableau des fichiers + note selon le mode de signature ──────────
+# Le ZIP n'est joint à la release que par le chemin signé (electron-builder
+# --publish) ; en build ad-hoc il reste disponible dans les artefacts CI.
 TABLE=""
 for f in "$DIR"/*.dmg; do
   [ -f "$f" ] && TABLE+="| \`$(basename "$f")\` | Installation (glisser Nova dans Applications) |"$'\n'
 done
-for f in "$DIR"/*.zip; do
-  [ -f "$f" ] && TABLE+="| \`$(basename "$f")\` | Mise à jour automatique (electron-updater) |"$'\n'
-done
+if [ "${NOVA_SIGNED:-}" = "true" ]; then
+  for f in "$DIR"/*.zip; do
+    [ -f "$f" ] && TABLE+="| \`$(basename "$f")\` | Mise à jour automatique (electron-updater) |"$'\n'
+  done
+fi
 
 if [ "${NOVA_SIGNED:-}" = "true" ]; then
   NOTE="Build **signé et notarisé** : l'app se met à jour automatiquement."
