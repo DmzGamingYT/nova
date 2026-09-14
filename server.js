@@ -346,6 +346,8 @@ const SCREENSHOT_DIR = path.join(DATA_DIR, 'screenshots');
    presse-papiers) vivent dans lib/skills.js : module isolé, sans état
    partagé avec le serveur, donc directement testable (test/skills.test.js). */
 const skills = require('./lib/skills.js');
+/* Contrôle Windows (parité macOS) — chargé partout, utilisé sur win32 */
+const WINCTL = require('./lib/winctl.js');
 const { execFileP, httpGetText } = skills;
 
 /* ------------------------------------------------------------------ */
@@ -419,6 +421,8 @@ function macSandboxContext() {
     "dis gentiment que tu ne peux pas faire cette action précise."
   );
 }
+
+const WIN_ACTIONS = new Set(['open', 'say', 'notification', 'volume', 'clipboard_set', 'brightness', 'screenshot']);
 
 function execMacAction(action, arg) {
   return new Promise((resolve) => {
@@ -525,6 +529,15 @@ function execMacAction(action, arg) {
         if (jour.type === 'rest') return done('aujourd\u2019hui c\u2019est repos — rien à valider');
         const maj = TRAINING.markDone(jour.dateISO, true);
         done('séance validée : ' + (maj.title || '') + ' (' + (maj.ex || []).length + ' exercices cochés)');
+      } else if (process.platform === 'win32' && WIN_ACTIONS.has(a)) {
+        /* Windows : mêmes actions que macOS, adaptées via PowerShell
+           (lib/winctl.js). Le Promise ci-dessus n'est pas async : on
+           repasse par une promesse, comme la branche skills ci-dessous. */
+        WINCTL.routeAction(a, s, { screenshotDir: SCREENSHOT_DIR }).then((r) => {
+          if (r && r.ok) done(r.output);
+          else fail((r && r.error) || 'action impossible');
+        });
+      } else if (skills.SKILLS[a]) {
       } else if (skills.SKILLS[a]) {
         /* Compétences de lecture : utilisables aussi via la ligne ACTION */
         skills.runSkill(a, s, skillCtx()).then((r) => {
@@ -1130,7 +1143,7 @@ function relayOpenAiStream(req, res, upstream, session, profile, skillInfo, last
   }
   res.write('data: ' + JSON.stringify({ nova_profile: profile }) + '\n\n');
   if (skillInfo) res.write('data: ' + JSON.stringify({ nova_skill: skillInfo }) + '\n\n');
-  const macInfo = MAC_CONTROL_ENABLED ? { host: os.hostname(), platform: 'darwin', actions: MAC_ACTION_LIST } : null;
+  const macInfo = MAC_CONTROL_ENABLED ? { host: os.hostname(), platform: process.platform, actions: MAC_ACTION_LIST } : null;
   if (macInfo) res.write('data: ' + JSON.stringify({ nova_mac: macInfo }) + '\n\n');
   const decoder = new StringDecoder('utf8');
   let accUser = lastUserText;

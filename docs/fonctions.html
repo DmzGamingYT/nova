@@ -18,7 +18,7 @@
     <a href="#memoire"><i data-ico="memory"></i>Mémoire</a>
     <a href="#sandbox"><i data-ico="shield"></i>Sandbox</a>
     <a href="#reveil"><i data-ico="moon"></i>Réveil</a>
-    <a href="#mac"><i data-ico="display"></i>Contrôle du Mac</a>
+    <a href="#mac"><i data-ico="display"></i>Contrôle machine</a>
     <a href="#sport"><i data-ico="dumbbell"></i>Sport</a>
     <a href="#app"><i data-ico="app"></i>App native</a>
     <a href="#securite"><i data-ico="shield"></i>Sécurité</a>
@@ -63,7 +63,7 @@
     <div class="feat-copy">
       <div class="f-ico"><i data-ico="shield"></i></div>
       <h3>Sandbox : elle demande avant d'agir</h3>
-      <p>Le contrôle du Mac passe par une <b>liste blanche stricte</b> : pas de commande libre,
+      <p>Le contrôle de ta machine passe par une <b>liste blanche stricte</b> : pas de commande libre,
       arguments validés (volume 0–100, URL http/https, texte plafonné), exécution via
       <code>execFile</code> <b>sans shell</b> — donc pas d'injection possible.
       Chaque action affiche une carte <b>Autoriser / Ignorer</b>. Un interrupteur
@@ -93,9 +93,10 @@
   <article class="feat" id="mac">
     <div class="feat-copy">
       <div class="f-ico"><i data-ico="display"></i></div>
-      <h3>Des mains sur ton Mac</h3>
+      <h3>Des mains sur ta machine</h3>
       <p>Ouvrir une app ou un site, régler le volume, afficher une notification, capturer
-      l'écran, copier dans le presse-papiers. Et pour les questions factuelles, elle lit
+      l'écran, copier dans le presse-papiers — sur <b>Mac comme sur Windows</b> (PowerShell
+      côté PC). Et pour les questions factuelles, elle lit
       la <b>donnée réelle avant de répondre</b> : heure, météo (sans clé d'API), batterie,
       disque, adresse IP, presse-papiers — avec une pastille verte <b>donnée réelle</b>
       sous sa réponse. Jamais inventé.</p>
@@ -145,7 +146,7 @@
       <p><b>Rien ne quitte ta machine</b> — sauf ta question, qui va à Groq pour être
       réfléchie. Conversations, profil, progression sportive : tout vit dans
       <code>data/</code>, sur ton disque, sans compte ni serveur distant. Les actions
-      sur ton Mac passent par la <b>sandbox à confirmation</b> : liste blanche, arguments
+      sur ta machine (Mac ou PC) passent par la <b>sandbox à confirmation</b> : liste blanche, arguments
       validés, exécution sans shell, et une carte <b>Autoriser / Ignorer</b> à chaque fois.
       Et le DMG que tu télécharges est <b>vérifiable</b> : chaque release publie son
       <code>SHA256SUMS.txt</code> — <code>shasum -a 256 -c SHA256SUMS.txt</code> et tu sais
