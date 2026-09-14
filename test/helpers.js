@@ -30,17 +30,23 @@ function seed(dataDir, name, value) {
   return file;
 }
 
-async function waitReady(base, child, timeoutMs) {
+/* Attend que CE serveur précis réponde : /api/diag expose data.dir,
+   ce qui évite de confondre deux serveurs de test qui auraient tiré
+   le même port (node --test exécute les fichiers en parallèle). */
+async function waitReady(base, child, dataDir, timeoutMs) {
   const fin = Date.now() + (timeoutMs || 8000);
   while (Date.now() < fin) {
     if (child.exitCode !== null) throw new Error('le serveur s\'est arrêté (code ' + child.exitCode + ')');
     try {
-      const r = await fetch(base + '/api/status');
-      if (r.ok) return;
+      const r = await fetch(base + '/api/diag');
+      if (r.ok) {
+        const body = await r.json();
+        if (body && body.data && body.data.dir === dataDir) return;
+      }
     } catch (_) {}
     await new Promise((r) => setTimeout(r, 80));
   }
-  throw new Error('le serveur n\'a pas répondu en ' + (timeoutMs || 8000) + ' ms');
+  throw new Error('le serveur n\'a pas répondu avec le bon dossier de données en ' + (timeoutMs || 8000) + ' ms');
 }
 
 /**
@@ -52,6 +58,22 @@ async function waitReady(base, child, timeoutMs) {
  */
 async function startServer(opts) {
   opts = opts || {};
+  /* Collision de port possible (plage réduite, fichiers de tests
+     parallèles) : on réessaie avec un nouveau port quand le processus
+     meurt au démarrage — typiquement EADDRINUSE. */
+  let lastErr;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      return await startServerOnce(opts);
+    } catch (e) {
+      lastErr = e;
+      if (!String(e.message).includes("s'est arrêté")) throw e;
+    }
+  }
+  throw lastErr;
+}
+
+async function startServerOnce(opts) {
   const dataDir = opts.dataDir || tempDataDir();
   if (opts.seed) opts.seed(dataDir);
 
@@ -72,7 +94,7 @@ async function startServer(opts) {
 
   const base = 'http://127.0.0.1:' + port;
   try {
-    await waitReady(base, child);
+    await waitReady(base, child, dataDir);
   } catch (e) {
     try { child.kill('SIGKILL'); } catch (_) {}
     throw new Error(e.message + (stderr ? ' — ' + stderr.slice(0, 400) : ''));
