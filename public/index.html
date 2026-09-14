@@ -191,6 +191,10 @@
         <section class="set-block" id="news-block" hidden>
           <label class="set-label">Nouveautés &amp; aide</label>
           <p class="set-help" id="news-version-line">Version en cours de vérification…</p>
+          <button class="btn ghost btn-sm" id="btn-check-updates" title="Interroge GitHub immédiatement, sans attendre le cache de 24 h">
+            <svg class="ic-sm"><use href="#i-redo" /></svg>Vérifier les mises à jour
+          </button>
+          <p class="news-status" id="news-check-status" hidden></p>
           <p class="set-ok" id="news-update" hidden></p>
           <p class="news-links">
             <a href="https://dmzgamingyt.github.io/nova/nouveautes.html" target="_blank" rel="noopener">Nouveautés du projet</a> ·
@@ -679,9 +683,10 @@
 
       async function check(force) {
         var v = currentVersion();
-        if (!v) return;
-        var latest = cached();
-        if (!latest || force) {
+        if (!v) return null;
+        var latest = force ? null : cached();
+        var offline = false;
+        if (!latest) {
           try {
             var r = await fetch('https://api.github.com/repos/DmzGamingYT/nova/releases/latest',
               { headers: { Accept: 'application/vnd.github+json' } });
@@ -691,15 +696,17 @@
               try { localStorage.setItem(KEY_CACHE, JSON.stringify({ tag: latest, at: Date.now() })); } catch (_) {}
             }
           } catch (_) { /* hors-ligne : on reste discret */ }
+          offline = !latest;
         }
-        var outdated = latest && cmp(latest, v) > 0;
+        var outdated = !!(latest && cmp(latest, v) > 0);
         var dismissed = null;
         try { dismissed = localStorage.getItem(KEY_DISMISS); } catch (_) {}
         if (outdated && dismissed !== latest) showBanner(latest);
         renderBlock(latest, outdated);
+        return { ok: !!latest, latest: latest, outdated: outdated, offline: offline };
       }
 
-      /* câblage de la bannière (fermer = ne plus la montrer pour cette version) */
+      /* câblage : fermeture de la bannière + bouton « Vérifier les mises à jour » */
       document.addEventListener('DOMContentLoaded', function () {
         var close = el('update-banner-close');
         if (close) close.addEventListener('click', function () {
@@ -709,6 +716,35 @@
             var m = link.match(/tag\/([^/]+)$/);
             if (m) localStorage.setItem(KEY_DISMISS, m[1]);
           } catch (_) {}
+        });
+
+        /* vérification manuelle : feedback immédiat, sans le cache 24 h */
+        var btn = el('btn-check-updates');
+        var status = el('news-check-status');
+        var statusTimer = null;
+        function say(msg, cls, keepMs) {
+          if (!status) return;
+          status.textContent = msg;
+          status.className = 'news-status' + (cls ? ' ' + cls : '');
+          status.hidden = false;
+          if (statusTimer) clearTimeout(statusTimer);
+          if (keepMs) statusTimer = setTimeout(function () { status.hidden = true; }, keepMs);
+        }
+        if (btn) btn.addEventListener('click', async function () {
+          if (btn.disabled) return;
+          btn.disabled = true;
+          btn.classList.add('busy');
+          say('Vérification auprès de GitHub…');
+          try {
+            var res = await check(true);
+            if (!res || res.offline) say('Impossible de joindre GitHub — vérifie ta connexion.', 'err', 8000);
+            else if (res.outdated) say('↗ Nouvelle version disponible : ' + res.latest + '.', 'ok', 8000);
+            else say('✓ Nova est à jour (dernière publiée : ' + res.latest + ').', 'ok', 6000);
+          } catch (_) {
+            say('Impossible de joindre GitHub — vérifie ta connexion.', 'err', 8000);
+          }
+          btn.disabled = false;
+          btn.classList.remove('busy');
         });
       });
 

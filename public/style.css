@@ -1324,6 +1324,16 @@ html[data-theme='light'] .sport-card { background: linear-gradient(160deg, rgba(
 .news-links a { color: #9db4ff; }
 .news-links a:hover { text-decoration: underline; }
 
+/* bouton « Vérifier les mises à jour » + retour immédiat */
+.btn-sm { padding: 8px 16px; border-radius: 18px; font-size: 12.5px; margin: 10px 0 2px; }
+.btn-sm .ic-sm { width: 14px; height: 14px; }
+.btn-sm.busy .ic-sm { animation: check-spin 0.9s linear infinite; }
+@keyframes check-spin { to { transform: rotate(360deg); } }
+.news-status { font-size: 12.5px; margin: 8px 0 0; line-height: 1.5; }
+.news-status.ok { color: var(--listen); }
+.news-status.err { color: var(--error); }
+html[data-theme='light'] .news-status.err { color: #b02a44; }
+
 @media (max-width: 560px) {
   .update-banner { flex-wrap: wrap; border-radius: 16px; }
 }
