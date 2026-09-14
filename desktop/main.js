@@ -208,6 +208,8 @@ function trayIcon() {
 function rebuildTrayMenu() {
   if (!tray) return;
   tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Nova v' + app.getVersion(), enabled: false },
+    { type: 'separator' },
     { label: 'Ouvrir le panneau (' + SHORTCUT.replace('CommandOrControl', '⌘') + ')', click: () => togglePanel() },
     { label: 'Ouvrir dans une fenêtre complète', click: openFullWindow },
     { type: 'separator' },

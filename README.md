@@ -76,7 +76,7 @@ Permissions micro intégrées, pensée pour **Apple Silicon** (M1 → M4).
 ```bash
 cd desktop
 npm install        # ~11 s
-npm run dist       # → release/Nova-1.0.0-arm64.dmg (build universel : npm run dist:universal)
+npm run dist       # → release/Nova-<version>-arm64.dmg (build universel : npm run dist:universal)
 ```
 
 - `Nova.app` : glisse-la dans **Applications**, ouvre-la — l'icône apparaît dans la barre
@@ -85,6 +85,12 @@ npm run dist       # → release/Nova-1.0.0-arm64.dmg (build universel : npm run
 - L'app ne remplace pas le serveur : elle **l'affiche** dans sa propre fenêtre sans barre de navigateur
 
 > 🔓 Le DMG n'est pas signé (build personnel) : au premier lancement, clic droit → **Ouvrir**.
+
+**Téléchargement direct** : chaque tag `v*` produit un DMG en [release GitHub](https://github.com/DmzGamingYT/nova/releases/latest) — avec `SHA256SUMS.txt` et le changelog automatiques. Vérifie ton téléchargement :
+
+```bash
+shasum -a 256 -c SHA256SUMS.txt   # → Nova-x.y.z-arm64.dmg: OK
+```
 
 <br/>
 
