@@ -63,6 +63,17 @@
   .mic-btn.listening{background:rgba(47,191,155,.18);border-color:#2fbf9b;color:#6fe0c3;animation:mic-pulse 1.4s ease-in-out infinite}
   @keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(47,191,155,.35)}50%{box-shadow:0 0 0 8px rgba(47,191,155,0)}}
   @media (prefers-reduced-motion: reduce){.mic-btn.listening{animation:none}}
+
+  /* puces « compétences de ta Nova locale » */
+  .skills{max-width:780px;margin:0 auto 18px;display:none;flex-wrap:wrap;gap:9px;justify-content:center;align-items:center}
+  .skills.show{display:flex}
+  .skills .skills-title{color:var(--muted);font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;width:100%;text-align:center;margin-bottom:2px}
+  .skills .skill-chip{
+    color:#cfc7ff;background:rgba(124,108,255,.12);border:1px solid rgba(124,108,255,.4);
+    border-radius:999px;padding:7px 15px;font:inherit;font-size:13px;cursor:pointer;transition:background .15s;
+  }
+  .skills .skill-chip:hover{background:rgba(124,108,255,.26)}
+  .skills .skill-chip:disabled{opacity:.5;cursor:wait}
 </style>
 </head>
 <body data-page="demo" data-live-demo="1">
@@ -93,6 +104,10 @@
 
   <div class="mode-banner" id="modeBanner">Détection de ta Nova locale…</div>
 
+  <div class="skills" id="skillsRow" aria-label="Compétences de ta Nova locale">
+    <span class="skills-title">Ta Nova locale sait faire — essaie</span>
+  </div>
+
   <div class="demo-wrap">
     <div class="demo-head">
       <div class="t">Nova<span class="st" id="demoState">— prête</span></div>
@@ -122,9 +137,10 @@
 
   <p class="demo-note" style="max-width:680px;margin:26px auto 0">
     Le bouton <b style="color:var(--txt)">micro</b> : clique, parle, il envoie au silence — et coupe Nova si elle
-    parle encore (barge-in). Le <b style="color:var(--txt)">haut-parleur</b> lit les réponses à voix haute,
-    phrase par phrase. En mode <b style="color:var(--txt)">local</b>, c'est la vraie app qui répond ;
-    en mode <b style="color:var(--txt)">clé Groq</b>, le vrai modèle répond depuis ton navigateur.
+    parle encore (barge-in).    Le <b style="color:var(--txt)">haut-parleur</b> lit les réponses à voix haute,
+    phrase par phrase. En mode <b style="color:var(--txt)">local</b>, c'est la vraie app qui répond —
+    les puces au-dessus lancent ses vraies compétences (heure, météo, batterie, sport…).
+    En mode <b style="color:var(--txt)">clé Groq</b>, le vrai modèle répond depuis ton navigateur.
   </p>
 </main>
 
@@ -164,6 +180,7 @@
   let history  = [];            // [{role, content}]
   let busy     = false;
   let aborter  = null;
+  const skillsRow = document.getElementById('skillsRow');
 
   /* ---------- voix : synthèse vocale du navigateur ----------
      Lit les réponses phrase par phrase, comme Nova sur ton Mac.
@@ -246,13 +263,15 @@
       bannerHTML('local', 'Connecté à <b>ta Nova locale</b> (localhost:8787) — vraies données, vraie mémoire.');
     } else if (eff === 'groq'){
       bannerHTML('groq', 'Le <b>vrai modèle</b> répond via ta clé Groq — clé stockée dans ton navigateur uniquement.');
-    } else if (mode === 'local' && localOK === false){
+    } else if (mode === 'local'){
       bannerHTML('err', 'Aucune Nova détectée sur localhost:8787 — <b>lance l\'app</b> ou choisis un autre mode.');
-    } else if (mode === 'groq' && !groqKey){
+    } else if (mode === 'groq'){
       bannerHTML('err', 'Colle ta clé Groq ci-dessus pour activer ce mode.');
     } else {
       bannerHTML('', 'Mode <b>hors ligne</b> : réponses pré-écrites. Lance Nova sur ton Mac, ou branche une clé Groq, pour du vrai.');
     }
+    /* les puces compétences n'ont de sens que branché à ta Nova locale */
+    skillsRow.classList.toggle('show', eff === 'local');
     /* LED de la pastille « Ma Nova locale » */
     chips.forEach(c => {
       const led = c.querySelector('.led');
@@ -285,7 +304,7 @@
       .then(r => (r.ok ? r.json() : null))
       .then(j => { clearTimeout(to); localOK = !!(j && typeof j.hasKey === 'boolean'); })
       .catch(() => { clearTimeout(to); localOK = false; })
-      .then(() => { refreshBanner(); return localOK; });
+      .then(() => { refreshChips(); return localOK; });
   }
 
   /* ---------- rendu des bulles ---------- */
@@ -620,6 +639,47 @@
     });
   }
 
+  /* ---------- puces « compétences de ta Nova locale » ----------
+     Lues dans /api/mac/status (liste blanche réelle de la sandbox) et
+     mappées vers une question naturelle. Cliquables : remplit et envoie. */
+  const SKILL_CHIPS = [
+    { action:'now',              q:'Quelle heure est-il ?' },
+    { action:'date',             q:'On est quel jour ?' },
+    { action:'weather',          q:'Il fait quel temps ?' },
+    { action:'battery',          q:'Quel est l\'état de la batterie ?' },
+    { action:'disk',             q:'Combien d\'espace disque ?' },
+    { action:'ip',               q:'Quelle est mon IP ?' },
+    { action:'uptime',           q:'Depuis quand le Mac est allumé ?' },
+    { action:'clipboard',        q:'Qu\'y a-t-il dans le presse-papiers ?' },
+    { action:'workout_week',     q:'C\'est quoi mon programme cette semaine ?' },
+    { action:'training_stats',   q:'Où j\'en suis dans mon sport ?' },
+  ];
+  function buildSkillChips(){
+    fetch(LOCAL + '/api/mac/status')
+      .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then(j => {
+        const available = new Set(j.actions || []);
+        SKILL_CHIPS.filter(c => available.has(c.action)).forEach(c => {
+          const b = document.createElement('button');
+          b.className = 'skill-chip';
+          b.type = 'button';
+          b.textContent = c.q;
+          b.title = 'Demande à ta Nova locale : ' + c.q;
+          b.addEventListener('click', () => {
+            if (busy) return;
+            /* mode auto → passe en local pour être sûr que la puce fasse
+               ce qu'elle promet (vraie donnée de ta machine) */
+            if (effectiveMode() !== 'local'){ mode = 'local'; localStorage.setItem(LS_MODE, mode); refreshChips(); }
+            submit(c.q);
+            b.disabled = true;
+            setTimeout(() => b.disabled = false, 1200);
+          });
+          skillsRow.appendChild(b);
+        });
+      })
+      .catch(() => {}); /* pas de Nova locale : les puces restent cachées */
+  }
+
   /* ---------- démarrage ---------- */
   TTS.init();
   if (!TTS.supported) voiceBtn.style.display = 'none';
@@ -627,6 +687,7 @@
   if (groqKey && mode === 'groq') keyInput.placeholder = 'clé enregistrée ✓ — colle-en une autre pour la remplacer';
   refreshChips();
   detectLocal();
+  buildSkillChips();
   setInterval(detectLocal, 20000); /* l'app peut démarrer pendant la visite */
 })();
 </script>
