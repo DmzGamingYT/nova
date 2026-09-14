@@ -1,0 +1,33 @@
+appId: app.nova.assistant
+productName: Nova
+copyright: Nova — Assistant IA vocal
+
+directories:
+  output: release
+  buildResources: assets
+
+files:
+  - main.js
+  - preload.js
+  - assets/**/*
+
+mac:
+  category: public.app-category.productivity
+  icon: assets/icon.icns
+  target:
+    - target: dmg
+      arch:
+        - arm64
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  darkModeSupport: true
+  extendInfo:
+    NSMicrophoneUsageDescription: Nova a besoin du micro pour t'écouter.
+    NSAppleEventsUsageDescription: Nova utilise AppleScript pour contrôler ton Mac (volume, notifications).
+
+dmg:
+  title: Nova — Assistant IA vocal
+  contents:
+    - { x: 130, y: 220, type: file }
+    - { x: 410, y: 220, type: link, path: /Applications }

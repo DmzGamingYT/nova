@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e0b1e"/>
+      <stop offset="0.55" stop-color="#171233"/>
+      <stop offset="1" stop-color="#241a4f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.24" cy="0.5" r="0.55">
+      <stop offset="0" stop-color="#7c6cff" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#7c6cff" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#7c6cff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orb" cx="0.38" cy="0.32" r="0.85">
+      <stop offset="0" stop-color="#b3a7ff"/>
+      <stop offset="0.35" stop-color="#7c6cff"/>
+      <stop offset="0.8" stop-color="#4a3ddb"/>
+      <stop offset="1" stop-color="#33249e"/>
+    </radialGradient>
+    <radialGradient id="glint" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#cdc6ff"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="400" fill="url(#bg)"/>
+  <rect width="1280" height="400" fill="url(#glow)"/>
+
+  <!-- satellites & orbites -->
+  <circle cx="290" cy="200" r="150" fill="none" stroke="#8f7dff" stroke-opacity="0.25" stroke-width="1.5"/>
+  <circle cx="290" cy="200" r="118" fill="none" stroke="#8f7dff" stroke-opacity="0.12" stroke-width="1"/>
+  <circle cx="290" cy="68"  r="7" fill="#8f7dff" opacity="0.9"/>
+  <circle cx="408" cy="200" r="5" fill="#8f7dff" opacity="0.7"/>
+
+  <!-- orbe -->
+  <circle cx="290" cy="200" r="86" fill="url(#orb)"/>
+  <ellipse cx="262" cy="168" rx="30" ry="20" fill="url(#glint)"/>
+
+  <!-- wordmark -->
+  <text x="440" y="188" font-family="-apple-system, 'SF Pro Display', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="92" font-weight="700" letter-spacing="10" fill="url(#title)">NOVA</text>
+  <text x="446" y="242" font-family="-apple-system, 'SF Pro Text', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="27" font-weight="400" letter-spacing="1" fill="#b9b0e8">Assistante IA vocale — 100 % locale, propulsée par Groq</text>
+
+  <!-- pastilles -->
+  <g font-family="-apple-system, 'SF Pro Text', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#ded9ff">
+    <rect x="446" y="286" width="152" height="40" rx="20" fill="#7c6cff" fill-opacity="0.16" stroke="#7c6cff" stroke-opacity="0.45"/>
+    <text x="466" y="312" fill="#cfc7ff">🎤 Voix macOS</text>
+    <rect x="612" y="286" width="196" height="40" rx="20" fill="#7c6cff" fill-opacity="0.16" stroke="#7c6cff" stroke-opacity="0.45"/>
+    <text x="632" y="312" fill="#cfc7ff">⚡ 0 dépendance npm</text>
+    <rect x="822" y="286" width="192" height="40" rx="20" fill="#7c6cff" fill-opacity="0.16" stroke="#7c6cff" stroke-opacity="0.45"/>
+    <text x="842" y="312" fill="#cfc7ff">🛡️ Sandbox Mac</text>
+  </g>
+</svg>

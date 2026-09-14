@@ -1,0 +1,16 @@
+.env
+.DS_Store
+node_modules/
+*.log
+data/
+preview.html
+preview-live.html
+nova-replay-*.html
+nova-launchd.log
+nova-launchd.err.log
+
+# Application macOS (Electron)
+desktop/node_modules/
+desktop/release/
+desktop/tools/Nova.iconset/
+.freebuff/

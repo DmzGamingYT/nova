@@ -1,0 +1,17 @@
+{
+  "name": "nova",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Nova — assistante IA vocale locale (Groq, voix macOS, mot d'activation, sandbox Mac)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/*.test.js",
+    "preview": "node tools/build-preview.js",
+    "check:sport": "node tools/check-sport.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Nova — Assistant IA vocal</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g' cx='35%25' cy='30%25' r='75%25'%3E%3Cstop offset='0%25' stop-color='%23a5b4fc'/%3E%3Cstop offset='55%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%232e1065'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='30' fill='url(%23g)'/%3E%3Ccircle cx='23' cy='22' r='7' fill='%23ffffff' opacity='0.55'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Décor animé -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Halo derrière l'orbe -->
+  <div class="stage" aria-hidden="true">
+    <div class="halo" id="halo"></div>
+    <div class="orbit orbit-a"><i></i></div>
+    <div class="orbit orbit-b"><i></i></div>
+  </div>
+
+  <main class="app">
+
+    <!-- Barre supérieure -->
+  <!-- Bibliothèque d'icônes : TOUTES les icônes de l'app vivent ici, et
+       nulle part ailleurs. Chaque bouton y réfère par <use href="#i-…">. -->
+  <svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true">
+    <symbol id="i-sun-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5 5l1.6 1.6M17.4 17.4L19 19M5 19l1.6-1.6M17.4 6.6L19 5"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.4 14.2A8.3 8.3 0 0 1 9.8 3.6a8.3 8.3 0 1 0 10.6 10.6Z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.02a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.02a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></symbol>
+    <symbol id="i-waves" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3l2-7 3 14 3-11 2 4h2l1-3 2 3h2"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.4 13.4A7.6 7.6 0 0 1 10.1 3.3a7.3 7.3 0 1 0 10.3 10.1Z"/><path d="M16.6 4.2l.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5Z"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18 6a8.5 8.5 0 0 1 0 12"/></symbol>
+    <symbol id="i-volume-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m16 9 6 6m0-6-6 6"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  </svg>
+
+    <header class="topbar glass">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Nova</span>
+        <span class="brand-sub" id="state-label">prête</span>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="btn-theme" title="Thème : auto — suit l'apparence de macOS" aria-label="Changer de thème">
+          <svg class="ic ic-auto"><use href="#i-sun-auto" /></svg>
+          <svg class="ic ic-light"><use href="#i-sun" /></svg>
+          <svg class="ic ic-dark"><use href="#i-moon" /></svg>
+        </button>
+        <button class="icon-btn" id="btn-clear" title="Effacer la conversation" aria-label="Effacer la conversation">
+          <svg class="ic"><use href="#i-trash" /></svg>
+        </button>
+        <button class="icon-btn" id="btn-settings" title="Réglages" aria-label="Réglages">
+          <svg class="ic"><use href="#i-gear" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Conversation -->
+    <section class="chat" id="chat" aria-live="polite">
+      <div class="chat-inner" id="chat-inner">
+
+        <div class="hero" id="hero">
+          <div class="hero-orb-slot" id="hero-orb-slot"></div>
+          <h1>Bonjour, je suis <em>Nova</em></h1>
+          <p>Tiens la barre <kbd>espace</kbd> — ou le bouton micro — et parle-moi.<br/>Ou active la <strong>conversation naturelle</strong> (bouton vague) et parle simplement.</p>
+          <div class="hero-chips">
+            <button class="chip" data-suggest="Raconte-moi une blague de développeur.">Une blague 🎭</button>
+            <button class="chip" data-suggest="Explique-moi ce qu'est l'intelligence artificielle, simplement.">L'IA, simplement 💡</button>
+            <button class="chip" data-suggest="Aide-moi à préparer un week-end à Lyon avec un petit budget.">Week-end à Lyon 🗺️</button>
+            <button class="chip" data-suggest="Donne-moi trois conseils pour mieux dormir.">Mieux dormir 🌙</button>
+          </div>
+        </div>
+
+        <div id="messages"></div>
+      </div>
+    </section>
+
+    <!-- Minuteurs en cours -->
+    <div class="timers" id="timers" hidden></div>
+
+    <!-- Zone de saisie -->
+    <footer class="composer glass">
+      <div class="wavebars" id="wavebars" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <button class="conv-btn wake-btn" id="btn-wake" title="Mot d'activation : dis « Nova » pour me réveiller" aria-label="Mot d'activation « Nova »" aria-pressed="false">
+        <svg class="ic"><use href="#i-star" /></svg>
+      </button>
+      <button class="conv-btn" id="btn-conv" title="Conversation naturelle : Nova détecte ta voix" aria-label="Conversation naturelle">
+        <svg class="ic"><use href="#i-waves" /></svg>
+      </button>
+      <button class="mic-btn" id="btn-mic" title="Maintenir pour parler (espace)" aria-label="Maintenir pour parler">
+        <svg class="ic ic-mic"><use href="#i-mic" /></svg>
+        <svg class="ic ic-stop"><use href="#i-stop" /></svg>
+      </button>
+      <div class="input-wrap">
+        <textarea id="input" rows="1" placeholder="Écris à Nova… (Entrée pour envoyer)" autocomplete="off"></textarea>
+      </div>
+      <button class="send-btn" id="btn-send" title="Envoyer" aria-label="Envoyer">
+        <svg class="ic"><use href="#i-send" /></svg>
+      </button>
+      <button class="icon-btn tts-btn" id="btn-tts" title="Couper / remettre la voix" aria-label="Couper la voix">
+        <svg class="ic ic-on"><use href="#i-volume" /></svg>
+        <svg class="ic ic-off"><use href="#i-volume-off" /></svg>
+      </button>
+    </footer>
+  </main>
+
+  <!-- Panneau de transcription -->
+  <aside class="transcript glass" id="transcript-panel" hidden>
+    <div class="t-title"><span class="rec-dot"></span> <span id="t-title-text">Je t'écoute…</span></div>
+    <div class="t-amp" id="t-amp"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="t-hint" id="t-hint">Relâche pour envoyer · <kbd>échap</kbd> pour annuler</div>
+  </aside>
+
+  <!-- Réglages -->
+  <div class="modal-backdrop" id="settings-backdrop" hidden>
+    <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <header class="modal-head">
+        <h2 id="settings-title">Réglages</h2>
+        <button class="icon-btn" id="btn-close-settings" aria-label="Fermer"><svg class="ic"><use href="#i-x" /></svg></button>
+      </header>
+      <nav class="set-tabs" role="tablist" aria-label="Sections des réglages">
+        <button class="set-tab" role="tab" data-tab="general" aria-selected="true">Général</button>
+        <button class="set-tab" role="tab" data-tab="voix" aria-selected="false">Voix &amp; veille</button>
+        <button class="set-tab" role="tab" data-tab="sport" aria-selected="false">Sport</button>
+        <button class="set-tab" role="tab" data-tab="skills" aria-selected="false">Compétences</button>
+        <button class="set-tab" role="tab" data-tab="profil" aria-selected="false">Profil</button>
+        <button class="set-tab" role="tab" data-tab="memoire" aria-selected="false">Mémoire</button>
+        <button class="set-tab" role="tab" data-tab="historique" aria-selected="false">Historique</button>
+        <button class="set-tab" role="tab" data-tab="diagnostic" aria-selected="false">Diagnostic</button>
+      </nav>
+
+      <div class="modal-body">
+        <div class="set-pane" data-pane="general" role="tabpanel">
+
+        <section class="set-block" id="key-block">
+          <label class="set-label" for="key-input">Clé API Groq <span class="req">requise pour l'IA réelle</span></label>
+          <p class="set-help" id="key-help-off">
+            Crée une clé gratuite sur <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a>,
+            colle-la ici : elle reste sur ta machine et n'est envoyée qu'à Groq.
+          </p>
+          <div class="key-row">
+            <input id="key-input" type="password" placeholder="gsk_…" spellcheck="false" autocomplete="off" />
+            <button class="btn" id="btn-save-key">Enregistrer</button>
+          </div>
+          <p class="set-ok" id="key-ok" hidden>✓ Clé enregistrée — Nova est pleinement active.</p>
+          <p class="set-err" id="key-err" hidden></p>
+        </section>
+
+        <section class="set-block">
+          <label class="set-label" for="model-select">Modèle de langage</label>
+          <div class="key-row">
+            <select id="model-select"></select>
+            <button class="btn ghost" id="btn-refresh-models">Rafraîchir</button>
+          </div>
+        </section>
+
+        <section class="set-block">
+          <label class="set-label" for="theme-mode">Apparence</label>
+          <select id="theme-mode">
+            <option value="auto">Auto — suit macOS</option>
+            <option value="light">Mode clair</option>
+            <option value="dark">Mode sombre</option>
+          </select>
+          <p class="set-help" style="margin-top:8px">
+            Le bouton soleil/lune de la barre du haut fait défiler Auto → Clair → Sombre.
+          </p>
+        </section>
+        </div>
+
+        <div class="set-pane" data-pane="voix" role="tabpanel" hidden>
+
+        <section class="set-block">
+          <label class="set-label" for="voice-select">Voix française</label>
+          <div class="key-row">
+            <select id="voice-select"></select>
+          </div>
+          <p class="set-help">Les voix viennent de macOS (Amélie, Thomas, Audrey…). Essaie-les :</p>
+          <button class="btn ghost" id="btn-test-voice"><svg class="ic-sm"><use href="#i-volume" /></svg>Écouter un test</button>
+        </section>
+
+        <section class="set-block two-col">
+          <div>
+            <label class="set-label" for="rate-range">Vitesse de parole · <span id="rate-val">1.0×</span></label>
+            <input id="rate-range" type="range" min="0.6" max="1.6" step="0.05" value="1" />
+          </div>
+          <div>
+            <label class="set-label" for="pitch-range">Hauteur de voix · <span id="pitch-val">1.0</span></label>
+            <input id="pitch-range" type="range" min="0.5" max="1.6" step="0.05" value="1" />
+          </div>
+        </section>
+
+        <section class="set-block">
+          <label class="switch-row">
+            <input type="checkbox" id="auto-tts" checked />
+            <span class="switch"></span>
+            <span>Lire les réponses à voix haute automatiquement</span>
+          </label>
+        </section>
+
+        <section class="set-block">
+          <label class="switch-row">
+            <input type="checkbox" id="conv-mode" />
+            <span class="switch"></span>
+            <span>Conversation naturelle — Nova écoute en continu</span>
+          </label>
+          <p class="set-help">
+            Parle sans toucher à rien : Nova détecte ta voix, et une pause d'environ une seconde
+            envoie ta question. Parle pendant sa réponse pour la couper. Casque recommandé pour
+            éviter qu'elle s'écoute elle-même.
+          </p>
+          <label class="set-label" for="vad-sens" style="margin-top:10px">Sensibilité du micro · <span id="vad-sens-val">moyenne</span></label>
+          <input id="vad-sens" type="range" min="0" max="1" step="0.05" value="0.5" />
+        </section>
+
+        <section class="set-block">
+          <label class="switch-row">
+            <input type="checkbox" id="wake-word" />
+            <span class="switch"></span>
+            <span>Mot d'activation — dis « Nova » pour la réveiller</span>
+          </label>
+          <p class="set-help" id="wake-help">
+            Nova reste en veille, silencieuse, et n'ouvre le micro qu'en entendant son
+            nom — puis elle se remet en veille après ta réponse. Exclusif avec la
+            conversation naturelle. Le moteur (reconnaissance du navigateur ou Whisper)
+            est choisi automatiquement.
+          </p>
+          <label class="set-label" for="wake-stay" style="margin-top:10px">Rester réveillée après une réponse · <span id="wake-stay-val">12 s</span></label>
+          <input id="wake-stay" type="range" min="5" max="90" step="1" value="12" />
+        </section>
+
+        <section class="set-block">
+          <label class="set-label">Commandes vocales</label>
+          <p class="set-help">
+            Dis-les à l'oral (précédées ou non de « Nova ») ou tape-les. Nova y répond
+            toujours, même en veille.
+          </p>
+          <div class="cmd-grid">
+            <code>Nova, coupe-toi</code><span>coupe sa voix (sourdine)</span>
+            <code>Nova, parle</code><span>réactive sa voix</span>
+            <code>Nova, efface</code><span>vide la conversation affichée</span>
+            <code>Nova, annule</code><span>rétablit la conversation effacée</span>
+            <code>Nova, répète</code><span>redit sa dernière réponse</span>
+            <code>Nova, minuteur de 5 minutes</code><span>minuteur avec alerte vocale</span>
+            <code>Nova, annule le minuteur</code><span>arrête les minuteurs en cours</span>
+            <code>Nova, plus vite</code><span>accélère sa lecture (+0,15×)</span>
+            <code>Nova, moins vite</code><span>ralentit sa lecture</span>
+            <code>Nova, change de voix</code><span>voix française suivante</span>
+            <code>Nova, oublie tout</code><span>efface toute sa mémoire</span>
+            <code>Nova, oublie cette conversation</code><span>oublie la session en cours</span>
+            <code>Nova, qu'as-tu retenu ?</code><span>récapitule ce qu'elle sait</span>
+            <code>Nova, séance terminée</code><span>valide la séance de sport du jour</span>
+          </div>
+        </section>
+        </div>
+
+        <div class="set-pane" data-pane="sport" role="tabpanel" hidden>
+
+        <section class="set-block">
+          <label class="set-label">Ton programme Pulse</label>
+          <p class="set-help" id="sport-help">
+            Nova lit ton programme directement dans le fichier Pulse (elle ne le recopie pas :
+            si tu modifies une séance dans Pulse, Nova la voit au prochain chargement).
+            Le fichier reste chez toi, il n'est jamais envoyé nulle part.
+          </p>
+          <div class="key-row">
+            <input id="sport-path" type="text" spellcheck="false" autocomplete="off" placeholder="/Users/…/APP 2/index.html" />
+            <button class="btn" id="btn-sport-path">Enregistrer</button>
+          </div>
+          <p class="set-err" id="sport-err" hidden></p>
+          <label class="set-help" for="sport-start" style="margin-top:12px">
+            Date de début du programme (le lundi de la semaine 1 — elle détermine les phases)
+          </label>
+          <input id="sport-start" type="date" />
+          <div class="sport-actions">
+            <button class="btn ghost" id="btn-sport-detect">Détecter automatiquement</button>
+            <button class="btn ghost" id="btn-sport-open">Ouvrir Pulse</button>
+            <button class="btn ghost" id="btn-sport-import">Importer une sauvegarde Pulse</button>
+            <input type="file" id="sport-import-file" accept="application/json,.json" hidden />
+          </div>
+        </section>
+
+        <section class="set-block">
+          <label class="set-label" id="sport-today-label">La séance du jour <span class="set-tag read">lue à l'instant</span></label>
+          <div class="sport-today" id="sport-today"><div class="sport-empty">Chargement…</div></div>
+        </section>
+
+        <section class="set-block">
+          <label class="set-label">La semaine</label>
+          <div class="sport-week" id="sport-week"><div class="sport-empty">—</div></div>
+          <div class="sport-actions">
+            <button class="btn ghost" id="btn-sport-prev">← Semaine précédente</button>
+            <button class="btn ghost" id="btn-sport-now">Cette semaine</button>
+            <button class="btn ghost" id="btn-sport-next">Semaine suivante →</button>
+          </div>
+        </section>
+
+        <section class="set-block">
+          <label class="set-label">Progression</label>
+          <div class="sport-stats" id="sport-stats"><div class="sport-empty">—</div></div>
+          <p class="set-help">
+            Nova garde son propre suivi (séances validées) dans <code>data/training.json</code>.
+            « Importer une sauvegarde Pulse » recopie une progression exportée depuis Pulse.
+          </p>
+          <button class="btn danger" id="btn-sport-reset">Réinitialiser ma progression</button>
+        </section>
+        </div>
+
+        <div class="set-pane" data-pane="skills" role="tabpanel" hidden>
+
+        <section class="set-block">
+          <label class="switch-row">
+            <input type="checkbox" id="mac-control" checked />
+            <span class="switch"></span>
+            <span>Autoriser les actions sur ce Mac</span>
+          </label>
+          <p class="set-help" id="mac-help">
+            Sandbox locale : liste blanche d'actions, aucun shell, arguments validés.
+            Rien ne s'exécute sans ton clic sur « Autoriser » dans la conversation.
+          </p>
+        </section>
+
+        <section class="set-block">
+          <label class="set-label">Ce qu'elle lit pour toi <span class="set-tag read">sans confirmation</span></label>
+          <p class="set-help">
+            Données réelles lues sur le Mac juste avant de répondre : elle ne les invente pas.
+            Clique une ligne pour la poser dans la zone de saisie.
+          </p>
+          <div class="skill-list">
+            <button class="skill-item" data-ask="Quelle heure est-il ?">
+              <span class="sk-top"><strong>Heure</strong><span class="sk-cmd">now</span></span>
+              <span class="sk-desc">L'heure exacte, à la minute près.</span>
+              <span class="sk-ex">« Quelle heure est-il ? »</span>
+            </button>
+            <button class="skill-item" data-ask="Quel jour sommes-nous ?">
+              <span class="sk-top"><strong>Date</strong><span class="sk-cmd">date</span></span>
+              <span class="sk-desc">Le jour, en toutes lettres.</span>
+              <span class="sk-ex">« Quel jour sommes-nous ? »</span>
+            </button>
+            <button class="skill-item" data-ask="Quel temps fait-il à Namur ?">
+              <span class="sk-top"><strong>Météo</strong><span class="sk-cmd">weather</span></span>
+              <span class="sk-desc">Météo réelle, sans clé d'API. Dis une autre ville pour la changer.</span>
+              <span class="sk-ex">« Quel temps fait-il à Namur ? »</span>
+            </button>
+            <button class="skill-item" data-ask="Combien de batterie me reste-t-il ?">
+              <span class="sk-top"><strong>Batterie</strong><span class="sk-cmd">battery</span></span>
+              <span class="sk-desc">Niveau de charge et secteur, sur MacBook.</span>
+              <span class="sk-ex">« Combien de batterie ? »</span>
+            </button>
+            <button class="skill-item" data-ask="Il me reste combien d'espace disque ?">
+              <span class="sk-top"><strong>Espace disque</strong><span class="sk-cmd">disk</span></span>
+              <span class="sk-desc">Total, utilisé et libre sur le disque principal.</span>
+              <span class="sk-ex">« Il me reste combien d'espace disque ? »</span>
+            </button>
+            <button class="skill-item" data-ask="Quelle est mon adresse IP locale ?">
+              <span class="sk-top"><strong>Réseau</strong><span class="sk-cmd">ip</span></span>
+              <span class="sk-desc">Adresse IP locale et interface active.</span>
+              <span class="sk-ex">« Quelle est mon adresse IP locale ? »</span>
+            </button>
+            <button class="skill-item" data-ask="Depuis combien de temps le Mac est allumé ?">
+              <span class="sk-top"><strong>Allumage</strong><span class="sk-cmd">uptime</span></span>
+              <span class="sk-desc">Depuis quand le Mac tourne, en jours et heures.</span>
+              <span class="sk-ex">« Depuis combien de temps le Mac est allumé ? »</span>
+            </button>
+            <button class="skill-item" data-ask="Qu'est-ce que j'ai copié ?">
+              <span class="sk-top"><strong>Presse-papiers</strong><span class="sk-cmd">clipboard</span></span>
+              <span class="sk-desc">Ce qui est actuellement copié (lecture seule).</span>
+              <span class="sk-ex">« Qu'est-ce que j'ai copié ? »</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="set-block">
+          <label class="set-label">Ton sport <span class="set-tag read">sans confirmation</span></label>
+          <p class="set-help">
+            Elle lit ton programme Pulse et saura te répondre sans inventer : séries, répétitions,
+            consignes, semaines. Valider une séance reste une action à confirmer.
+          </p>
+          <div class="skill-list">
+            <button class="skill-item" data-ask="Quelle séance j'ai aujourd'hui ?">
+              <span class="sk-top"><strong>Séance du jour</strong><span class="sk-cmd">workout</span></span>
+              <span class="sk-desc">Exercices, séries, répétitions, repos et durée estimée.</span>
+              <span class="sk-ex">« Quelle séance j'ai aujourd'hui ? »</span>
+            </button>
+            <button class="skill-item" data-ask="C'est quoi mon programme de sport cette semaine ?">
+              <span class="sk-top"><strong>La semaine</strong><span class="sk-cmd">workout_week</span></span>
+              <span class="sk-desc">Les sept jours, ce qui est fait et ce qui reste.</span>
+              <span class="sk-ex">« C'est quoi mon programme de sport cette semaine ? »</span>
+            </button>
+            <button class="skill-item" data-ask="Comment on fait les pompes ?">
+              <span class="sk-top"><strong>Technique d'un exercice</strong><span class="sk-cmd">workout_exercise</span></span>
+              <span class="sk-desc">La consigne exacte écrite dans ton programme.</span>
+              <span class="sk-ex">« Comment on fait les pompes ? »</span>
+            </button>
+            <button class="skill-item" data-ask="Où j'en suis dans mon programme de sport ?">
+              <span class="sk-top"><strong>Bilan sport</strong><span class="sk-cmd">training_stats</span></span>
+              <span class="sk-desc">Séances, série en cours, minutes cumulées, niveau, phase.</span>
+              <span class="sk-ex">« Où j'en suis dans mon programme ? »</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="set-block">
+          <label class="set-label">Ce qu'elle peut faire <span class="set-tag ask">après ton accord</span></label>
+          <p class="set-help">
+            Chaque demande affiche une carte « Autoriser / Ignorer » dans la conversation :
+            l'action n'est exécutée qu'après ton clic.
+          </p>
+          <div class="skill-list">
+            <button class="skill-item" data-ask="Ouvre le site de la NASA.">
+              <span class="sk-top"><strong>Ouvrir un site ou une app</strong><span class="sk-cmd">open</span></span>
+              <span class="sk-desc">Lance une URL ou une application installée.</span>
+              <span class="sk-ex">« Ouvre le site de la NASA. »</span>
+            </button>
+            <button class="skill-item" data-ask="Fais dire au Mac : réunion dans cinq minutes.">
+              <span class="sk-top"><strong>Faire parler le Mac</strong><span class="sk-cmd">say</span></span>
+              <span class="sk-desc">Annonce un texte à voix haute (voix Amélie).</span>
+              <span class="sk-ex">« Fais dire au Mac : réunion dans cinq minutes. »</span>
+            </button>
+            <button class="skill-item" data-ask="Affiche une notification : pause café.">
+              <span class="sk-top"><strong>Notification macOS</strong><span class="sk-cmd">notification</span></span>
+              <span class="sk-desc">Affiche une bannière signée Nova.</span>
+              <span class="sk-ex">« Affiche une notification : pause café. »</span>
+            </button>
+            <button class="skill-item" data-ask="Monte le volume de 10.">
+              <span class="sk-top"><strong>Volume</strong><span class="sk-cmd">volume</span></span>
+              <span class="sk-desc">Valeur absolue (0–100) ou relative (« +10 », « -5 »).</span>
+              <span class="sk-ex">« Monte le volume de 10. »</span>
+            </button>
+            <button class="skill-item" data-ask="Règle la luminosité à 60.">
+              <span class="sk-top"><strong>Luminosité</strong><span class="sk-cmd">brightness</span></span>
+              <span class="sk-desc">De 0 à 100. macOS n'expose pas la luminosité absolue : F1/F2 si besoin.</span>
+              <span class="sk-ex">« Règle la luminosité à 60. »</span>
+            </button>
+            <button class="skill-item" data-ask="Copie dans le presse-papiers : rendez-vous à 14 h.">
+              <span class="sk-top"><strong>Copier du texte</strong><span class="sk-cmd">clipboard_set</span></span>
+              <span class="sk-desc">Écrit dans le presse-papiers, pour coller ailleurs.</span>
+              <span class="sk-ex">« Copie dans le presse-papiers : rendez-vous à 14 h. »</span>
+            </button>
+            <button class="skill-item" data-ask="Prends une capture d'écran.">
+              <span class="sk-top"><strong>Capture d'écran</strong><span class="sk-cmd">screenshot</span></span>
+              <span class="sk-desc">Enregistre le PNG dans data/screenshots/ (autorisation macOS requise).</span>
+              <span class="sk-ex">« Prends une capture d'écran. »</span>
+            </button>
+            <button class="skill-item" data-ask="Nova, séance terminée">
+              <span class="sk-top"><strong>Valider la séance du jour</strong><span class="sk-cmd">training_done</span></span>
+              <span class="sk-desc">Coche la séance dans ton suivi Nova.</span>
+              <span class="sk-ex">« Nova, séance terminée »</span>
+            </button>
+            <button class="skill-item" data-ask="Ouvre mon programme de sport.">
+              <span class="sk-top"><strong>Ouvrir Pulse</strong><span class="sk-cmd">pulse</span></span>
+              <span class="sk-desc">Lance ton application de sport dans le navigateur.</span>
+              <span class="sk-ex">« Ouvre mon programme de sport. »</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="set-block">
+          <label class="set-label">Dans l'application <span class="set-tag free">instantané</span></label>
+          <p class="set-help">Sans passer par le modèle : Nova obéit directement.</p>
+          <div class="skill-list">
+            <button class="skill-item" data-ask="Mets un minuteur de 10 minutes.">
+              <span class="sk-top"><strong>Minuteur</strong><span class="sk-cmd">client</span></span>
+              <span class="sk-desc">Compte à rebours + carillon, annonce vocale et notification.</span>
+              <span class="sk-ex">« Mets un minuteur de 10 minutes. »</span>
+            </button>
+            <button class="skill-item" data-ask="Nova, répète">
+              <span class="sk-top"><strong>Répéter</strong><span class="sk-cmd">client</span></span>
+              <span class="sk-desc">Redit sa dernière réponse en entier.</span>
+              <span class="sk-ex">« Nova, répète »</span>
+            </button>
+            <button class="skill-item" data-ask="Nova, qu'as-tu retenu ?">
+              <span class="sk-top"><strong>Récap mémoire</strong><span class="sk-cmd">client</span></span>
+              <span class="sk-desc">Résume à voix haute ce qu'elle sait de toi.</span>
+              <span class="sk-ex">« Nova, qu'as-tu retenu ? »</span>
+            </button>
+            <button class="skill-item" data-ask="Nova, change de voix">
+              <span class="sk-top"><strong>Changer de voix</strong><span class="sk-cmd">client</span></span>
+              <span class="sk-desc">Passe à la voix française suivante de macOS.</span>
+              <span class="sk-ex">« Nova, change de voix »</span>
+            </button>
+          </div>
+        </section>
+        </div>
+
+        <div class="set-pane" data-pane="profil" role="tabpanel" hidden>
+
+        <section class="set-block">
+          <label class="set-label">Ton profil — Nova te connaît</label>
+          <p class="set-help">
+            Ces informations sont enregistrées localement et données à Nova pour
+            personnaliser ses réponses. Change-les quand tu veux.
+          </p>
+          <div class="profile-grid">
+            <div><label class="set-help" for="p-name">Prénom et nom</label>
+              <input id="p-name" type="text" autocomplete="off" placeholder="Ton nom" /></div>
+            <div class="profile-duo">
+              <div><label class="set-help" for="p-age">Âge</label>
+                <input id="p-age" type="number" min="1" max="120" placeholder="23" /></div>
+              <div><label class="set-help" for="p-physique">Physique</label>
+                <input id="p-physique" type="text" autocomplete="off" placeholder="athlétique" /></div>
+            </div>
+            <div><label class="set-help" for="p-studies">Études / travail</label>
+              <input id="p-studies" type="text" autocomplete="off" placeholder="Tes études ou ton métier" /></div>
+            <div><label class="set-help" for="p-notes">Divers (loisirs, préférences…)</label>
+              <input id="p-notes" type="text" autocomplete="off" placeholder="Ce que Nova doit retenir de toi" /></div>
+          </div>
+          <p class="set-help" id="profile-path">
+            Enregistré localement, dans <code>data/profile.json</code> — jamais envoyé ailleurs qu'à Groq,
+            au même titre que le reste de la conversation.
+          </p>
+          <button class="btn ghost" id="btn-recap-profile"><svg class="ic-sm"><use href="#i-volume" /></svg>Qu'a-t-elle retenu de moi ?</button>
+        </section>
+        </div>
+
+        <div class="set-pane" data-pane="memoire" role="tabpanel" hidden>
+
+        <section class="set-block">
+          <label class="set-label">Mémoire de Nova</label>
+          <p class="set-help">
+            Nova archive automatiquement tes conversations et s'en souvient d'une fois sur l'autre,
+            même après redémarrage. Chaque ligne est une conversation : tu peux l'ouvrir pour voir
+            ses souvenirs, la supprimer, ou tout effacer à la voix (« <em>Nova, oublie tout</em> »).
+          </p>
+          <div class="mem-list" id="mem-list">
+            <div class="mem-empty">—</div>
+          </div>
+          <div class="mem-actions">
+            <button class="btn ghost" id="btn-refresh-mem">Rafraîchir</button>
+            <button class="btn ghost" id="btn-recap-mem"><svg class="ic-sm"><use href="#i-volume" /></svg>Qu'a-t-elle retenu ?</button>
+            <button class="btn danger" id="btn-forget-all">Tout oublier</button>
+          </div>
+        </section>
+        </div>
+
+        <div class="set-pane" data-pane="historique" role="tabpanel" hidden>
+
+        <section class="set-block">
+          <label class="set-label">Historique de tes conversations</label>
+          <p class="set-help">
+            Toutes les conversations archivées par Nova. Clique sur l'une d'elles pour la rouvrir ici :
+            la suite se rangera dans la même conversation.
+          </p>
+          <input id="hist-search" type="search" placeholder="Rechercher dans les titres et les débuts de conversation…" autocomplete="off" />
+          <div class="hist-list" id="hist-list">
+            <div class="mem-empty">—</div>
+          </div>
+          <div class="mem-actions">
+            <button class="btn ghost" id="btn-refresh-hist">Rafraîchir</button>
+          </div>
+        </section>
+        </div>
+
+        <div class="set-pane" data-pane="diagnostic" role="tabpanel" hidden>
+
+        <section class="set-block">
+          <label class="set-label">Diagnostic</label>
+          <p class="set-help">
+            Un œil sur l'état réel de Nova : clé API, modèle, micro, voix, mémoire,
+            dossier de données et sandbox du Mac. Utile si quelque chose ne répond pas.
+          </p>
+          <div class="diag-actions">
+            <button class="btn ghost" id="btn-diag">Lancer le diagnostic</button>
+            <button class="btn ghost" id="btn-diag-copy" hidden>Copier</button>
+          </div>
+          <div class="diag-out" id="diag-out" hidden></div>
+        </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bannière d'erreur -->
+  <div class="toast glass" id="toast" hidden></div>
+
+  <script src="markdown.js"></script>
+  <script src="orb.js"></script>
+  <script src="wake.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

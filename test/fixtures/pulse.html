@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>Pulse — Programme Poids du Corps</title></head>
+<body>
+<h1>PULSE</h1>
+<script>
+/* Fixture de test : même forme que l'application Pulse, programme réduit.
+   Les valeurs sont choisies pour produire des arrondis intéressants
+   (reps ×1.15, secondes et repos arrondis à 5 s, série bonus). */
+const PROGRAM_WEEKS = 16;
+const DAY_NAMES = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+const PLAN = [
+  { type:'push', icon:'i-dumbbell', accent:'#ff6b7a', title:'Haut du corps — Poussée',
+    focus:['Pectoraux','Épaules'],
+    ex:[
+      { n:'Pompes', cue:'Mains sous les épaules, corps gainé.', s:4, reps:10, rest:75, m:'Pectoraux' },
+      { n:'Planche', cue:'Corps en un seul bloc.', s:3, secs:45, rest:45, m:'Gainage' },
+    ]},
+  { type:'legs', icon:'i-squat', accent:'#c084fc', title:'Bas du corps — Jambes',
+    focus:['Quadriceps'],
+    ex:[
+      { n:'Squats', cue:'Hanches en arrière, talons ancrés.', s:4, reps:15, rest:75, m:'Quadriceps' },
+      { n:'Fentes alternées', cue:'Genou arrière vers le sol.', s:3, reps:12, rest:60, m:'Fessiers', note:'/ jambe' },
+    ]},
+  { type:'cardio', icon:'i-heart', accent:'#4ade80', title:'Cardio léger & Gainage',
+    focus:['Cardio'],
+    ex:[
+      { n:'Jumping jacks', cue:'Atterris souple.', s:4, secs:45, rest:40, m:'Cardio' },
+    ]},
+  { type:'pull', icon:'i-magnet', accent:'#60a5fa', title:'Tirage & Dos',
+    focus:['Dos'],
+    ex:[
+      { n:'Rowing inversé', cue:'Serre les omoplates.', s:4, reps:10, rest:75, m:'Dos' },
+    ]},
+  { type:'full', icon:'i-bolt', accent:'#fbbf24', title:'Full body & Core',
+    focus:['Corps entier'],
+    ex:[
+      { n:'Burpees', cue:'Poitrine au sol, saut compact.', s:3, reps:10, rest:75, m:'Full body' },
+    ]},
+  { type:'mobility', icon:'i-leaf', accent:'#2dd4bf', title:'Mobilité & Marche',
+    focus:['Souplesse'],
+    ex:[
+      { n:'Flow mobilisation', cue:'Synchronise avec la respiration.', s:2, secs:300, rest:30, m:'Hanches' },
+    ]},
+  { type:'rest', icon:'i-moon', accent:'#818cf8', title:'Repos complet — Priorité sommeil',
+    focus:[], ex:[] },
+];
+</script>
+</body>
+</html>
