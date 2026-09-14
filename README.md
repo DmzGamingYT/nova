@@ -7,6 +7,7 @@
 **Une assistante vocale française qui vit sur ton Mac.**
 Elle t'écoute, réfléchit avec Groq, et te répond **à voix haute** — le tout en local.
 
+[![CI](https://github.com/DmzGamingYT/nova/actions/workflows/ci.yml/badge.svg)](https://github.com/DmzGamingYT/nova/actions/workflows/ci.yml)
 ![plateforme](https://img.shields.io/badge/macOS-Apple%20Silicon-black?logo=apple&logoColor=white)
 ![node](https://img.shields.io/badge/Node.js-%E2%89%A520-339933?logo=nodedotjs&logoColor=white)
 ![deps](https://img.shields.io/badge/dépendances_npm-0-success)
