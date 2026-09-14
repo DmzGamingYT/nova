@@ -11,8 +11,19 @@ files:
   - preload.js
   - assets/**/*
 
-afterSign: build/notarize.js
-afterAllArtifactBuild: build/verify-signature.js
+# electron-updater doit être présent en clair sur le disque : il lance des
+# binaires auxiliaires et l'auto-mise à jour ne marche pas depuis app.asar.
+asarUnpack:
+  - "**/node_modules/electron-updater/**"
+
+# Cœur embarqué (server.js + public/ + lib/, copiés par tools/sync-core.js)
+# + modules requis par server.js (lib/ est dans core/, le reste vient des
+# node_modules de l'app). from: → chemin relatif au dossier du projet desktop.
+extraResources:
+  - from: core
+    to: core
+    filter:
+      - "**/*"
 
 mac:
   category: public.app-category.productivity
@@ -58,3 +69,33 @@ dmg:
   contents:
     - { x: 130, y: 220, type: file }
     - { x: 410, y: 220, type: link, path: /Applications }
+
+# ── Windows ──────────────────────────────────────────────────────────────
+win:
+  icon: assets/icon.ico
+  # NSIS : installeur classique, par machine (pas de Store, pas de dépendance
+  # d'appx). L'app reste une app de barre des tâches / zone de notification.
+  target:
+    - target: nsis
+      arch: [x64]
+
+  publish:
+    - provider: github
+      owner: DmzGamingYT
+      repo: nova
+
+  # SGCB (SignalGC) n'est pas nécessaire ici ; l'app met simplement à jour
+  # via electron-updater comme sur macOS dès qu'elle sera signée.
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  artifactName: Nova-Setup-${version}-x64.exe
+  shortcutName: Nova
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  # Pas d'AutoLaunch au premier lancement : l'utilisateur garde la main.
+
+# electron-updater sous Windows exige une cible qui se met à jour toute
+# seule : NSIS est supporté (l'installeur se relance en mode mise à jour).

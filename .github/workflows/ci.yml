@@ -32,6 +32,56 @@ jobs:
           GROQ_API_KEY: ''
         run: npm test
 
+  win:
+    name: Installateur Windows (x64)
+    runs-on: windows-latest
+    # Après le job mac : la release du tag (notes + checksums) existe déjà,
+    # l'installeur s'y joint sans course, et complète le SHA256SUMS.txt.
+    needs: [test, dmg]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci --no-audit --no-fund
+
+      # Le cœur embarqué est régénéré (gitignored) puis packagé en
+      # extraResources par electron-builder — l'app Windows embarque
+      # son propre serveur Nova, comme sur macOS.
+      - name: Sync embedded core
+        working-directory: desktop
+        run: node tools/sync-core.js
+
+      - name: Build Windows installer (NSIS x64)
+        working-directory: desktop
+        run: npx electron-builder --win --x64 --config electron-builder.yml --publish never
+        shell: pwsh
+
+      - name: Upload artifact (every build)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Nova-Windows-x64
+          path: desktop/release/*.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      # Release non signée : l'exe est joint à la release du tag, et son
+      # hash complète le SHA256SUMS.txt généré par le job mac.
+      - name: Attach installer + checksum to GitHub Release (tags only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          gh release download "$GITHUB_REF_NAME" -p SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --clobber
+          ( cd desktop/release && sha256sum *.exe ) >> SHA256SUMS.txt
+          gh release upload "$GITHUB_REF_NAME" desktop/release/*.exe SHA256SUMS.txt \
+            --repo "$GITHUB_REPOSITORY" --clobber
+
   dmg:
     name: DMG macOS (arm64)
     runs-on: macos-latest

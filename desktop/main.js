@@ -6,10 +6,106 @@ const {
 } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
+const http = require('http');
+const { spawn } = require('child_process');
+const fs = require('fs');
 
-const NOVA_URL = process.env.NOVA_URL || 'http://localhost:8787';
 const SHORTCUT = process.env.NOVA_SHORTCUT || 'CommandOrControl+Shift+Space';
 const isMac = process.platform === 'darwin';
+const isWin = process.platform === 'win32';
+
+/* ------------------------------------------------------------------ */
+/* Serveur embarqué : l'app packagée embarque le cœur (server.js +     */
+/* public/ + lib/, copiés par tools/sync-core.js puis extraResources)  */
+/* et lance son propre serveur sur un port libre — la fenêtre n'est    */
+/* plus dependante d'un serveur lancé à la main.                       */
+/* ------------------------------------------------------------------ */
+
+let serverChild = null;
+let serverPort = 0;
+/* Packagé : serveur embarqué (port libre). En dev : le serveur du dépôt
+   sur :8787 (start.command), workflow inchangé — NOVA_EMBEDDED=1 ou
+   NOVA_URL permettent de tester l'embarqué / une autre instance. */
+let NOVA_URL = process.env.NOVA_URL
+  || (app.isPackaged || process.env.NOVA_EMBEDDED ? '' : 'http://localhost:8787');
+
+function coreDir() {
+  /* packagé : resources/core (posé par extraResources) ;
+     dev : la racine du dépôt (desktop/..), là où vit server.js */
+  const packed = path.join(process.resourcesPath || '', 'core');
+  if (app.isPackaged && fs.existsSync(path.join(packed, 'server.js'))) return packed;
+  const root = path.join(app.getAppPath(), '..');
+  if (fs.existsSync(path.join(root, 'server.js'))) return root;
+  return app.getAppPath();
+}
+
+function httpProbe(url) {
+  return new Promise((resolve) => {
+    const req = http.get(url + '/api/status', (r) => { r.resume(); resolve(r.statusCode === 200); });
+    req.on('error', () => resolve(false));
+    req.setTimeout(1500, () => { req.destroy(); resolve(false); });
+  });
+}
+
+function freePort() {
+  return new Promise((resolve, reject) => {
+    const net = require('net');
+    const srv = net.createServer();
+    srv.listen(0, '127.0.0.1', () => {
+      const p = srv.address().port;
+      srv.close(() => resolve(p));
+    });
+    srv.on('error', reject);
+  });
+}
+
+async function waitReady(url, child, timeoutMs) {
+  const fin = Date.now() + (timeoutMs || 15000);
+  while (Date.now() < fin) {
+    if (child.exitCode !== null) throw new Error('le serveur embarqué s\'est arrêté (code ' + child.exitCode + ')');
+    if (await httpProbe(url)) return;
+    await new Promise((r) => setTimeout(r, 150));
+  }
+  throw new Error('le serveur embarqué n\'a pas répondu');
+}
+
+async function startEmbeddedServer() {
+  /* Un serveur Nova externe (NOVA_URL) reste prioritaire : permet de
+     faire pointer l'app vers une instance déjà lancée. */
+  if (NOVA_URL) {
+    rebuildTrayMenu();
+    return;
+  }
+  serverPort = await freePort();
+  NOVA_URL = 'http://127.0.0.1:' + serverPort;
+
+  const core = coreDir();
+  /* Données de l'app packagée : dossier userData (writable partout,
+     séparé du dépôt de dev). En dev : le data/ du dépôt, comme start.command. */
+  const dataDir = app.isPackaged
+    ? path.join(app.getPath('userData'), 'core-data')
+    : path.join(core, 'data');
+
+  serverChild = spawn(process.execPath, [path.join(core, 'server.js')], {
+    env: Object.assign({}, process.env, {
+      PORT: String(serverPort),
+      NOVA_DATA_DIR: dataDir,
+      ELECTRON_RUN_AS_NODE: '1',   // process.execPath = binaire Electron → en faire un Node propre
+    }),
+    stdio: ['ignore', 'inherit', 'inherit'],
+    windowsHide: true,
+  });
+  serverChild.on('exit', (code) => { serverChild = null; if (code) console.error('[nova-server] exit', code); });
+
+  await waitReady(NOVA_URL, serverChild);
+  rebuildTrayMenu();
+}
+
+function stopEmbeddedServer() {
+  if (!serverChild) return;
+  try { if (isWin) spawn('taskkill', ['/pid', String(serverChild.pid), '/f', '/t']); else serverChild.kill('SIGTERM'); } catch (_) {}
+  serverChild = null;
+}
 
 /* Dossier de données surchargé (dev/test) : permet de faire tourner une
    instance de dev à côté de l'app installée (verrous d'instance distincts). */
@@ -79,6 +175,8 @@ function createPanel() {
 
 function togglePanel() {
   if (!win) createPanel();
+  /* serveur embarqué mort (crash, veille longue) → relance au réveil */
+  if (!NOVA_URL && !serverChild) startEmbeddedServer().catch(() => {});
   if (win.isVisible()) {
     win.hide();
     return;
@@ -198,11 +296,14 @@ function updaterMenuLabel() {
 /* ------------------------------------------------------------------ */
 
 function trayIcon() {
-  /* template : macOS l'adapte à la barre claire/sombre automatiquement */
-  const p = path.join(__dirname, 'assets', 'iconTemplate.png');
-  const img = nativeImage.createFromPath(p);
-  img.setTemplateImage(true);
-  return img;
+  if (isMac) {
+    /* template : macOS l'adapte à la barre claire/sombre automatiquement */
+    const img = nativeImage.createFromPath(path.join(__dirname, 'assets', 'iconTemplate.png'));
+    img.setTemplateImage(true);
+    return img;
+  }
+  /* Windows : icône couleur normale dans la zone de notification */
+  return nativeImage.createFromPath(path.join(__dirname, 'assets', 'icon.png'));
 }
 
 function rebuildTrayMenu() {
@@ -210,10 +311,10 @@ function rebuildTrayMenu() {
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Nova v' + app.getVersion(), enabled: false },
     { type: 'separator' },
-    { label: 'Ouvrir le panneau (' + SHORTCUT.replace('CommandOrControl', '⌘') + ')', click: () => togglePanel() },
+    { label: 'Ouvrir le panneau (' + SHORTCUT.replace('CommandOrControl', isMac ? '⌘' : 'Ctrl') + ')', click: () => togglePanel() },
     { label: 'Ouvrir dans une fenêtre complète', click: openFullWindow },
     { type: 'separator' },
-    { label: 'Serveur : ' + NOVA_URL, enabled: false },
+    { label: 'Serveur : ' + NOVA_URL + (serverChild ? ' (embarqué)' : ''), enabled: false },
     {
       label: 'Ouvrir dans le navigateur',
       click: () => shell.openExternal(NOVA_URL),
@@ -222,8 +323,8 @@ function rebuildTrayMenu() {
     updaterMenuLabel(),
     { type: 'separator' },
     {
-      label: 'Quitter Nova',
-      accelerator: 'Command+Q',
+      label: isMac ? 'Quitter Nova' : 'Quitter Nova',
+      accelerator: isMac ? 'Command+Q' : undefined,
       click: () => app.quit(),
     },
   ]));
@@ -240,12 +341,24 @@ function createTray() {
 /* Cycle de vie                                                        */
 /* ------------------------------------------------------------------ */
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   if (isMac && app.dock) {
     /* app de barre de menus : pas d'icône dans le Dock */
     try { app.dock.hide(); } catch (_) {}
   }
   nativeTheme.themeSource = 'system';
+
+  try {
+    await startEmbeddedServer();
+  } catch (e) {
+    console.error('[nova-server]', e.message);
+    new Notification({
+      title: 'Nova — serveur en échec',
+      body: 'Le serveur interne n\'a pas démarré. L\'app essaiera de le relancer à la prochaine ouverture du panneau.',
+      silent: true,
+    }).show();
+  }
+
   createTray();
   createPanel();
   setupAutoUpdater();
@@ -254,6 +367,8 @@ app.whenReady().then(() => {
 
   app.on('second-instance', () => togglePanel());
 });
+
+app.on('before-quit', () => stopEmbeddedServer());
 
 /* rester actif quand toutes les fenêtres sont fermées (barre de menus) */
 app.on('window-all-closed', (e) => {

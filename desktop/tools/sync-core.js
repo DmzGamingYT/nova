@@ -32,8 +32,15 @@ function copyFile(src, dest) {
 rmrf(DEST);
 fs.mkdirSync(DEST, { recursive: true });
 
-/* Le cœur serveur, autonome : zéro dépendance Node au-delà du stdlib */
+/* Le cœur serveur, autonome : zéro dépendance Node au-delà du stdlib.
+   lib/ contient les compétences et l'entraînement, requises par server.js. */
 copyFile(path.join(ROOT, 'server.js'), path.join(DEST, 'server.js'));
+const libSrc = path.join(ROOT, 'lib');
+if (fs.existsSync(libSrc)) {
+  for (const e of fs.readdirSync(libSrc, { withFileTypes: true })) {
+    if (e.isFile() && e.name.endsWith('.js')) copyFile(path.join(libSrc, e.name), path.join(DEST, 'lib', e.name));
+  }
+}
 
 /* L'interface web (fichiers connus uniquement — pas de surprise) */
 const pub = path.join(ROOT, 'public');

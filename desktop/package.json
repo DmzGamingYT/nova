@@ -5,9 +5,11 @@
   "description": "Nova — application macOS (Electron) de l'assistant vocal local",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "dist": "electron-builder --mac --arm64 --config electron-builder.yml",
-    "dist:universal": "electron-builder --mac --universal --config electron-builder.yml"
+    "sync-core": "node tools/sync-core.js",
+    "start": "node tools/sync-core.js && electron .",
+    "dist": "node tools/sync-core.js && electron-builder --mac --arm64 --config electron-builder.yml",
+    "dist:win": "node tools/sync-core.js && electron-builder --win --x64 --config electron-builder.yml",
+    "dist:universal": "node tools/sync-core.js && electron-builder --mac --universal --config electron-builder.yml"
   },
   "devDependencies": {
     "electron": "^33.0.0",

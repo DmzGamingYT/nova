@@ -69,27 +69,33 @@ cp .env.example .env      # puis GROQ_API_KEY=gsk_…
 
 <br/>
 
-## 📱 Application macOS native
+## 📱 Applications natives — macOS & Windows
 
 Nova se compile en **vraie application de barre de menus** : son icône vit dans la barre
-macOS, un clic (ou **⌘⇧Espace** où que tu sois) ouvre un **panneau flottant** façon
-Spotlight — au-dessus de tout, replié dès que tu cliques ailleurs ou tapes `Échap`.
-Permissions micro intégrées, pensée pour **Apple Silicon** (M1 → M4).
+macOS (ou la zone de notification Windows), un clic (ou **⌘⇧Espace** / **Ctrl⇧Espace** où que
+tu sois) ouvre un **panneau flottant** façon Spotlight — au-dessus de tout, replié dès que tu
+cliques ailleurs ou tapes `Échap`. Permissions micro intégrées, pensée pour **Apple Silicon** (M1 → M4).
 
 ```bash
 cd desktop
 npm install        # ~11 s
 npm run dist       # → release/Nova-<version>-arm64.dmg (build universel : npm run dist:universal)
+npm run dist:win   # → release/Nova-Setup-<version>-x64.exe (installeur NSIS)
 ```
 
 - `Nova.app` : glisse-la dans **Applications**, ouvre-la — l'icône apparaît dans la barre
   de menus ; `⌘⇧Espace` ouvre/ferme le panneau, le menu offre aussi une fenêtre complète
-- Ou `npm start` pour lancer l'app en mode dev
-- L'app ne remplace pas le serveur : elle **l'affiche** dans sa propre fenêtre sans barre de navigateur
+- `Nova-Setup-x64.exe` : installeur Windows classique (raccourcis bureau + menu Démarrer,
+  désinstallation propre) — l'app vit dans la zone de notification
+- **Serveur embarqué** : l'app packagée contient son propre serveur Nova (port libre
+  choisi au lancement, données dans le dossier utilisateur) — rien d'autre à installer ;
+  en dev, `npm start` continue d'utiliser le serveur du dépôt sur `:8787`
 
 > 🔓 Le DMG n'est pas signé (build personnel) : au premier lancement, clic droit → **Ouvrir** — et si ça résiste, [Dépannage](#-dépannage).
 
-**Téléchargement direct** : chaque tag `v*` produit un DMG en [release GitHub](https://github.com/DmzGamingYT/nova/releases/latest) — avec `SHA256SUMS.txt` et le changelog automatiques.
+**Téléchargement direct** : chaque tag `v*` produit un DMG macOS **et un installeur Windows** en
+[release GitHub](https://github.com/DmzGamingYT/nova/releases/latest) — avec `SHA256SUMS.txt`
+(couvrant les deux fichiers) et le changelog automatiques.
 
 ### 🔒 Vérifier ton DMG (SHA-256)
 
