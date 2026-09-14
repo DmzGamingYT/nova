@@ -23,6 +23,7 @@ mac:
   gatekeeperAssess: false
   darkModeSupport: true
   extendInfo:
+    LSUIElement: true
     NSMicrophoneUsageDescription: Nova a besoin du micro pour t'écouter.
     NSAppleEventsUsageDescription: Nova utilise AppleScript pour contrôler ton Mac (volume, notifications).
 

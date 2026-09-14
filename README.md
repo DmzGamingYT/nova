@@ -68,8 +68,10 @@ cp .env.example .env      # puis GROQ_API_KEY=gsk_…
 
 ## 📱 Application macOS native
 
-Nova se compile en **vraie application** (fenêtre dédiée, icône dans le Dock, vibrance macOS,
-permissions micro intégrées) — pensée pour **Apple Silicon** (M1 → M4).
+Nova se compile en **vraie application de barre de menus** : son icône vit dans la barre
+macOS, un clic (ou **⌘⇧Espace** où que tu sois) ouvre un **panneau flottant** façon
+Spotlight — au-dessus de tout, replié dès que tu cliques ailleurs ou tapes `Échap`.
+Permissions micro intégrées, pensée pour **Apple Silicon** (M1 → M4).
 
 ```bash
 cd desktop
@@ -77,7 +79,8 @@ npm install        # ~11 s
 npm run dist       # → release/Nova-1.0.0-arm64.dmg (build universel : npm run dist:universal)
 ```
 
-- `Nova.app` : glisse-la dans **Applications**, ouvre-la — elle se connecte au serveur local
+- `Nova.app` : glisse-la dans **Applications**, ouvre-la — l'icône apparaît dans la barre
+  de menus ; `⌘⇧Espace` ouvre/ferme le panneau, le menu offre aussi une fenêtre complète
 - Ou `npm start` pour lancer l'app en mode dev
 - L'app ne remplace pas le serveur : elle **l'affiche** dans sa propre fenêtre sans barre de navigateur
 
@@ -240,7 +243,7 @@ public/
   orb.js             Orbe réactive + décor canvas
   markdown.js        Mini-markdown résistant au streaming
 desktop/             📱 Application macOS (Electron)
-  main.js            Fenêtre vibrance, icône Dock, permissions micro
+  main.js            Barre de menus : Tray, panneau flottant, raccourci global ⌘⇧Espace
   electron-builder.yml   Build DMG arm64 (M1→M4) et universel
   tools/make-icon.py Génération de l'icône (orbe violette)
 test/                68 tests + suite sport (fixtures, vrai serveur isolé)
