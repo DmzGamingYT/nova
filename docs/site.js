@@ -65,11 +65,18 @@
         '<a href="index.html"' + (page==='index'?' class="active"':'') + '>Accueil</a>' +
         '<a href="fonctions.html"' + (page==='fonctions'?' class="active"':'') + '>Fonctions</a>' +
         '<a href="demo.html"' + (page==='demo'?' class="active"':'') + '>Démo</a>' +
-        '<a href="commandes.html"' + (page==='commandes'?' class="active"':'') + '>Commandes</a>' +
         '<a href="installation.html"' + (page==='installation'?' class="active"':'') + '>Installation</a>' +
-        '<a href="depannage.html"' + (page==='depannage'?' class="active"':'') + '>Dépannage</a>' +
-        '<a href="readme.html"' + (page==='readme'?' class="active"':'') + '>README visuel</a>' +
-        '<a href="nouveautes.html"' + (page==='nouveautes'?' class="active"':'') + '>Nouveautés</a>' +
+        '<div class="nav-more" id="nav-more">' +
+          '<button class="nav-more-btn" type="button" aria-expanded="false" aria-controls="nav-more-menu">Plus' +
+            '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>' +
+          '</button>' +
+          '<div class="nav-more-menu" id="nav-more-menu" role="menu">' +
+            '<a role="menuitem" href="commandes.html"' + (page==='commandes'?' class="active"':'') + '>Commandes</a>' +
+            '<a role="menuitem" href="depannage.html"' + (page==='depannage'?' class="active"':'') + '>Dépannage</a>' +
+            '<a role="menuitem" href="readme.html"' + (page==='readme'?' class="active"':'') + '>README visuel</a>' +
+            '<a role="menuitem" href="nouveautes.html"' + (page==='nouveautes'?' class="active"':'') + '>Nouveautés</a>' +
+          '</div>' +
+        '</div>' +
         '<a class="gh" href="' + REPO + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true">' +
           '<path d="M12 2C6.5 2 2 6.6 2 12.2c0 4.5 2.9 8.3 6.8 9.7.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.4-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5 4-1.4 6.8-5.2 6.8-9.7C22 6.6 17.5 2 12 2z"/></svg>GitHub</a>' +
         '<button class="theme-toggle" type="button" aria-label="Changer de thème"></button>' +
@@ -77,22 +84,41 @@
     document.body.prepend(nav);
     const menuButton = nav.querySelector('.nav-menu-toggle');
     const links = nav.querySelector('.links');
+    const moreWrap = nav.querySelector('.nav-more');
+    const moreBtn = nav.querySelector('.nav-more-btn');
+    /* si la page courante vit dans « Plus », marquer le bouton */
+    if (moreWrap && moreWrap.querySelector('a.active')) moreWrap.classList.add('has-active');
     function closeMenu(){
       nav.classList.remove('nav-open');
       menuButton.setAttribute('aria-expanded', 'false');
       menuButton.setAttribute('aria-label', 'Ouvrir le menu');
+    }
+    function closeMore(){
+      if (!moreWrap) return;
+      moreWrap.classList.remove('open');
+      moreBtn.setAttribute('aria-expanded', 'false');
     }
     menuButton.addEventListener('click', () => {
       const open = nav.classList.toggle('nav-open');
       menuButton.setAttribute('aria-expanded', String(open));
       menuButton.setAttribute('aria-label', open ? 'Fermer le menu' : 'Ouvrir le menu');
     });
-    links.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+    if (moreWrap){
+      moreBtn.addEventListener('click', event => {
+        event.stopPropagation();
+        const open = moreWrap.classList.toggle('open');
+        moreBtn.setAttribute('aria-expanded', String(open));
+      });
+      document.addEventListener('click', event => {
+        if (!moreWrap.contains(event.target)) closeMore();
+      });
+    }
+    links.querySelectorAll('a').forEach(link => link.addEventListener('click', () => { closeMenu(); closeMore(); }));
     document.addEventListener('click', event => {
       if (!nav.contains(event.target)) closeMenu();
     });
     document.addEventListener('keydown', event => {
-      if (event.key === 'Escape') closeMenu();
+      if (event.key === 'Escape'){ closeMenu(); closeMore(); }
     });
     initThemeToggle();
   }

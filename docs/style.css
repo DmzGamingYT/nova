@@ -84,6 +84,18 @@ code{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:.92em;backgrou
 }
 .site-nav .links a:hover{color:var(--txt);background:var(--panel-soft);transform:translateY(-1px)}
 .site-nav .links a.active{color:var(--txt);background:var(--accent-mid);box-shadow:inset 0 0 0 1px rgba(124,108,255,.14)}
+/* groupe « Plus » : pages secondaires compactées en menu déroulant */
+.site-nav .nav-more{position:relative}
+.site-nav .nav-more-btn{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-family:inherit;font-size:14px;font-weight:550;padding:8px 12px;border:none;border-radius:12px;background:transparent;cursor:pointer;transition:color .2s,background .2s}
+.site-nav .nav-more-btn svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.site-nav .nav-more-btn:hover{color:var(--txt);background:var(--panel-soft)}
+.site-nav .nav-more.open .nav-more-btn{color:var(--txt);background:var(--panel-soft)}
+.site-nav .nav-more.open .nav-more-btn svg{transform:rotate(180deg)}
+.site-nav .nav-more.has-active .nav-more-btn{color:var(--txt);background:var(--accent-mid);box-shadow:inset 0 0 0 1px rgba(124,108,255,.14)}
+.site-nav .nav-more-menu{position:absolute;top:calc(100% + 6px);right:0;z-index:60;min-width:172px;display:flex;flex-direction:column;gap:2px;padding:8px;background:var(--nav-bg);border:1px solid var(--panel-brd);border-radius:14px;box-shadow:var(--shadow-float);backdrop-filter:blur(var(--nav-blur));-webkit-backdrop-filter:blur(var(--nav-blur));opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .18s,transform .18s,visibility .18s}
+.site-nav .nav-more.open .nav-more-menu{opacity:1;visibility:visible;transform:none}
+.site-nav .nav-more-menu a{display:block;padding:9px 12px;transform:none}
+.site-nav .nav-more-menu a:hover{transform:none}
 .site-nav .links a.gh{display:inline-flex;align-items:center;gap:7px;margin-left:10px;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-deep));padding:9px 17px;border-radius:12px;font-weight:650;box-shadow:0 7px 20px rgba(90,72,224,.25)}
 .site-nav .links a.gh:hover{background:linear-gradient(135deg,#8d7dff,#6a58f0);box-shadow:0 10px 25px rgba(90,72,224,.35)}
 
@@ -106,6 +118,11 @@ code{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:.92em;backgrou
   .site-nav.nav-open .links{opacity:1;visibility:visible;transform:none}
   .site-nav .links a:not(.gh){padding:9px 10px;font-size:13px}
   .site-nav .links{gap:2px}
+  /* « Plus » dans le panneau mobile : sous-menu déplié en place */
+  .site-nav .nav-more{display:block}
+  .site-nav .nav-more-btn{width:100%;justify-content:space-between;padding:9px 10px;font-size:13px}
+  .site-nav .nav-more-menu{position:static;min-width:0;margin:2px 0 0;padding:0 0 0 14px;border:none;background:transparent;box-shadow:none;backdrop-filter:none;display:flex;flex-direction:column;gap:2px}
+  .site-nav .nav-more:not(.open) .nav-more-menu{display:none}
 }
 @media(max-width:560px){
   .site-nav{height:58px}
@@ -113,6 +130,11 @@ code{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:.92em;backgrou
   .site-nav .links{left:var(--content-gutter);right:var(--content-gutter);grid-template-columns:repeat(2,minmax(0,1fr));display:grid;gap:5px;padding:10px}
   .site-nav .links a:not(.gh){display:block;padding:10px 11px;border-radius:10px;font-size:13px}
   .site-nav .links a.gh{grid-column:1 / -1;margin:4px 0 0;padding:10px 12px;text-align:center;justify-content:center;font-size:13px}
+  /* « Plus » occupe toute la largeur, sous-menu en 2 colonnes */
+  .site-nav .nav-more{grid-column:1 / -1}
+  .site-nav .nav-more-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;padding:4px 0 0}
+  .site-nav .nav-more:not(.open) .nav-more-menu{display:none}
+  .site-nav .nav-more-menu a{padding:10px 11px}
   .theme-toggle{margin-left:0}
   .hero{padding-bottom:44px}
   .hero h1{font-size:clamp(46px,16vw,72px)}
