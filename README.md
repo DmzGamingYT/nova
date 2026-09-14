@@ -15,7 +15,7 @@ Elle t'écoute, réfléchit avec Groq, et te répond **à voix haute** — le to
 ![tests](https://img.shields.io/badge/tests-68%20%2B%20sport-7c6cff)
 ![licence](https://img.shields.io/badge/licence-MIT-blue)
 
-[🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App macOS](#-application-macos-native) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🗣️ Commandes vocales](https://dmzgamingyt.github.io/nova/commandes.html) · [⚡ **Démo live**](https://dmzgamingyt.github.io/nova/demo.html) · [📰 Nouveautés](https://dmzgamingyt.github.io/nova/nouveautes.html) · [🌐 Site web](https://dmzgamingyt.github.io/nova/) · [🏗️ Architecture](#-architecture)
+[🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App macOS](#-application-macos-native) · [🧰 Dépannage](#-dépannage) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🗣️ Commandes vocales](https://dmzgamingyt.github.io/nova/commandes.html) · [⚡ **Démo live**](https://dmzgamingyt.github.io/nova/demo.html) · [📰 Nouveautés](https://dmzgamingyt.github.io/nova/nouveautes.html) · [🌐 Site web](https://dmzgamingyt.github.io/nova/) · [🏗️ Architecture](#-architecture)
 
 </div>
 
@@ -87,7 +87,7 @@ npm run dist       # → release/Nova-<version>-arm64.dmg (build universel : npm
 - Ou `npm start` pour lancer l'app en mode dev
 - L'app ne remplace pas le serveur : elle **l'affiche** dans sa propre fenêtre sans barre de navigateur
 
-> 🔓 Le DMG n'est pas signé (build personnel) : au premier lancement, clic droit → **Ouvrir**.
+> 🔓 Le DMG n'est pas signé (build personnel) : au premier lancement, clic droit → **Ouvrir** — et si ça résiste, [Dépannage](#-dépannage).
 
 **Téléchargement direct** : chaque tag `v*` produit un DMG en [release GitHub](https://github.com/DmzGamingYT/nova/releases/latest) — avec `SHA256SUMS.txt` et le changelog automatiques.
 
@@ -126,6 +126,59 @@ Ne lance pas le DMG. Deux causes possibles :
 </details>
 
 <br/>
+
+## 🧰 Dépannage
+
+### 🔒 Le checksum SHA-256 ne correspond pas
+
+**Ne lance pas le DMG.** Retélécharge-le d'abord — un proxy ou un Wi-Fi captif peut tronquer
+les gros fichiers sans prévenir —, remplace `SHA256SUMS.txt` à côté et revérifie :
+
+```bash
+shasum -a 256 -c SHA256SUMS.txt   # macOS · sha256sum -c sur Linux
+```
+
+- `: OK` → c'était un téléchargement incomplet, tout va bien ;
+- encore différent → compare avec le bloc « Checksums SHA-256 » des
+  [notes de la release](https://github.com/DmzGamingYT/nova/releases/latest), puis
+  [ouvre une Issue](https://github.com/DmzGamingYT/nova/issues) avec la version, ton OS et le hash obtenu.
+
+### 🛡️ macOS refuse d'ouvrir Nova (Gatekeeper)
+
+C'est le prix du build non signé — macOS protège par défaut. Trois leviers, du plus simple
+au plus direct :
+
+1. **Clic droit → Ouvrir** sur `Nova.app` (un vrai clic droit, pas un double-clic), puis
+   « Ouvrir » dans le dialogue — suffit dans la plupart des cas ;
+2. **Réglages Système → Confidentialité et sécurité** : descendre au bloc « Nova a été
+   bloqué… » → **Ouvrir quand même** ;
+3. Si le message dit « **Nova est endommagé** » (fréquent pour les builds ad-hoc sur les
+   macOS récents), retire l'attribut de quarantaine posé au téléchargement :
+
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/Nova.app
+   ```
+
+   La commande ne contourne rien : elle dit juste à Gatekeeper que tu as choisi cette app
+   toi-même. Quand l'app sera signée et notariée (secrets Apple en CI), tout ce paragraphe
+   disparaîtra.
+
+### 🎙️ Le micro ne fonctionne pas
+
+1. **Permission macOS** : Réglages Système → Confidentialité et sécurité → **Micro** →
+   active Nova. Si elle n'apparaît pas dans la liste, lance l'app et tente un tour de micro :
+   macOS l'inscrit alors automatiquement.
+2. **Permission refusée avant ?** macOS ne repose jamais la question — remets-la à zéro :
+
+   ```bash
+   tccutil reset Microphone app.nova.assistant
+   ```
+
+   puis relance Nova et accepte la demande.
+3. **Lancé via `npm start` en dev ?** C'est le terminal (ou Electron) qui détient la
+   permission, pas « Nova » — cherche le nom de ton terminal dans la liste du point 1.
+4. **Démo web dans le navigateur ?** Le micro dépend des permissions du *site* : icône
+   cadenas ou micro dans la barre d'adresse → Autoriser, puis recharge la page.
 
 ## 🎙️ Ce qu'elle sait faire
 
