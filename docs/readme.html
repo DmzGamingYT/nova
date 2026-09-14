@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script>try{var t=localStorage.getItem('nova.site.theme');if(t===null){if(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)t='light';}if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<title>Le projet en un coup d'œil — Nova</title>
+<meta name="description" content="Nova en images : démarrage en trois commandes, app de barre de menus macOS et Windows, compétences, sécurité, architecture et tests — le README, en version visuelle."/>
+<link rel="stylesheet" href="style.css"/>
+<style>
+  /* ═══════════════════════════════════════════════════════════════
+     Page « README visuel » — reprend les composants du site
+     (.card, .term, .toc, .step-card) + styles propres.
+     ═══════════════════════════════════════════════════════════════ */
+  .rdm-hero{max-width:1200px;margin:0 auto;padding:calc(var(--nav-h) + 52px) 32px 0;text-align:center}
+  .rdm-hero img{width:100%;max-width:760px;border-radius:22px;display:block;margin:0 auto}
+  .rdm-hero .lead{color:var(--muted);font-size:17px;max-width:620px;margin:18px auto 0;line-height:1.6}
+  .rdm-hero .lead b{color:var(--txt)}
+
+  .rdm-wrap{max-width:1200px;margin:0 auto;padding:60px 32px 0}
+  .rdm-sec{margin-bottom:72px;scroll-margin-top:calc(var(--nav-h) + 20px)}
+  .rdm-sec > .sec-title{font-size:clamp(24px,3vw,32px)}
+  .rdm-sec .sec-sub{margin-bottom:30px;font-size:15.5px}
+
+  /* ── cartes « pourquoi » ── */
+  .rdm-why{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+  .rdm-why .card{padding:24px}
+  .rdm-why .card .ico svg{width:26px;height:26px}
+  .rdm-why .card h3{font-size:16.5px}
+  .rdm-why .card p{font-size:14px}
+
+  /* ── badges du haut ── */
+  .rdm-badges{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:26px}
+  .rdm-badge{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);
+    background:var(--panel);border:1px solid var(--panel-brd);border-radius:999px;padding:6px 14px}
+  .rdm-badge svg{width:14px;height:14px;stroke:var(--accent2);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .rdm-badge b{color:var(--txt);font-weight:600}
+
+  /* ── tableaux ── */
+  .rdm-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--panel);
+    border:1px solid var(--panel-brd);border-radius:16px;overflow:hidden}
+  .rdm-table thead th{text-align:left;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);padding:12px 16px;border-bottom:1px solid var(--panel-brd);background:rgba(255,255,255,.03)}
+  .rdm-table td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top;font-size:14px;color:var(--muted)}
+  .rdm-table tbody tr:last-child td{border-bottom:none}
+  .rdm-table tbody tr{transition:background .15s}
+  .rdm-table tbody tr:hover{background:rgba(124,108,255,.07)}
+  .rdm-table td b{color:var(--txt)}
+  .rdm-table code{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12.5px;
+    background:rgba(124,108,255,.13);border-radius:5px;padding:1.5px 6px;color:#c9c0ff}
+  html[data-theme="light"] .rdm-table thead th{background:var(--panel-soft)}
+  html[data-theme="light"] .rdm-table td{border-bottom-color:var(--line)}
+  html[data-theme="light"] .rdm-table code{color:var(--accent2)}
+  .rdm-scroll{overflow-x:auto;border-radius:16px}
+
+  /* ── captures côte à côte ── */
+  .rdm-shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px;max-width:1000px;margin:0 auto}
+  .rdm-shot{background:var(--panel);border:1px solid var(--panel-brd);border-radius:20px;padding:14px;text-align:center}
+  .rdm-shot img{width:100%;border-radius:12px;display:block}
+  .rdm-shot p{color:var(--muted);font-size:13px;margin:10px 0 2px}
+  .rdm-shot p b{color:var(--txt)}
+
+  /* ── grille archi ── */
+  .rdm-arch{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .rdm-arch .card{padding:20px}
+  .rdm-arch code{font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--accent2)}
+  .rdm-arch .card p{font-size:13.5px;margin-top:7px}
+
+  /* ── note de sécurité ── */
+  .rdm-note{display:flex;gap:14px;align-items:flex-start;background:var(--panel);
+    border:1px solid var(--panel-brd);border-radius:16px;padding:18px 20px;max-width:900px;margin:26px auto 0}
+  .rdm-note svg{width:20px;height:20px;flex:none;stroke:var(--accent2);fill:none;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+  .rdm-note p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
+  .rdm-note b{color:var(--txt)}
+  .rdm-note a{color:var(--accent2)}
+
+  /* ── bandeau tests ── */
+  .rdm-tests{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+  .rdm-test{display:inline-flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--panel-brd);
+    border-radius:14px;padding:12px 20px;font-size:14px;color:var(--muted)}
+  .rdm-test svg{width:17px;height:17px;stroke:var(--teal);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .rdm-test b{color:var(--txt);font-size:16px}
+
+  @media (max-width:640px){
+    .rdm-wrap{padding:44px 18px 0}
+    .rdm-sec{margin-bottom:56px}
+  }
+</style>
+</head>
+<body data-page="readme">
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<header class="rdm-hero">
+  <img src="banner.svg" alt="Nova — assistante IA vocale"/>
+  <p class="lead"><b>Nova vit sur ton Mac</b> : elle t'écoute, réfléchit avec Groq et te répond
+  <b>à voix haute</b> — mémoire, contrôle du Mac et programme de sport compris. Voici le projet,
+  en version visuelle.</p>
+
+  <div class="rdm-badges">
+    <span class="rdm-badge"><i data-ico="apple"></i>macOS · Apple Silicon <b>M1 → M4</b></span>
+    <span class="rdm-badge"><i data-ico="windows"></i>Windows <b>x64</b></span>
+    <span class="rdm-badge"><i data-ico="bolt"></i>IA <b>Groq · GPT-OSS 120B</b></span>
+    <span class="rdm-badge"><i data-ico="package"></i><b>0</b> dépendance npm</span>
+    <span class="rdm-badge"><i data-ico="shield"></i>Sandbox à <b>liste blanche</b></span>
+    <span class="rdm-badge"><i data-ico="sparkle"></i>Licence <b>MIT</b></span>
+  </div>
+
+  <nav class="toc" style="justify-content:center;margin-top:30px" aria-label="Sommaire">
+    <a href="#demarrage"><i data-ico="terminal"></i>Démarrage</a>
+    <a href="#app"><i data-ico="app"></i>App native</a>
+    <a href="#competences"><i data-ico="sparkle"></i>Compétences</a>
+    <a href="#visuel"><i data-ico="display"></i>L'interface</a>
+    <a href="#architecture"><i data-ico="memory"></i>Architecture</a>
+    <a href="#tests"><i data-ico="shield"></i>Tests &amp; sécurité</a>
+  </nav>
+</header>
+
+<main class="rdm-wrap">
+
+  <!-- ═══════════════ POURQUOI ═══════════════ -->
+  <section class="rdm-sec">
+    <h2 class="sec-title">✨ Pourquoi Nova</h2>
+    <p class="sec-sub">Six idées simples, tenues d'un bout à l'autre du projet.</p>
+    <div class="rdm-why">
+      <div class="card">
+        <div class="ico"><i data-ico="wave"></i></div>
+        <h3>Voix naturelle</h3>
+        <p>Tu parles, elle répond : voix françaises de macOS, lecture phrase par phrase pendant que le modèle écrit.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><i data-ico="brain"></i></div>
+        <h3>Mémoire réelle</h3>
+        <p>Conversations, profil, programme de sport — elle s'en souvient, même après un redémarrage.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><i data-ico="shield"></i></div>
+        <h3>Sandbox sécurisée</h3>
+        <p>Liste blanche d'actions, exécution sans shell, carte de confirmation avant tout geste sur le Mac.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><i data-ico="package"></i></div>
+        <h3>Zéro dépendance</h3>
+        <p>Le serveur est du Node.js pur : pas de <code>npm install</code>, pas de framework — et 77 tests.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><i data-ico="moon"></i></div>
+        <h3>Mot d'activation</h3>
+        <p>Dis « Nova » comme tu dirais « Siri » : elle s'éveille, écoute, répond, se rendort.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><i data-ico="dumbbell"></i></div>
+        <h3>Coach sportif</h3>
+        <p>Elle lit ton programme Pulse : séance du jour, technique, progression, validation vocale.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ DÉMARRAGE ═══════════════ -->
+  <section class="rdm-sec" id="demarrage">
+    <h2 class="sec-title">🚀 Démarrage rapide</h2>
+    <p class="sec-sub">Trois commandes, aucune installation — et sans clé API, Nova tourne déjà en mode démo.</p>
+
+    <div class="step-cards">
+      <div class="step-card">
+        <span class="n">1</span>
+        <h4>Récupère le projet</h4>
+        <p><code>git clone</code> puis <code>cd nova</code> — quelques secondes, zéro dépendance.</p>
+      </div>
+      <div class="step-card">
+        <span class="n">2</span>
+        <h4>Ta clé Groq (gratuite)</h4>
+        <p><code>cp .env.example .env</code> puis colle ta clé de <b>console.groq.com/keys</b>.</p>
+      </div>
+      <div class="step-card">
+        <span class="n">3</span>
+        <h4>Lance</h4>
+        <p><code>./start.command</code> — double-clic possible. L'interface s'ouvre sur <b>localhost:8787</b>.</p>
+      </div>
+    </div>
+
+    <div class="term" style="max-width:820px">
+      <div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+      <pre>git clone https://github.com/DmzGamingYT/nova.git &amp;&amp; cd nova
+<span class="c"># 2. ta clé Groq (gratuite — console.groq.com/keys)</span>
+cp .env.example .env      <span class="c"># puis GROQ_API_KEY=gsk_…</span>
+./start.command           <span class="c"># → http://localhost:8787</span></pre>
+    </div>
+
+    <div class="rdm-note">
+      <i data-ico="sparkle"></i>
+      <p><b>Sans clé API</b>, Nova tourne en <b>mode démo</b> : interface, voix et streaming
+      fonctionnent, les réponses sont pré-écrites. Avec une clé, elle devient pleinement
+      intelligente — tu peux aussi la coller dans les <b>Réglages</b> (⚙️ ou ⌘,), elle reste sur ta machine.
+      → <a href="installation.html">Guide d'installation complet</a></p>
+    </div>
+  </section>
+
+  <!-- ═══════════════ APP NATIVE ═══════════════ -->
+  <section class="rdm-sec" id="app">
+    <h2 class="sec-title">📱 App native — macOS &amp; Windows</h2>
+    <p class="sec-sub">Une vraie app de barre de menus : l'orbe vit au-dessus de tout, à un raccourci de n'importe où.</p>
+
+    <div class="rdm-why" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+      <div class="card">
+        <div class="ico"><i data-ico="app"></i></div>
+        <h3>Panneau façon Spotlight</h3>
+        <p>Un clic sur l'icône de barre de menus — ou <b>⌘⇧Espace</b> (Ctrl⇧Espace sous Windows) —
+        ouvre un panneau flottant au-dessus de tout, replié dès que tu cliques ailleurs ou tapes Échap.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><i data-ico="download"></i></div>
+        <h3>Installation directe</h3>
+        <p>Chaque tag <code>v*</code> publie un <b>DMG macOS</b> et un <b>installeur Windows NSIS</b>
+        sur les releases GitHub, avec <code>SHA256SUMS.txt</code> et changelog automatiques.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><i data-ico="package"></i></div>
+        <h3>Serveur embarqué</h3>
+        <p>L'app packagée contient son propre serveur Nova : port libre au lancement, données dans
+        le dossier utilisateur — rien d'autre à installer.</p>
+      </div>
+    </div>
+
+    <div class="rdm-note">
+      <i data-ico="shield"></i>
+      <p><b>DMG non signé</b> (build personnel) : au premier lancement, clic droit → <b>Ouvrir</b>.
+      Chaque release publie <code>SHA256SUMS.txt</code> pour vérifier ton téléchargement —
+      la marche à suivre détaillée est sur la page <a href="depannage.html">Dépannage</a>.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════ COMPÉTENCES ═══════════════ -->
+  <section class="rdm-sec" id="competences">
+    <h2 class="sec-title">🎙️ Ce qu'elle sait faire</h2>
+    <p class="sec-sub">Un aperçu — la référence complète et cherchable est sur la page <a href="commandes.html">Commandes</a>.</p>
+
+    <div class="rdm-scroll">
+    <table class="rdm-table">
+      <thead><tr><th>Domaine</th><th>Ce que tu peux dire</th><th>Ce qui se passe</th></tr></thead>
+      <tbody>
+        <tr><td><b>Conversation</b></td><td>« Maintiens la barre espace » ou bouton ⚡ pour une conversation en continu</td><td>Elle t'écoute, enchaîne toute seule, se coupe si tu parles par-dessus (barge-in)</td></tr>
+        <tr><td><b>Réveil vocal</b></td><td>« Nova »</td><td>En veille, elle n'écoute qu'en entendant son nom — comme un « Siri » local</td></tr>
+        <tr><td><b>Contrôle du Mac</b></td><td>« Ouvre github.com », « mets le volume à 40 », « prends une capture »</td><td>Action exécutée <b>après ta confirmation</b> (carte Autoriser / Ignorer), jamais toute seule</td></tr>
+        <tr><td><b>Données réelles</b></td><td>« Quelle heure est-il ? », « il fait quel temps ? », « état de la batterie ? »</td><td>Réponse instantanée et hors-modèle : heure, météo, batterie, disque, IP, presse-papiers</td></tr>
+        <tr><td><b>Sport (Pulse)</b></td><td>« Quelle séance j'ai aujourd'hui ? » · « Nova, séance terminée »</td><td>Séance du jour, technique, semaine complète, bilan — validation en un souffle</td></tr>
+        <tr><td><b>Voix</b></td><td>« Nova, plus vite » · « change de voix » · « coupe-toi »</td><td>Vitesse, voix française suivante du Mac, silence immédiat</td></tr>
+        <tr><td><b>Mémoire</b></td><td>« Nova, qu'as-tu retenu ? » · « oublie tout »</td><td>Récapitule à voix haute ce qu'elle sait, ou efface sa mémoire persistante</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="rdm-note">
+      <i data-ico="brain"></i>
+      <p><b>Modèles 100 % locaux</b> : si <b>Ollama</b> ou <b>LM Studio</b> tourne sur ta machine, Nova
+      le détecte — un clic dans le sélecteur et la conversation passe en local, sans aucune requête sortante.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════ RENDU VISUEL ═══════════════ -->
+  <section class="rdm-sec" id="visuel">
+    <h2 class="sec-title">🖼️ L'interface en vrai</h2>
+    <p class="sec-sub">Captures de la vraie app (1280×800 rendu retina ×2), régénérables à tout moment :
+    <code>node tools/capture-screenshots.js</code>.</p>
+
+    <div class="rdm-shots">
+      <figure class="rdm-shot">
+        <img src="screenshot-light.png" alt="Nova en thème clair : conversation avec la séance du jour et la météo" loading="lazy"/>
+        <p><b>Thème clair</b> — séance du jour et météo, pastille « donnée réelle »</p>
+      </figure>
+      <figure class="rdm-shot">
+        <img src="screenshot-dark.png" alt="Nova en thème sombre : même conversation, thème sombre" loading="lazy"/>
+        <p><b>Thème sombre</b> — même conversation, verre dépoli et blobs d'arrière-plan</p>
+      </figure>
+    </div>
+
+    <div class="rdm-why" style="max-width:1000px;margin:22px auto 0">
+      <div class="card">
+        <div class="ico"><i data-ico="orb"></i></div>
+        <h3>Orbe vivante</h3>
+        <p>Elle pulse avec ta voix : verte quand tu parles, violette quand elle réfléchit, ambre quand elle parle.</p>
+      </div>
+      <div class="card">
+        <div class="ico"><i data-ico="display"></i></div>
+        <h3>Verre &amp; lumière</h3>
+        <p>Verre dépoli, blobs d'arrière-plan, grain de film, halo d'état — thèmes sombre et clair (auto → suit macOS).</p>
+      </div>
+      <div class="card">
+        <div class="ico"><i data-ico="chat"></i></div>
+        <h3>Markdown en direct</h3>
+        <p>Markdown rendu pendant le streaming, et nettoyage automatique avant la lecture vocale.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ ARCHITECTURE ═══════════════ -->
+  <section class="rdm-sec" id="architecture">
+    <h2 class="sec-title">🏗️ Architecture</h2>
+    <p class="sec-sub">Un dépôt plat, lisible d'un coup d'œil — chaque dossier a un rôle unique.</p>
+
+    <div class="rdm-arch">
+      <div class="card">
+        <h3><code>server.js</code></h3>
+        <p>Serveur Node sans dépendance : statiques, proxy SSE Groq (filtre &lt;think&gt;, bascule de modèle, retry OTPM), Whisper STT, mémoire, sandbox.</p>
+      </div>
+      <div class="card">
+        <h3><code>lib/</code></h3>
+        <p><code>skills.js</code> — compétences de lecture (heure, météo, batterie…)<br/><code>training.js</code> — moteur sport : plan Pulse, phases, progression.</p>
+      </div>
+      <div class="card">
+        <h3><code>public/</code></h3>
+        <p>Interface : conversation, micro, voix, réglages, VAD, barge-in, minuteurs, mot d'activation, orbe réactive, mini-markdown.</p>
+      </div>
+      <div class="card">
+        <h3><code>desktop/</code></h3>
+        <p>Application Electron : barre de menus, panneau flottant, raccourci global, builds DMG arm64 / NSIS Windows, serveur embarqué.</p>
+      </div>
+      <div class="card">
+        <h3><code>test/</code></h3>
+        <p>77 tests sur un vrai serveur avec dossier temporaire : sandbox, traversée de répertoire, mémoire corrompue, moteur sport.</p>
+      </div>
+      <div class="card">
+        <h3><code>data/</code></h3>
+        <p>Mémoire, profil et progression sport (gitignored) — tout vit chez toi, rien ne sort de la machine.</p>
+      </div>
+    </div>
+
+    <div class="rdm-note">
+      <i data-ico="shield"></i>
+      <p><b>Confidentialité</b> : la clé passe uniquement entre ton navigateur → serveur local →
+      <code>api.groq.com</code>. Rien d'autre, aucun stockage distant. Les actions Mac exigent ta
+      confirmation, une par une.</p>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TESTS ═══════════════ -->
+  <section class="rdm-sec" id="tests">
+    <h2 class="sec-title">🧪 Tests &amp; fiabilité</h2>
+    <p class="sec-sub"><code>npm test</code> lance tout sur un vrai serveur, dossier temporaire, zéro appel réseau.</p>
+
+    <div class="rdm-tests">
+      <span class="rdm-test"><i data-ico="shield"></i><b>77</b> tests — passent en ~2,5 s</span>
+      <span class="rdm-test"><i data-ico="shield"></i>Sandbox : toute action hors liste blanche est rejetée</span>
+      <span class="rdm-test"><i data-ico="shield"></i>Traversée de répertoire refusée</span>
+      <span class="rdm-test"><i data-ico="dumbbell"></i>Moteur sport : 70 jours comparés aux formules exactes</span>
+      <span class="rdm-test"><i data-ico="memory"></i>Mémoire corrompue &amp; import de sauvegarde</span>
+    </div>
+
+    <div class="term" style="max-width:820px;margin-top:26px">
+      <div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+      <pre>npm test              <span class="c"># 77 tests — vrai serveur, dossier temporaire</span>
+npm run check:sport   <span class="c"># vérification manuelle du sport (vraie clé)</span></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════ LIENS ═══════════════ -->
+  <section class="rdm-sec" style="text-align:center">
+    <div class="actions" style="justify-content:center">
+      <a class="btn primary" href="installation.html"><i data-ico="download"></i>Installer Nova</a>
+      <a class="btn ghost" href="demo.html"><i data-ico="wave"></i>Essayer la démo</a>
+      <a class="btn ghost" href="https://github.com/DmzGamingYT/nova" target="_blank" rel="noopener"><i data-ico="github"></i>Voir sur GitHub</a>
+    </div>
+    <p class="sec-sub" style="margin-top:26px">Cette page est le pendant visuel du
+    <a href="https://github.com/DmzGamingYT/nova#readme" target="_blank" rel="noopener">README GitHub</a> —
+    la source de vérité reste le dépôt.</p>
+  </section>
+
+</main>
+
+<script src="icons.js"></script>
+<script src="site.js"></script>
+</body>
+</html>

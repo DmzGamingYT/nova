@@ -17,10 +17,12 @@
 
    Worker, pour chaque thème :
      1. offscreen BrowserWindow 1280×800 (scale 2 → PNG retina 2560×1600)
-     2. charge l'UI, force le thème via localStorage avant app.js
-     3. injecte une conversation réaliste (mêmes classes que l'app : .msg,
+     2. bloque /api/memory dans la fenêtre : les captures sont publiques,
+        elles ne doivent jamais montrer la vraie mémoire de l'utilisateur
+     3. charge l'UI, force le thème via localStorage avant app.js
+     4. injecte une conversation réaliste (mêmes classes que l'app : .msg,
         .bubble, .skill-badge) — sans appel réseau ni voix
-     4. attend le rendu réel (bulles présentes, PNG non vide), capture
+     5. attend le rendu réel (bulles présentes, PNG non vide), capture
         en docs/screenshot-<thème>.png   */
 
 const fs = require('fs');
@@ -51,6 +53,7 @@ const INJECT = `(function(){
     if (hero) hero.style.display = 'none';
     var log = document.getElementById('messages');
     if (!log) return false;
+    log.innerHTML = '';   // repart d'un écran propre, même si un rendu tardif a traîné
 
     function addMsg(role, html){
       var wrap = document.createElement('div');
@@ -112,6 +115,14 @@ async function captureOnce(theme, outFile) {
     },
   });
   win.webContents.setFrameRate(20);
+
+  /* Captures publiques : jamais la vraie mémoire de l'utilisateur.
+     /api/memory échoue silencieusement côté UI (restoreLastSession
+     avale l'erreur), donc aucune conversation réelle ne s'affiche. */
+  win.webContents.session.webRequest.onBeforeRequest(
+    { urls: ['*://*/api/memory', '*://*/api/memory/*'] },
+    (details, callback) => callback({ cancel: true })
+  );
 
   try {
     /* 1re charge → imposer le thème avant que app.js ne lise localStorage */

@@ -15,7 +15,7 @@ Elle t'écoute, réfléchit avec Groq, et te répond **à voix haute** — le to
 ![tests](https://img.shields.io/badge/tests-68%20%2B%20sport-7c6cff)
 ![licence](https://img.shields.io/badge/licence-MIT-blue)
 
-[🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App macOS](#-application-macos-native) · [🧰 Dépannage](#-dépannage) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🗣️ Commandes vocales](https://dmzgamingyt.github.io/nova/commandes.html) · [⚡ **Démo live**](https://dmzgamingyt.github.io/nova/demo.html) · [📰 Nouveautés](https://dmzgamingyt.github.io/nova/nouveautes.html) · [🌐 Site web](https://dmzgamingyt.github.io/nova/) · [🏗️ Architecture](#-architecture)
+[🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App native](#-applications-natives--macos--windows) · [🧰 Dépannage](#-dépannage) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🖼️ **Le README en visuel**](https://dmzgamingyt.github.io/nova/readme.html) · [🗣️ Commandes vocales](https://dmzgamingyt.github.io/nova/commandes.html) · [⚡ **Démo live**](https://dmzgamingyt.github.io/nova/demo.html) · [📰 Nouveautés](https://dmzgamingyt.github.io/nova/nouveautes.html) · [🌐 Site web](https://dmzgamingyt.github.io/nova/) · [🏗️ Architecture](#-architecture)
 
 </div>
 
@@ -238,13 +238,13 @@ requête sortante, même la clé Groq devient inutile.
 </details>
 
 <details>
-<summary><b>🖥️ contrôle du Mac (sandbox, après confirmation)</b></summary>
+<summary><b>🖥️ Contrôle du Mac et du PC (sandbox, après confirmation)</b></summary>
 
 | Action | Effet | | Lecture seule (instantané) | |
 |---|---|---|---|---|
 | `open` | Ouvre un site ou une app | | `now` · `date` | Heure et date exactes |
-| `say` | Fait parler le Mac | | `weather` | Météo réelle, sans clé API |
-| `notification` | Notification macOS | | `battery` · `disk` · `ip` · `uptime` | État du Mac |
+| `say` | Fait parler la machine | | `weather` | Météo réelle, sans clé API |
+| `notification` | Notification macOS / toast Windows | | `battery` · `disk` · `ip` · `uptime` | État de la machine |
 | `volume` | Absolu (`40`) ou relatif (`+10`) | | `clipboard` | Contenu du presse-papiers |
 | `brightness` | Luminosité 0–100 | | `workout` · `workout_week` | Programme sport |
 | `screenshot` | Capture → `data/screenshots/` | | `training_stats` | Bilan de progression |
@@ -254,6 +254,8 @@ requête sortante, même la clé Groq devient inutile.
 Validation stricte des arguments, exécution via `execFile` sans shell — pas d'injection possible.
 Interrupteur général dans les réglages (`MAC_CONTROL=off` coupe aussi les routes côté serveur).
 
+Sous Windows, les mêmes actions passent par **PowerShell** (`lib/winctl.js`) : notification toast WinRT,
+volume par touches système (`keybd_event`), voix System.Speech, capture System.Drawing, batterie/disque WMI.
 </details>
 
 <details>
@@ -304,7 +306,8 @@ ta dernière conversation se restaure automatiquement.
 <img src="docs/screenshot-dark.png" alt="Nova en thème sombre : même conversation, thème sombre" width="84%"/>
 </div>
 
-<p align="center"><i>Captures de la vraie interface (1280×800 rendu retina ×2), régénérables à tout moment :</i></p>
+<p align="center"><i>Captures de la vraie interface (1280×800 rendu retina ×2), régénérables à tout moment —
+<a href="https://dmzgamingyt.github.io/nova/readme.html">le README complet, en version visuelle</a> :</i></p>
 
 ```bash
 node tools/capture-screenshots.js   # serveur Nova lancé + Electron dans desktop/node_modules
