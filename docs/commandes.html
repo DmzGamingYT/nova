@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Commandes vocales — Nova</title>
+<meta name="description" content="Toutes les commandes vocales de Nova : conversation, voix, minuteurs, veille, mémoire, sport, contrôle du Mac. Recherche instantanée, variantes comprises."/>
+<link rel="stylesheet" href="style.css"/>
+<style>
+  .cmd-tools{max-width:980px;margin:0 auto 26px;display:flex;flex-direction:column;gap:16px}
+  .cmd-search{position:relative}
+  .cmd-search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round}
+  .cmd-search input{
+    width:100%;box-sizing:border-box;padding:14px 18px 14px 46px;border-radius:14px;
+    border:1px solid var(--panel-brd);background:var(--panel);color:var(--txt);
+    font:inherit;font-size:15px;outline:none;transition:border-color .2s, box-shadow .2s;
+  }
+  .cmd-search input::placeholder{color:var(--muted)}
+  .cmd-search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(124,108,255,.18)}
+  .cmd-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .cmd-pills .pill{
+    border:1px solid var(--panel-brd);background:var(--panel);color:var(--muted);
+    border-radius:999px;padding:7px 15px;font:inherit;font-size:13px;cursor:pointer;transition:all .18s;
+  }
+  .cmd-pills .pill:hover{color:var(--txt);border-color:var(--accent)}
+  .cmd-pills .pill.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  .cmd-wrap{max-width:980px;margin:0 auto}
+  .cmd-count{color:var(--muted);font-size:13px;margin:0 0 10px 2px}
+  .cmd-table{width:100%;border-collapse:separate;border-spacing:0;background:var(--panel);
+    border:1px solid var(--panel-brd);border-radius:16px;overflow:hidden}
+  .cmd-table thead th{
+    text-align:left;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    padding:12px 16px;border-bottom:1px solid var(--panel-brd);background:rgba(255,255,255,.03)}
+  .cmd-table td{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.06);vertical-align:top;font-size:14px}
+  .cmd-table tbody tr:last-child td{border-bottom:none}
+  .cmd-table tbody tr{transition:background .15s}
+  .cmd-table tbody tr:hover{background:rgba(124,108,255,.07)}
+  td.c-cat{white-space:nowrap}
+  .chip{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;border-radius:999px;padding:3px 10px}
+  .chip.conversation{background:rgba(124,108,255,.16);color:#b3a7ff}
+  .chip.voix{background:rgba(47,191,155,.16);color:#6fe0c3}
+  .chip.minuteur{background:rgba(245,168,60,.16);color:#f5c98a}
+  .chip.veille{background:rgba(96,116,255,.16);color:#a7b4ff}
+  .chip.memoire{background:rgba(240,110,170,.16);color:#f3a4cb}
+  .chip.sport{background:rgba(80,200,120,.16);color:#8fe6ad}
+  .chip.mac{background:rgba(90,170,255,.16);color:#9ecbff}
+  td.c-cmd{color:var(--txt);font-weight:600;white-space:nowrap}
+  td.c-alt{color:var(--muted);font-size:13px}
+  td.c-eff{color:var(--txt)}
+  .cmd-table mark{background:rgba(124,108,255,.32);color:inherit;border-radius:3px;padding:0 1px}
+
+  .cmd-empty{display:none;text-align:center;color:var(--muted);padding:44px 0}
+  .cmd-empty svg{width:30px;height:30px;stroke:var(--muted);fill:none;stroke-width:1.6;stroke-linecap:round;margin-bottom:10px}
+  .cmd-empty b{color:var(--txt)}
+
+  .cmd-note{max-width:980px;margin:26px auto 0;display:flex;gap:14px;align-items:flex-start;
+    background:var(--panel);border:1px solid var(--panel-brd);border-radius:16px;padding:18px 20px}
+  .cmd-note svg{width:20px;height:20px;flex:none;stroke:var(--accent2);fill:none;stroke-width:1.8;stroke-linecap:round;margin-top:2px}
+  .cmd-note p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
+  .cmd-note a{color:var(--accent2)}
+
+  @media (max-width:720px){
+    .cmd-table thead{display:none}
+    .cmd-table, .cmd-table tbody, .cmd-table tr, .cmd-table td{display:block;width:100%}
+    .cmd-table tr{border-bottom:1px solid rgba(255,255,255,.08);padding:6px 0}
+    .cmd-table td{border-bottom:none;padding:5px 16px}
+    td.c-cat{padding-top:12px}
+    td.c-cmd{white-space:normal;font-size:15px}
+  }
+</style>
+</head>
+<body data-page="commandes">
+
+<header class="page-head center" style="padding-top:calc(var(--nav-h) + 52px);max-width:1200px;margin:0 auto">
+  <h1 class="sec-title">Commandes vocales</h1>
+  <p class="sec-sub" style="max-width:640px;margin:0 auto 30px">Tout ce que tu peux dire à Nova — cherche, filtre, essaie.
+  Les formulations voisines sont reconnues : <b>parle naturellement</b>.</p>
+</header>
+
+<main class="section" style="padding-top:0">
+
+  <div class="cmd-tools">
+    <div class="cmd-search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+      <input id="cmdSearch" type="search" placeholder="Cherche une commande… (volume, minuteur, voix, séance…)" autocomplete="off" aria-label="Rechercher une commande vocale"/>
+    </div>
+    <div class="cmd-pills" role="group" aria-label="Filtrer par catégorie">
+      <button class="pill active" data-cat="tout">Tout</button>
+      <button class="pill" data-cat="conversation">Conversation</button>
+      <button class="pill" data-cat="voix">Voix</button>
+      <button class="pill" data-cat="minuteur">Minuteurs</button>
+      <button class="pill" data-cat="veille">Veille</button>
+      <button class="pill" data-cat="memoire">Mémoire</button>
+      <button class="pill" data-cat="sport">Sport</button>
+      <button class="pill" data-cat="mac">Mac</button>
+    </div>
+  </div>
+
+  <div class="cmd-wrap">
+    <p class="cmd-count" id="cmdCount"></p>
+
+    <table class="cmd-table" id="cmdTable">
+      <thead><tr><th>Catégorie</th><th>Commande</th><th>Variantes</th><th>Effet</th></tr></thead>
+      <tbody>
+        <!-- ── Conversation ─────────────────────────────────────────── -->
+        <tr data-cat="conversation">
+          <td class="c-cat"><span class="chip conversation">Conversation</span></td>
+          <td class="c-cmd">« Nova, efface »</td>
+          <td class="c-alt">efface tout · vide la conversation · nouvelle conversation · on repart à zéro</td>
+          <td class="c-eff">Vide la conversation affichée — la mémoire, elle, reste intacte. Instantané, sans passer par le modèle.</td>
+        </tr>
+        <tr data-cat="conversation">
+          <td class="c-cat"><span class="chip conversation">Conversation</span></td>
+          <td class="c-cmd">« Nova, annule »</td>
+          <td class="c-alt">annule ça · rétablis · reviens en arrière · restaure</td>
+          <td class="c-eff">Remet la conversation que « efface » venait de vider, mot pour mot.</td>
+        </tr>
+        <tr data-cat="conversation">
+          <td class="c-cat"><span class="chip conversation">Conversation</span></td>
+          <td class="c-cmd">« Nova, répète »</td>
+          <td class="c-alt">redis · redis-moi ça · tu peux répéter · répète ta réponse</td>
+          <td class="c-eff">Relit à voix haute sa dernière réponse complète.</td>
+        </tr>
+
+        <!-- ── Voix ─────────────────────────────────────────────────── -->
+        <tr data-cat="voix">
+          <td class="c-cat"><span class="chip voix">Voix</span></td>
+          <td class="c-cmd">« Nova, coupe-toi »</td>
+          <td class="c-alt">tais-toi · chut · arrête-toi</td>
+          <td class="c-eff">Coupe sa voix immédiatement. Tu peux aussi simplement parler par-dessus (barge-in).</td>
+        </tr>
+        <tr data-cat="voix">
+          <td class="c-cat"><span class="chip voix">Voix</span></td>
+          <td class="c-cmd">« Nova, plus vite »</td>
+          <td class="c-alt">accélère · parle plus vite · accélère un peu</td>
+          <td class="c-eff">Accélère sa lecture, phrase par phrase.</td>
+        </tr>
+        <tr data-cat="voix">
+          <td class="c-cat"><span class="chip voix">Voix</span></td>
+          <td class="c-cmd">« Nova, moins vite »</td>
+          <td class="c-alt">ralentis · plus lentement · parle moins vite</td>
+          <td class="c-eff">Ralentit sa lecture.</td>
+        </tr>
+        <tr data-cat="voix">
+          <td class="c-cat"><span class="chip voix">Voix</span></td>
+          <td class="c-cmd">« Nova, change de voix »</td>
+          <td class="c-alt">autre voix · voix suivante · nouvelle voix · change ta voix</td>
+          <td class="c-eff">Passe à la voix française suivante installée sur ton Mac.</td>
+        </tr>
+
+        <!-- ── Minuteurs ────────────────────────────────────────────── -->
+        <tr data-cat="minuteur">
+          <td class="c-cat"><span class="chip minuteur">Minuteurs</span></td>
+          <td class="c-cmd">« Nova, minuteur de 10 minutes »</td>
+          <td class="c-alt">timer de 5 min · minuteur d'une minute</td>
+          <td class="c-eff">Lance un minuteur : carillon + annonce vocale à la fin. Plusieurs minuteurs en parallèle.</td>
+        </tr>
+        <tr data-cat="minuteur">
+          <td class="c-cat"><span class="chip minuteur">Minuteurs</span></td>
+          <td class="c-cmd">« Nova, annule le minuteur »</td>
+          <td class="c-alt">arrête le minuteur · stoppe les minuteurs · supprime le minuteur</td>
+          <td class="c-eff">Annule les minuteurs en cours.</td>
+        </tr>
+
+        <!-- ── Veille ───────────────────────────────────────────────── -->
+        <tr data-cat="veille">
+          <td class="c-cat"><span class="chip veille">Veille</span></td>
+          <td class="c-cmd">« Nova, va en veille »</td>
+          <td class="c-alt">dors · mets-toi en veille · endors-toi</td>
+          <td class="c-eff">Se rendort aussitôt : l'orbe s'éteint, plus aucune écoute.</td>
+        </tr>
+        <tr data-cat="veille">
+          <td class="c-cat"><span class="chip veille">Veille</span></td>
+          <td class="c-cmd">« Nova »</td>
+          <td class="c-alt">dis simplement son nom (mode mot d'activation)</td>
+          <td class="c-eff">S'éveille, t'écoute, répond — puis se rendort toute seule.</td>
+        </tr>
+
+        <!-- ── Mémoire ──────────────────────────────────────────────── -->
+        <tr data-cat="memoire">
+          <td class="c-cat"><span class="chip memoire">Mémoire</span></td>
+          <td class="c-cmd">« Nova, qu'as-tu retenu ? »</td>
+          <td class="c-alt">de quoi te souviens-tu · qu'est-ce que tu sais sur moi</td>
+          <td class="c-eff">Récapitule à voix haute ce qu'elle a retenu de toi — profil, conversations, sport.</td>
+        </tr>
+        <tr data-cat="memoire">
+          <td class="c-cat"><span class="chip memoire">Mémoire</span></td>
+          <td class="c-cmd">« Nova, oublie tout »</td>
+          <td class="c-alt">efface toute la mémoire · oublie toutes les conversations</td>
+          <td class="c-eff">Vide sa mémoire persistante. Irréversible — d'où la formulation explicite.</td>
+        </tr>
+
+        <!-- ── Sport ────────────────────────────────────────────────── -->
+        <tr data-cat="sport">
+          <td class="c-cat"><span class="chip sport">Sport</span></td>
+          <td class="c-cmd">« Quelle séance j'ai aujourd'hui ? »</td>
+          <td class="c-alt">ma séance du jour</td>
+          <td class="c-eff">Exercices, séries, repos et durée estimée, lus depuis ton programme Pulse.</td>
+        </tr>
+        <tr data-cat="sport">
+          <td class="c-cat"><span class="chip sport">Sport</span></td>
+          <td class="c-cmd">« C'est quoi mon programme cette semaine ? »</td>
+          <td class="c-alt">ma semaine de sport</td>
+          <td class="c-eff">Les 7 jours, séances faites / restantes.</td>
+        </tr>
+        <tr data-cat="sport">
+          <td class="c-cat"><span class="chip sport">Sport</span></td>
+          <td class="c-cmd">« Comment on fait les pompes ? »</td>
+          <td class="c-alt">n'importe quel exercice de ton programme</td>
+          <td class="c-eff">La consigne technique exacte de ton programme — pas une réponse générique.</td>
+        </tr>
+        <tr data-cat="sport">
+          <td class="c-cat"><span class="chip sport">Sport</span></td>
+          <td class="c-cmd">« Où j'en suis ? »</td>
+          <td class="c-alt">mon avancement · ma progression</td>
+          <td class="c-eff">Séances validées, série en cours, niveau et phase du programme.</td>
+        </tr>
+        <tr data-cat="sport">
+          <td class="c-cat"><span class="chip sport">Sport</span></td>
+          <td class="c-cmd">« Nova, séance terminée »</td>
+          <td class="c-alt">— (commande instantanée)</td>
+          <td class="c-eff">Valide la séance du jour et met à jour ta progression.</td>
+        </tr>
+
+        <!-- ── Mac ──────────────────────────────────────────────────── -->
+        <tr data-cat="mac">
+          <td class="c-cat"><span class="chip mac">Mac</span></td>
+          <td class="c-cmd">« Ouvre github.com » / « ouvre Spotify »</td>
+          <td class="c-alt">ouvre + n'importe quel site ou app</td>
+          <td class="c-eff">Demande confirmation sur une carte <b>Autoriser / Ignorer</b>, puis ouvre.</td>
+        </tr>
+        <tr data-cat="mac">
+          <td class="c-cat"><span class="chip mac">Mac</span></td>
+          <td class="c-cmd">« Mets le volume à 40 »</td>
+          <td class="c-alt">augmente le volume de 10 · baisse le son</td>
+          <td class="c-eff">Volume absolu (0–100) ou relatif, après confirmation.</td>
+        </tr>
+        <tr data-cat="mac">
+          <td class="c-cat"><span class="chip mac">Mac</span></td>
+          <td class="c-cmd">« Baisse la luminosité à 30 »</td>
+          <td class="c-alt">monte la luminosité</td>
+          <td class="c-eff">Luminosité de l'écran, 0–100, après confirmation.</td>
+        </tr>
+        <tr data-cat="mac">
+          <td class="c-cat"><span class="chip mac">Mac</span></td>
+          <td class="c-cmd">« Prends une capture d'écran »</td>
+          <td class="c-alt">capture l'écran</td>
+          <td class="c-eff">Capture → enregistrée dans <code>data/screenshots/</code>.</td>
+        </tr>
+        <tr data-cat="mac">
+          <td class="c-cat"><span class="chip mac">Mac</span></td>
+          <td class="c-cmd">« Copie ce texte »</td>
+          <td class="c-alt">copie + n'importe quel contenu</td>
+          <td class="c-eff">Met le texte demandé dans le presse-papiers.</td>
+        </tr>
+        <tr data-cat="mac">
+          <td class="c-cat"><span class="chip mac">Mac</span></td>
+          <td class="c-cmd">« Affiche une notification »</td>
+          <td class="c-alt">notifie-moi</td>
+          <td class="c-eff">Affiche une vraie notification macOS avec ton message.</td>
+        </tr>
+        <tr data-cat="mac">
+          <td class="c-cat"><span class="chip mac">Mac</span></td>
+          <td class="c-cmd">« Quelle heure est-il ? »</td>
+          <td class="c-alt">quelle date on est</td>
+          <td class="c-eff">Donnée réelle instantanée — lue localement, sans passer par le modèle (pastille verte).</td>
+        </tr>
+        <tr data-cat="mac">
+          <td class="c-cat"><span class="chip mac">Mac</span></td>
+          <td class="c-cmd">« Il fait quel temps ? »</td>
+          <td class="c-alt">la météo à [ville]</td>
+          <td class="c-eff">Météo réelle via wttr.in — sans clé d'API.</td>
+        </tr>
+        <tr data-cat="mac">
+          <td class="c-cat"><span class="chip mac">Mac</span></td>
+          <td class="c-cmd">« Quel est l'état de la batterie ? »</td>
+          <td class="c-alt">l'espace disque · mon IP · l'uptime du Mac</td>
+          <td class="c-eff">État du Mac en lecture seule, instantané.</td>
+        </tr>
+        <tr data-cat="mac">
+          <td class="c-cat"><span class="chip mac">Mac</span></td>
+          <td class="c-cmd">« Qu'y a-t-il dans le presse-papiers ? »</td>
+          <td class="c-alt">lis le presse-papiers</td>
+          <td class="c-eff">Lit le contenu actuel du presse-papiers.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="cmd-empty" id="cmdEmpty">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="21"/></svg>
+      <p>Aucune commande ne correspond à <b id="cmdQuery"></b>.<br/>Nova comprend aussi les formulations voisines — essaie un autre mot.</p>
+    </div>
+
+    <div class="cmd-note">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.7 4.6L18 9.3l-4.3 1.7L12 15.6l-1.7-4.6L6 9.3l4.3-1.7z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>
+      <p>Une seule règle : <b>parle naturellement</b>. « tais-toi », « chut », « accélère », « redis-moi ça »… fonctionnent
+      comme les formes canoniques. Pour le contrôle du Mac, chaque action attend ta confirmation sur une carte dédiée —
+      rien ne s'exécute tout seul. <a href="demo.html">Essaie la démo →</a></p>
+    </div>
+  </div>
+
+</main>
+
+<script src="icons.js"></script>
+<script src="site.js"></script>
+<script>
+(function(){
+  const input  = document.getElementById('cmdSearch');
+  const table  = document.getElementById('cmdTable');
+  const rows   = Array.from(table.querySelectorAll('tbody tr'));
+  const pills  = Array.from(document.querySelectorAll('.cmd-pills .pill'));
+  const count  = document.getElementById('cmdCount');
+  const empty  = document.getElementById('cmdEmpty');
+  const query  = document.getElementById('cmdQuery');
+
+  /* normalisation : minuscules + sans accents, pour que « seance » trouve « séance » */
+  const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const esc  = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+  /* texte original de chaque cellule, pour re-surligner proprement */
+  const orig = new Map();
+  rows.forEach(r => r.querySelectorAll('.c-cmd, .c-alt, .c-eff')
+    .forEach(td => orig.set(td, td.innerHTML)));
+
+  let cat = 'tout';
+
+  function highlight(td, q){
+    if (!q){ td.innerHTML = orig.get(td); return; }
+    const src = norm(orig.get(td).replace(/<[^>]+>/g, ''));
+    /* on re-surligne depuis la version normale, en conservant la casse d'origine */
+    const raw = orig.get(td);
+    const re = new RegExp(esc(q), 'gi');
+    td.innerHTML = raw.replace(re, m => '<mark>' + m + '</mark>');
+    if (!re.test(src)) td.innerHTML = raw; /* match portait sur la catégorie, pas ce texte */
+  }
+
+  function apply(){
+    const q = norm(input.value.trim());
+    let visible = 0;
+    rows.forEach(r => {
+      const okCat = cat === 'tout' || r.dataset.cat === cat;
+      const okTxt = !q || norm(r.textContent).includes(q);
+      const show = okCat && okTxt;
+      r.style.display = show ? '' : 'none';
+      if (show){
+        visible++;
+        r.querySelectorAll('.c-cmd, .c-alt, .c-eff').forEach(td => highlight(td, q));
+      }
+    });
+    count.textContent = visible + (visible > 1 ? ' commandes' : ' commande');
+    empty.style.display = visible ? 'none' : 'block';
+    if (!visible) query.textContent = '« ' + input.value.trim() + ' »';
+  }
+
+  input.addEventListener('input', apply);
+  pills.forEach(p => p.addEventListener('click', () => {
+    pills.forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    cat = p.dataset.cat;
+    apply();
+  }));
+
+  /* « / » met le focus dans la recherche (hors saisie) */
+  document.addEventListener('keydown', e => {
+    if (e.key === '/' && document.activeElement !== input && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)){
+      e.preventDefault(); input.focus();
+    }
+  });
+
+  apply();
+})();
+</script>
+</body>
+</html>

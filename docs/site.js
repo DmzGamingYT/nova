@@ -16,6 +16,7 @@
         '<a href="index.html"' + (page==='index'?' class="active"':'') + '>Accueil</a>' +
         '<a href="fonctions.html"' + (page==='fonctions'?' class="active"':'') + '>Fonctions</a>' +
         '<a href="demo.html"' + (page==='demo'?' class="active"':'') + '>Démo</a>' +
+        '<a href="commandes.html"' + (page==='commandes'?' class="active"':'') + '>Commandes</a>' +
         '<a href="installation.html"' + (page==='installation'?' class="active"':'') + '>Installation</a>' +
         '<a class="gh" href="' + REPO + '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true">' +
           '<path d="M12 2C6.5 2 2 6.6 2 12.2c0 4.5 2.9 8.3 6.8 9.7.5.1.7-.2.7-.5v-1.8c-2.8.6-3.4-1.2-3.4-1.2-.4-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 .1 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.2-.3-4.6-1.1-4.6-5 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.7 0 0 .8-.3 2.7 1a9.4 9.4 0 0 1 5 0c1.9-1.3 2.7-1 2.7-1 .5 1.4.2 2.4.1 2.7.6.7 1 1.6 1 2.7 0 3.9-2.4 4.7-4.6 5 .4.3.7.9.7 1.9v2.8c0 .3.2.6.7.5 4-1.4 6.8-5.2 6.8-9.7C22 6.6 17.5 2 12 2z"/></svg>GitHub</a>' +

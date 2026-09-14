@@ -15,7 +15,7 @@ Elle t'écoute, réfléchit avec Groq, et te répond **à voix haute** — le to
 ![tests](https://img.shields.io/badge/tests-68%20%2B%20sport-7c6cff)
 ![licence](https://img.shields.io/badge/licence-MIT-blue)
 
-[🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App macOS](#-application-macos-native) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🌐 Site web](https://dmzgamingyt.github.io/nova/) · [🏗️ Architecture](#-architecture)
+[🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App macOS](#-application-macos-native) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🗣️ Commandes vocales](https://dmzgamingyt.github.io/nova/commandes.html) · [🌐 Site web](https://dmzgamingyt.github.io/nova/) · [🏗️ Architecture](#-architecture)
 
 </div>
 
@@ -119,7 +119,8 @@ npm run dist       # → release/Nova-1.0.0-arm64.dmg (build universel : npm run
 | « Nova, qu'as-tu retenu ? » | Récapitule à voix haute ce qu'elle sait de toi |
 | « Nova, séance terminée » | Valide la séance de sport du jour |
 
-*Les formulations voisines sont reconnues (« tais-toi », « chut », « accélère », « redis-moi ça »…).*
+*Les formulations voisines sont reconnues (« tais-toi », « chut », « accélère », « redis-moi ça »…).
+→ Référence complète et cherchable : **[dmzgamingyt.github.io/nova/commandes.html](https://dmzgamingyt.github.io/nova/commandes.html)***
 
 </details>
 
