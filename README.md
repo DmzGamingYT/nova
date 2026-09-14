@@ -278,6 +278,18 @@ ta dernière conversation se restaure automatiquement.
 ## ✨ Rendu visuel
 
 <div align="center">
+<img src="docs/screenshot-light.png" alt="Nova en thème clair : conversation avec la séance du jour et la météo" width="84%"/>
+<br/>
+<img src="docs/screenshot-dark.png" alt="Nova en thème sombre : même conversation, thème sombre" width="84%"/>
+</div>
+
+<p align="center"><i>Captures de la vraie interface (1280×800 rendu retina ×2), régénérables à tout moment :</i></p>
+
+```bash
+node tools/capture-screenshots.js   # serveur Nova lancé + Electron dans desktop/node_modules
+```
+
+<div align="center">
 <img src="docs/orb-states.svg" alt="Les trois états de l'orbe Nova : écoute, réflexion, parole" width="100%"/>
 </div>
 
