@@ -14,7 +14,7 @@ Elle t'écoute, réfléchit avec Groq, et te répond **à voix haute** — le to
 ![tests](https://img.shields.io/badge/tests-68%20%2B%20sport-7c6cff)
 ![licence](https://img.shields.io/badge/licence-MIT-blue)
 
-[🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App macOS](#-application-macos-native) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🏗️ Architecture](#-architecture)
+[🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App macOS](#-application-macos-native) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🌐 Site web](https://dmzgamingyt.github.io/nova/) · [🏗️ Architecture](#-architecture)
 
 </div>
 
@@ -37,7 +37,7 @@ Elle t'écoute, réfléchit avec Groq, et te répond **à voix haute** — le to
 
 ```bash
 # 1. Récupère le projet
-git clone https://github.com/alessioinnangi/nova.git && cd nova
+git clone https://github.com/DmzGamingYT/nova.git && cd nova
 
 # 2. Ta clé Groq (gratuite — console.groq.com/keys)
 cp .env.example .env      # puis GROQ_API_KEY=gsk_…
@@ -179,6 +179,10 @@ ta dernière conversation se restaure automatiquement.
 <br/>
 
 ## ✨ Rendu visuel
+
+<div align="center">
+<img src="docs/orb-states.svg" alt="Les trois états de l'orbe Nova : écoute, réflexion, parole" width="100%"/>
+</div>
 
 - Orbe vivante : **pulse avec ta voix** (analyse temps réel), verte quand tu parles,
   violette quand elle réfléchit, ambre quand elle parle

@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0e0b1e"/>
+      <stop offset="1" stop-color="#1c1440"/>
+    </linearGradient>
+    <radialGradient id="gTeal" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#2fbf9b" stop-opacity="0.5"/><stop offset="1" stop-color="#2fbf9b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="gViolet" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#7c6cff" stop-opacity="0.5"/><stop offset="1" stop-color="#7c6cff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="gAmber" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f5a83c" stop-opacity="0.5"/><stop offset="1" stop-color="#f5a83c" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="oTeal" cx="0.38" cy="0.32" r="0.85">
+      <stop offset="0" stop-color="#9defd8"/><stop offset="0.4" stop-color="#2fbf9b"/><stop offset="1" stop-color="#177a63"/>
+    </radialGradient>
+    <radialGradient id="oViolet" cx="0.38" cy="0.32" r="0.85">
+      <stop offset="0" stop-color="#b3a7ff"/><stop offset="0.4" stop-color="#7c6cff"/><stop offset="1" stop-color="#33249e"/>
+    </radialGradient>
+    <radialGradient id="oAmber" cx="0.38" cy="0.32" r="0.85">
+      <stop offset="0" stop-color="#ffd9a0"/><stop offset="0.4" stop-color="#f5a83c"/><stop offset="1" stop-color="#b06a12"/>
+    </radialGradient>
+    <radialGradient id="glintS" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1280" height="320" fill="url(#bg2)"/>
+
+  <!-- ÉTAT 1 : tu parles (vert) -->
+  <g>
+    <circle cx="213" cy="140" r="105" fill="url(#gTeal)">
+      <animate attributeName="r" values="105;125;105" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="213" cy="140" r="74" fill="url(#oTeal)">
+      <animate attributeName="r" values="74;80;74" dur="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <ellipse cx="190" cy="114" rx="24" ry="16" fill="url(#glintS)"/>
+    <!-- ondes entrantes (elle écoute) -->
+    <circle cx="213" cy="140" r="74" fill="none" stroke="#2fbf9b" stroke-opacity="0.6" stroke-width="2">
+      <animate attributeName="r" values="74;130" dur="2.4s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-opacity" values="0.55;0" dur="2.4s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="213" cy="140" r="74" fill="none" stroke="#2fbf9b" stroke-opacity="0.6" stroke-width="2">
+      <animate attributeName="r" values="74;130" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-opacity" values="0.55;0" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="213" y="258" text-anchor="middle" font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif" font-size="22" font-weight="600" fill="#9defd8">tu parles</text>
+    <text x="213" y="284" text-anchor="middle" font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif" font-size="16" fill="#6e6a8f">elle écoute — l'orbe capte ta voix</text>
+  </g>
+
+  <!-- ÉTAT 2 : elle réfléchit (violet) -->
+  <g>
+    <circle cx="640" cy="140" r="105" fill="url(#gViolet)">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="3.2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="640" cy="140" r="74" fill="url(#oViolet)">
+      <animate attributeName="r" values="74;77;74" dur="3.2s" repeatCount="indefinite"/>
+    </circle>
+    <ellipse cx="617" cy="114" rx="24" ry="16" fill="url(#glintS)"/>
+    <!-- orbite en rotation = réflexion -->
+    <g>
+      <animateTransform attributeName="transform" type="rotate" from="0 640 140" to="360 640 140" dur="6s" repeatCount="indefinite"/>
+      <circle cx="640" cy="52" r="6" fill="#b3a7ff"/>
+      <circle cx="716" cy="164" r="4" fill="#8f7dff" opacity="0.8"/>
+    </g>
+    <text x="640" y="258" text-anchor="middle" font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif" font-size="22" font-weight="600" fill="#cdc6ff">elle réfléchit</text>
+    <text x="640" y="284" text-anchor="middle" font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif" font-size="16" fill="#6e6a8f">Groq calcule — l'orbe orbite doucement</text>
+  </g>
+
+  <!-- ÉTAT 3 : elle parle (ambre) -->
+  <g>
+    <circle cx="1067" cy="140" r="105" fill="url(#gAmber)">
+      <animate attributeName="opacity" values="0.55;1;0.55" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="1067" cy="140" r="74" fill="url(#oAmber)">
+      <animate attributeName="r" values="74;82;74" dur="0.75s" repeatCount="indefinite"/>
+    </circle>
+    <ellipse cx="1044" cy="114" rx="24" ry="16" fill="url(#glintS)"/>
+    <!-- equalizer (elle émet) -->
+    <g fill="#f5a83c">
+      <rect x="1024" y="130" width="5" height="20" rx="2.5">
+        <animate attributeName="height" values="20;34;12;26;20" dur="0.9s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="130;123;134;127;130" dur="0.9s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="1035" y="124" width="5" height="32" rx="2.5">
+        <animate attributeName="height" values="32;16;36;22;32" dur="0.7s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="124;132;122;129;124" dur="0.7s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="1046" y="132" width="5" height="16" rx="2.5">
+        <animate attributeName="height" values="16;38;14;30;16" dur="1s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="132;121;135;125;132" dur="1s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="1057" y="126" width="5" height="28" rx="2.5">
+        <animate attributeName="height" values="28;40;18;32;28" dur="0.8s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="126;120;128;124;126" dur="0.8s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="1068" y="131" width="5" height="18" rx="2.5">
+        <animate attributeName="height" values="18;30;36;12;18" dur="1.1s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="131;125;122;134;131" dur="1.1s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="1079" y="125" width="5" height="30" rx="2.5">
+        <animate attributeName="height" values="30;14;34;24;30" dur="0.75s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="125;133;123;128;125" dur="0.75s" repeatCount="indefinite"/>
+      </rect>
+      <rect x="1090" y="130" width="5" height="20" rx="2.5">
+        <animate attributeName="height" values="20;36;16;28;20" dur="0.95s" repeatCount="indefinite"/>
+        <animate attributeName="y" values="130;122;132;126;130" dur="0.95s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+    <text x="1067" y="258" text-anchor="middle" font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif" font-size="22" font-weight="600" fill="#ffd9a0">elle parle</text>
+    <text x="1067" y="284" text-anchor="middle" font-family="-apple-system,'SF Pro Text',Segoe UI,sans-serif" font-size="16" fill="#6e6a8f">voix macOS — lecture phrase par phrase</text>
+  </g>
+</svg>
