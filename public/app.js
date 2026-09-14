@@ -2366,12 +2366,42 @@
       var j = await r.json();
       var models = j.models || [];
       els.modelSelect.innerHTML = '';
+      /* Groupes : modèles locaux d'abord (Ollama / LM Studio détectés),
+         puis Groq. Le regroupement suit le préfixe local-…/… posé par le
+         serveur — un jour un autre fournisseur = un autre préfixe. */
+      var groups = {};
+      var order = [];
       models.forEach(function (m) {
-        var o = document.createElement('option');
-        o.value = m.id;
-        o.textContent = m.label || m.id;
-        els.modelSelect.appendChild(o);
+        var g = 'Groq';
+        if (/^local-ollama\//.test(m.id)) g = 'Ollama (local)';
+        else if (/^local-lmstudio\//.test(m.id)) g = 'LM Studio (local)';
+        else if (/^local-/.test(m.id)) g = 'Local';
+        if (!groups[g]) { groups[g] = []; order.push(g); }
+        groups[g].push(m);
       });
+      order.forEach(function (g) {
+        if (order.length > 1) {
+          var og = document.createElement('optgroup');
+          og.label = g;
+          groups[g].forEach(function (m) {
+            var o = document.createElement('option');
+            o.value = m.id;
+            o.textContent = m.label || m.id;
+            og.appendChild(o);
+          });
+          els.modelSelect.appendChild(og);
+        } else {
+          groups[g].forEach(function (m) {
+            var o = document.createElement('option');
+            o.value = m.id;
+            o.textContent = m.label || m.id;
+            els.modelSelect.appendChild(o);
+          });
+        }
+      });
+      if (order.indexOf('Ollama (local)') !== -1 || order.indexOf('LM Studio (local)') !== -1) {
+        toast('Modèles locaux détectés (Ollama / LM Studio) — ils apparaissent en tête du sélecteur.');
+      }
       if (settings.model) {
         els.modelSelect.value = settings.model;
         if (els.modelSelect.selectedIndex === -1 && models.length) {

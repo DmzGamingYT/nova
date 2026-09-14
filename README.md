@@ -197,6 +197,21 @@ au plus direct :
 </details>
 
 <details>
+<summary><b>🧠 modèles locaux — Ollama & LM Studio</b> — cliquer pour replier</summary>
+
+Si **Ollama** (`ollama serve`) ou **LM Studio** (serveur Developer) tourne sur ta machine,
+Nova le détecte automatiquement : ses modèles apparaissent en tête du sélecteur de modèles,
+regroupés par fournisseur. Un clic, et la conversation passe **100 % en local** — aucune
+requête sortante, même la clé Groq devient inutile.
+
+- Modèles préfixés `local-ollama/…` ou `local-lmstudio/…` — le reste du cerveau de Nova
+  (mémoire, compétences, filtres) fonctionne à l'identique ;
+- Ports surchargables si le serveur tourne ailleurs : `NOVA_OLLAMA_URL`, `NOVA_LMSTUDIO_URL` ;
+- Premier appel un peu long : le modèle se charge depuis le disque.
+
+</details>
+
+<details>
 <summary><b>💬 commandes vocales</b></summary>
 
 | Commande | Effet |
@@ -304,12 +319,14 @@ node tools/capture-screenshots.js   # serveur Nova lancé + Electron dans deskto
 ## ⚙️ Personnalisation
 
 ```bash
-GROQ_API_KEY=gsk_…          # ta clé
+GROQ_API_KEY=gsk_…          # ta clé (inutile avec un modèle local)
 PORT=8787                   # port du serveur
 GROQ_MODEL=qwen/qwen3.6-27b # modèle par défaut (optionnel)
 GROQ_STT_MODEL=whisper-large-v3-turbo
 GROQ_MAX_TOKENS=900         # sort du plafond OTPM des comptes gratuits
 MAC_CONTROL=on              # "off" coupe toute exécution d'actions
+NOVA_OLLAMA_URL=http://127.0.0.1:11434   # Ollama ailleurs sur le réseau
+NOVA_LMSTUDIO_URL=http://127.0.0.1:1234  # LM Studio ailleurs sur le réseau
 ```
 
 **Résilience intégrée** : modèle retiré du compte → bascule automatique vers le meilleur
@@ -321,7 +338,7 @@ disponible (et prévenue) · plafond OTPM → retry avec moins de tokens · mod�
 ## 🧪 Tests
 
 ```bash
-npm test              # 68 tests — vrai serveur, dossier temporaire, zéro appel réseau
+npm test              # 77 tests — vrai serveur, dossier temporaire, zéro appel réseau
 npm run check:sport   # vérification manuelle du sport (vraie clé, vraie donnée)
 ```
 

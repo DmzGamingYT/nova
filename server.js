@@ -586,22 +586,30 @@ function readBody(req, limitBytes) {
   });
 }
 
-/* Requête HTTPS sortante générique vers Groq */
-function groqRequest(method, apiPath, headers, bodyStream, timeoutMs) {
+/* Requête sortante générique : Groq (HTTPS) ou serveur local (HTTP).
+   `local` = true → target est une URL complète http://127.0.0.1:PORT/... */
+function upstreamRequest(method, target, headers, bodyStream, timeoutMs, local) {
   return new Promise((resolve, reject) => {
-    const req = https.request(
-      {
-        host: GROQ_API_HOST,
-        port: 443,
-        path: apiPath,
-        method,
-        headers,
-        timeout: timeoutMs || 30000,
-      },
+    let host, port, reqPath, mod;
+    if (local) {
+      let u;
+      try { u = new URL(target); } catch (e) { reject(new Error('URL invalide : ' + target)); return; }
+      host = u.hostname;
+      port = u.port || 80;
+      reqPath = u.pathname + (u.search || '');
+      mod = http;
+    } else {
+      host = GROQ_API_HOST;
+      port = 443;
+      reqPath = target;
+      mod = https;
+    }
+    const req = mod.request(
+      { host, port, path: reqPath, method, headers, timeout: timeoutMs || 30000 },
       (res) => resolve(res)
     );
     req.on('timeout', () => {
-      req.destroy(new Error('Délai dépassé en contactant Groq'));
+      req.destroy(new Error('Délai dépassé en contactant ' + (local ? 'le serveur local' : 'Groq')));
     });
     req.on('error', reject);
     if (Buffer.isBuffer(bodyStream)) {
@@ -613,6 +621,11 @@ function groqRequest(method, apiPath, headers, bodyStream, timeoutMs) {
       req.end();
     }
   });
+}
+
+/* Requête vers l'API Groq (chemin relatif sur api.groq.com) */
+function groqRequest(method, apiPath, headers, bodyStream, timeoutMs) {
+  return upstreamRequest(method, apiPath, headers, bodyStream, timeoutMs, false);
 }
 
 /* ------------------------------------------------------------------ */
@@ -676,6 +689,84 @@ function streamDemo(res, userText) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Modèles locaux : Ollama (port 11434) et LM Studio (port 1234)       */
+/*                                                                     */
+/* Les deux exposent une API compatible OpenAI (/v1/models,            */
+/* /v1/chat/completions en SSE) : on les sonde à chaque /api/models    */
+/* et, si un serveur tourne sur la machine, ses modèles apparaissent   */
+/* préfixés « local-ollama/ » ou « local-lmstudio/ » dans le sélecteur. */
+/* ------------------------------------------------------------------ */
+
+/* URLs surchargables (tests, ou modèle servi par une autre machine du réseau) */
+const LOCAL_PROVIDERS = [
+  { id: 'ollama', label: 'Ollama', prefix: 'local-ollama', base: process.env.NOVA_OLLAMA_URL || 'http://127.0.0.1:11434' },
+  { id: 'lmstudio', label: 'LM Studio', prefix: 'local-lmstudio', base: process.env.NOVA_LMSTUDIO_URL || 'http://127.0.0.1:1234' },
+];
+
+function providerOf(modelId) {
+  const m = String(modelId || '');
+  if (m.startsWith('local-ollama/')) return 'ollama';
+  if (m.startsWith('local-lmstudio/')) return 'lmstudio';
+  return 'groq';
+}
+
+/* Id « local-ollama/llama3.2:3b » → « llama3.2:3b » (nu, pour l'API locale) */
+function localBareModel(modelId) {
+  return String(modelId).split('/').slice(1).join('/');
+}
+
+/* Liste des modèles d'un serveur local ([] si absent ou pas lancé) */
+async function localProviderModels(p) {
+  try {
+    const r = await upstreamRequest('GET', p.base + '/v1/models', null, null, 3000, true);
+    const buf = await readBodyFromResponse(r);
+    if (r.statusCode !== 200) return [];
+    const data = JSON.parse(buf.toString('utf8'));
+    return (data.data || [])
+      .filter((m) => m && typeof m.id === 'string')
+      .map((m) => ({ id: p.prefix + '/' + m.id, label: m.id, owned_by: p.label }));
+  } catch (_) {
+    return [];   // pas installé ou pas lancé : simplement absent de la liste
+  }
+}
+
+/* Ouvre le flux SSE d'un modèle local. Long délai : le premier appel
+   peut charger le modèle depuis le disque (plusieurs minutes sur une
+   machine lente). Renvoie { res } ou { err } avec un message lisible. */
+async function openLocalStream(p, modelId, payload, messages, skillNote) {
+  const sys = skillNote ? buildSystemPrompt() + '\n\n' + skillNote : buildSystemPrompt();
+  const body = JSON.stringify({
+    model: localBareModel(modelId),
+    messages: [{ role: 'system', content: sys }].concat(messages),
+    temperature: typeof payload.temperature === 'number' ? payload.temperature : 0.7,
+    stream: true,
+    /* pas de max_tokens imposé : chaque machine locale a ses propres limites */
+  });
+  try {
+    const r = await upstreamRequest('POST', p.base + '/v1/chat/completions', {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(body),
+      Accept: 'text/event-stream',
+    }, Buffer.from(body), 600000, true);
+    if (r.statusCode !== 200) {
+      const buf = await readBodyFromResponse(r);
+      let msg = extraireErreurGroq(buf);
+      if (!msg) {
+        const t = buf.toString('utf8').slice(0, 200).trim();
+        msg = t || 'HTTP ' + r.statusCode;
+      }
+      return { err: p.label + ' (' + localBareModel(modelId) + ') a refusé la requête : ' + msg };
+    }
+    return { res: r };
+  } catch (e) {
+    return {
+      err: 'Impossible de joindre ' + p.label + ' sur ' + p.base + ' (' + e.message + '). ' +
+           'Vérifie que le serveur est lancé (« ollama serve » ou le bouton Developer de LM Studio).',
+    };
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* Routes API                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -723,11 +814,12 @@ async function handleStatus(res) {
 async function handleModels(res) {
   const key = getApiKey();
   if (!key) {
+    const locals = (await Promise.all(LOCAL_PROVIDERS.map(localProviderModels))).flat();
     sendJson(res, 200, {
-      models: [
+      models: locals.concat([
         { id: DEFAULT_MODEL, label: 'GPT-OSS 120B (recommandé)', owned_by: 'openai' },
         { id: 'qwen/qwen3.6-27b', label: 'Qwen 3.6 27B (rapide)', owned_by: 'qwen' },
-      ],
+      ]),
     });
     return;
   }
@@ -759,6 +851,8 @@ async function handleModels(res) {
     if (!chat.length) {
       chat.push({ id: DEFAULT_MODEL, label: DEFAULT_MODEL + ' (par défaut)', owned_by: 'meta' });
     }
+    const locals = (await Promise.all(LOCAL_PROVIDERS.map(localProviderModels))).flat();
+    if (locals.length) chat.unshift(...locals);
     sendJson(res, 200, { models: chat });
   } catch (e) {
     sendJson(res, 502, { error: 'Impossible de joindre Groq : ' + e.message });
@@ -820,13 +914,27 @@ async function handleChat(req, res) {
     saveProfileNow();
   }
 
+  const model = typeof payload.model === 'string' && payload.model ? payload.model : (process.env.GROQ_MODEL || DEFAULT_MODEL);
+  const provider = providerOf(model);
+
+  /* Modèle local (Ollama / LM Studio) : ouvrir le flux et relayer, sans
+     passer par le cheminement Groq (clé, repli de modèle, quotas). */
+  if (provider !== 'groq') {
+    const p = LOCAL_PROVIDERS.find((x) => x.id === provider);
+    const up = await openLocalStream(p, model, payload, messages, skillNote);
+    if (up.err) {
+      sendJson(res, 502, { error: up.err });
+      return;
+    }
+    relayOpenAiStream(req, res, up.res, session, profile, skillInfo, lastUserText, null);
+    return;
+  }
+
   const key = requestKey(req);
   if (!key) {
     streamDemo(res, lastUserText);
     return;
   }
-
-  const model = typeof payload.model === 'string' && payload.model ? payload.model : (process.env.GROQ_MODEL || DEFAULT_MODEL);
 
   const HALF = Math.max(256, Math.floor(MAX_TOKENS / 2));
   const HALF2 = Math.max(200, Math.floor(HALF / 2));
@@ -929,6 +1037,13 @@ async function handleChat(req, res) {
     return;
   }
 
+  relayOpenAiStream(req, res, upstream, session, profile, skillInfo, lastUserText, switchedModel);
+}
+
+/* Relais commun Groq / local : rediffuse le SSE OpenAI au client en
+   filtrant <think>…</think> et les lignes ACTION, puis archive le tour
+   dans la mémoire persistante. Identique quel que soit le fournisseur. */
+function relayOpenAiStream(req, res, upstream, session, profile, skillInfo, lastUserText, switchedModel) {
   // Filtre streaming qui retire les blocs <think>…</think>
   // (raisonnement visible de certains modèles type Qwen) — même coupés entre chunks.
   function makeThinkFilter(emit) {
