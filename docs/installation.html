@@ -38,6 +38,14 @@
   .dl-chip svg{width:14px;height:14px;stroke:var(--accent2)}
   .dl-chip b{color:var(--txt);font-weight:600}
   .dl-chip.warn svg{stroke:var(--amber)}
+  .dl-chip .hash{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:var(--txt);letter-spacing:.02em}
+  .dl-chip .copy{
+    display:inline-flex;align-items:center;justify-content:center;
+    background:none;border:none;padding:0;margin-left:2px;cursor:pointer;color:var(--accent2);
+  }
+  .dl-chip .copy svg{width:13px;height:13px;stroke:var(--accent2)}
+  .dl-chip .copy:hover svg{stroke:var(--txt)}
+  .dl-chip .copy.ok svg{stroke:#8fe6ad}
   .dl-note{margin-top:14px;font-size:14px;color:var(--muted)}
   .dl-note a{color:var(--accent2)}
   .dl-note b{color:var(--txt)}
@@ -80,6 +88,13 @@
       <span class="dl-chip warn" title="Mac à puce Apple Silicon (M1 à M4)">
         <svg viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><path d="M16.7 12.9c0-2 1.6-3 1.7-3.1-.9-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7-.6 0-1.6-.7-2.6-.7-1.3 0-2.6.8-3.3 2-1.4 2.4-.4 6 1 8 .7 1 1.5 2.1 2.5 2 1 0 1.4-.6 2.6-.6 1.2 0 1.6.6 2.6.6 1.1 0 1.8-1 2.4-2 .8-1.1 1.1-2.2 1.1-2.3 0 0-2.1-.8-2.1-3zM14.6 6.6c.5-.7.9-1.6.8-2.6-.8 0-1.8.6-2.3 1.2-.5.6-1 1.6-.8 2.5.9.1 1.8-.4 2.3-1.1z"/></svg>
         Apple Silicon requis
+      </span>
+      <span class="dl-chip" id="dlSumChip" hidden title="Empreinte SHA-256 du DMG — clique pour la copier">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+        SHA-256 <span class="hash" id="dlSum">…</span>
+        <button class="copy" id="dlSumCopy" aria-label="Copier le checksum complet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>
+        </button>
       </span>
     </div>
 
@@ -190,6 +205,12 @@
         size.textContent = fmtSize(dmg.size) + ' · DMG';
         sizeChip.hidden = false;
         sub.textContent = 'dernière version — téléchargement direct';
+        /* checksum : extrait directement du corps de la release — les
+           notes générées par la CI embarquent les SHA-256, et le corps
+           arrive avec releases/latest (déjà CORS-compatible, sans requête
+           supplémentaire ; les liens d'assets github.com, eux, refusent
+           le CORS navigateur). */
+        loadChecksum(rel.body || '', dmg.name);
       } else {
         sub.textContent = 'voir les assets de la release ' + (rel.tag_name || '');
       }
@@ -202,6 +223,27 @@
       sub.textContent = 'voir la dernière version sur GitHub';
       btn.classList.remove('loading');
     });
+
+  /* SHA-256 du DMG, extrait du corps des notes de release (bloc
+     « Checksums SHA-256 » généré par la CI). Absent (vieille release)
+     → la pastille reste cachée. */
+  function loadChecksum(body, dmgName){
+    const m = body.match(new RegExp(
+      '([0-9a-f]{64})\\s+\\*?' + dmgName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*$', 'im'));
+    if (!m) return;
+    const sha = m[1];
+    const chip = document.getElementById('dlSumChip');
+    document.getElementById('dlSum').textContent = sha.slice(0, 8) + '…' + sha.slice(-6);
+    chip.title = 'SHA-256 complet : ' + sha + ' — clique pour copier';
+    chip.hidden = false;
+    const copyBtn = document.getElementById('dlSumCopy');
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(sha).then(() => {
+        copyBtn.classList.add('ok');
+        setTimeout(() => copyBtn.classList.remove('ok'), 1600);
+      }).catch(() => {});
+    });
+  }
 })();
 </script>
 </body>
