@@ -8,7 +8,147 @@
 <meta name="description" content="Toutes les versions de Nova : notes de release générées par la CI, changelog, téléchargements et checksums SHA-256."/>
 <link rel="stylesheet" href="style.css"/>
 <style>
-  .rel-wrap{max-width:860px;margin:0 auto}
+  .rel-wrap{max-width:900px;margin:0 auto}
+
+  /* ── aurore d'entête ── */
+  .rel-aurora{position:absolute;inset:0 0 auto 0;height:420px;overflow:hidden;pointer-events:none;z-index:-1}
+  .rel-aurora i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5}
+  .rel-aurora i:nth-child(1){width:520px;height:520px;left:12%;top:-220px;background:radial-gradient(circle,rgba(124,108,255,.5),transparent 65%)}
+  .rel-aurora i:nth-child(2){width:420px;height:420px;right:8%;top:-160px;background:radial-gradient(circle,rgba(47,191,155,.32),transparent 65%)}
+  html[data-theme="light"] .rel-aurora i{opacity:.35}
+
+  /* ── bandeau de stats ── */
+  .rel-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0 0 30px}
+  .stat{background:var(--panel);border:1px solid var(--panel-brd);border-radius:18px;padding:18px 20px 16px;
+    text-align:center;position:relative;overflow:hidden;opacity:0;transform:translateY(12px);
+    transition:opacity .55s ease,transform .55s ease}
+  .stat.in{opacity:1;transform:none}
+  .stat::after{content:'';position:absolute;inset:-40% 20% auto;height:80px;border-radius:50%;
+    background:radial-gradient(closest-side,var(--accent-soft),transparent);pointer-events:none}
+  .stat b{display:block;font-size:27px;font-weight:800;letter-spacing:-.02em;color:var(--txt);
+    font-variant-numeric:tabular-nums;line-height:1.1}
+  .stat span{display:block;margin-top:5px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .stat:nth-child(2) b{background:linear-gradient(120deg,var(--accent2),var(--teal));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* ── carte vedette : dernière release ── */
+  .featured{position:relative;border-radius:24px;padding:2px;margin-bottom:44px;
+    background:linear-gradient(140deg,rgba(124,108,255,.65),rgba(47,191,155,.4) 55%,rgba(124,108,255,.15));
+    background-size:200% 200%;animation:feat-border 7s ease infinite;opacity:0;transform:translateY(16px);
+    transition:opacity .6s ease,transform .6s ease}
+  .featured.in{opacity:1;transform:none}
+  @keyframes feat-border{0%,100%{background-position:0% 0%}50%{background-position:100% 100%}}
+  .featured-in{background:var(--bg2);border-radius:22px;padding:30px 32px;position:relative;overflow:hidden}
+  .featured-in::before{content:'';position:absolute;top:-120px;right:-80px;width:340px;height:340px;border-radius:50%;
+    background:radial-gradient(circle,rgba(124,108,255,.16),transparent 65%);pointer-events:none}
+  .feat-glow{position:absolute;top:-70px;left:50%;transform:translateX(-50%);width:420px;height:150px;border-radius:50%;
+    background:radial-gradient(closest-side,rgba(124,108,255,.28),transparent);filter:blur(30px);
+    animation:feat-glow 4.5s ease-in-out infinite;pointer-events:none}
+  @keyframes feat-glow{0%,100%{opacity:.55}50%{opacity:1}}
+  .feat-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:relative}
+  .feat-tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:800;font-size:30px;letter-spacing:-.01em;
+    background:linear-gradient(120deg,#fff,var(--accent2) 70%);-webkit-background-clip:text;background-clip:text;color:transparent}
+  html[data-theme="light"] .feat-tag{background:linear-gradient(120deg,var(--txt),var(--accent-deep));
+    -webkit-background-clip:text;background-clip:text}
+  .rel-latest{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.06em;
+    color:#6fe0c3;background:rgba(47,191,155,.14);border-radius:999px;padding:5px 12px;
+    animation:latest-pulse 2.4s ease-in-out infinite}
+  @keyframes latest-pulse{0%,100%{box-shadow:0 0 0 0 rgba(47,191,155,.35)}55%{box-shadow:0 0 0 7px rgba(47,191,155,0)}}
+  .rel-latest svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+  .feat-date{color:var(--muted);font-size:13.5px}
+  .feat-date svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;vertical-align:-1px;margin-right:4px}
+  .feat-dl{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 4px;position:relative}
+  .feat-dl a{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-size:13.5px;font-weight:600;
+    border-radius:999px;padding:10px 18px;transition:all .18s}
+  .feat-dl a svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .feat-dl a small{font-weight:500;opacity:.75;font-variant-numeric:tabular-nums}
+  .feat-dl .dl-main{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+    box-shadow:0 8px 26px rgba(124,108,255,.38)}
+  .feat-dl .dl-main:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(124,108,255,.5)}
+  .feat-dl .dl-alt{color:#fff;background:linear-gradient(135deg,#3f7cf6,#2b5cd8);box-shadow:0 8px 26px rgba(63,124,246,.32)}
+  .feat-dl .dl-alt:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(63,124,246,.45)}
+  .feat-dl .dl-ghost{color:var(--accent2);border:1px solid var(--line-strong);background:var(--white-soft);font-weight:500}
+  .feat-dl .dl-ghost:hover{background:var(--white-hover);border-color:var(--accent-line)}
+  .feat-dl .dl-gh{color:var(--muted);border:1px solid var(--panel-brd);background:transparent;font-weight:500}
+  .feat-dl .dl-gh:hover{color:var(--txt);border-color:var(--line-strong)}
+
+  /* ── titre de section timeline ── */
+  .tl-head{display:flex;align-items:baseline;gap:14px;margin:0 0 20px;flex-wrap:wrap}
+  .tl-head h2{margin:0;font-size:21px;font-weight:800;letter-spacing:-.01em}
+  .tl-toggle{margin-left:auto;display:flex;gap:8px}
+  .tl-toggle button{font:inherit;font-size:12.5px;color:var(--muted);background:var(--white-soft);
+    border:1px solid var(--panel-brd);border-radius:999px;padding:6px 14px;cursor:pointer;transition:all .18s}
+  .tl-toggle button:hover{color:var(--txt);border-color:var(--accent-line);background:var(--accent-soft)}
+
+  /* ── timeline ── */
+  .timeline{position:relative;padding-left:34px}
+  .timeline::before{content:'';position:absolute;left:10px;top:8px;bottom:8px;width:2px;border-radius:2px;
+    background:linear-gradient(180deg,var(--accent-line),rgba(124,108,255,.08))}
+  .titem{position:relative;margin-bottom:18px;opacity:0;transform:translateX(14px);
+    transition:opacity .5s ease,transform .5s ease}
+  .titem.in{opacity:1;transform:none}
+  .tnode{position:absolute;left:-34px;top:20px;width:22px;height:22px;border-radius:50%;
+    background:var(--bg2);border:2px solid var(--accent-line);display:flex;align-items:center;justify-content:center}
+  .tnode::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 10px 2px rgba(124,108,255,.5)}
+  .titem.is-major .tnode{border-color:rgba(124,108,255,.8)}
+  .titem.is-minor .tnode{border-color:rgba(79,124,255,.65)}
+  .titem.is-minor .tnode::after{background:#4f7cff;box-shadow:0 0 10px 2px rgba(79,124,255,.45)}
+  .titem.is-patch .tnode{border-color:rgba(47,191,155,.55)}
+  .titem.is-patch .tnode::after{background:var(--teal);box-shadow:0 0 10px 2px rgba(47,191,155,.4)}
+  .tcard{background:var(--panel);border:1px solid var(--panel-brd);border-radius:18px;overflow:hidden;
+    transition:border-color .2s,transform .2s,box-shadow .2s}
+  .tcard:hover{border-color:var(--accent-line);transform:translateY(-1px);box-shadow:var(--shadow-card)}
+  .trow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 20px;cursor:pointer;user-select:none}
+  .trow .rel-tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:16.5px;color:var(--txt)}
+  .rel-kind{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.07em;
+    text-transform:uppercase;border-radius:999px;padding:3.5px 10px}
+  .rel-kind svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .kind-major{color:#c9c0ff;background:rgba(124,108,255,.16)}
+  .kind-minor{color:#9db9ff;background:rgba(79,124,255,.14)}
+  .kind-patch{color:#6fe0c3;background:rgba(47,191,155,.13)}
+  html[data-theme="light"] .kind-major{color:var(--accent-deep);background:rgba(124,108,255,.12)}
+  html[data-theme="light"] .kind-minor{color:#2b5cd8;background:rgba(79,124,255,.1)}
+  html[data-theme="light"] .kind-patch{color:#0c7a5e;background:rgba(47,191,155,.12)}
+  .tdate{color:var(--muted);font-size:12.5px}
+  .tchips{margin-left:auto;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .tchip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--accent2);
+    border:1px solid var(--panel-brd);border-radius:999px;padding:4px 10px;text-decoration:none;transition:all .16s}
+  .tchip:hover{border-color:var(--accent-line);background:var(--accent-soft)}
+  .tchip svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .tchip small{opacity:.7;font-variant-numeric:tabular-nums}
+  .tchev{display:inline-flex;width:24px;height:24px;align-items:center;justify-content:center;border-radius:50%;
+    color:var(--muted);transition:transform .3s cubic-bezier(.22,1,.36,1),color .2s,background .2s}
+  .tchev svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .titem.open .tchev{transform:rotate(180deg);color:var(--accent2);background:var(--accent-soft)}
+  .tnotes{max-height:0;overflow:hidden;transition:max-height .38s cubic-bezier(.22,1,.36,1)}
+  .tnotes-in{padding:2px 22px 18px;border-top:1px solid var(--line);margin-top:-1px}
+
+  /* ── notes markdown rendues (commun featured + timeline) ── */
+  .rel-notes{margin-top:14px;color:var(--txt);font-size:14px;line-height:1.62}
+  .titem .rel-notes{margin-top:0}
+  .rel-notes h2{font-size:14.5px;letter-spacing:.02em;color:var(--accent2);margin:18px 0 8px}
+  .rel-notes h2:first-child{margin-top:0}
+  .rel-notes ul{margin:8px 0;padding-left:4px;list-style:none}
+  .rel-notes li{padding:3px 0 3px 20px;position:relative}
+  .rel-notes li::before{content:'';position:absolute;left:4px;top:11px;width:6px;height:6px;border-radius:50%;
+    background:var(--accent);opacity:.75;box-shadow:0 0 8px rgba(124,108,255,.45)}
+  .rel-notes code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
+    background:rgba(124,108,255,.12);border-radius:5px;padding:1.5px 6px;color:#c9c0ff}
+  .rel-notes pre{background:rgba(0,0,0,.35);border:1px solid var(--panel-brd);border-radius:12px;
+    padding:14px 16px;overflow-x:auto;margin:10px 0}
+  .rel-notes pre code{background:none;padding:0;color:#9fe8cf;font-size:12px;line-height:1.5}
+  .rel-notes table{width:100%;border-collapse:separate;border-spacing:0;margin:10px 0;
+    border:1px solid var(--panel-brd);border-radius:12px;overflow:hidden;font-size:13px}
+  .rel-notes th{text-align:left;background:rgba(255,255,255,.04);color:var(--muted);
+    font-size:11px;letter-spacing:.07em;text-transform:uppercase;padding:8px 13px}
+  .rel-notes td{padding:8px 13px;border-top:1px solid rgba(255,255,255,.06)}
+  .rel-notes blockquote{margin:14px 0 0;padding:10px 16px;border-left:3px solid var(--amber);
+    background:rgba(245,168,60,.08);border-radius:0 10px 10px 0;color:var(--muted);font-size:13px}
+  .rel-notes blockquote p{margin:0}
+  .rel-notes a{color:var(--accent2)}
+  html[data-theme="light"] .rel-notes code{color:var(--accent-deep)}
+  html[data-theme="light"] .rel-notes td{border-top-color:rgba(30,20,70,.08)}
 
   /* ── états chargement / erreur ── */
   .rel-state{display:none;text-align:center;color:var(--muted);padding:60px 0}
@@ -19,65 +159,31 @@
   .rel-state.spinner svg{animation:spin 1.1s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ── une release ── */
-  .release{background:var(--panel);border:1px solid var(--panel-brd);border-radius:18px;
-    padding:26px 28px;margin-bottom:22px;opacity:0;transform:translateY(14px);
-    transition:opacity .5s ease, transform .5s ease}
-  .release.in{opacity:1;transform:none}
-  .rel-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:4px}
-  .rel-tag{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:19px;color:var(--txt)}
-  .rel-latest{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.06em;
-    color:#6fe0c3;background:rgba(47,191,155,.14);border-radius:999px;padding:4px 11px}
-  .rel-latest svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
-  .rel-date{color:var(--muted);font-size:13px}
-  .rel-actions{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
-  .rel-actions a{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--accent2);
-    text-decoration:none;border:1px solid var(--panel-brd);border-radius:999px;padding:6px 13px;transition:all .18s}
-  .rel-actions a:hover{border-color:var(--accent);color:#fff;background:rgba(124,108,255,.14)}
-  .rel-actions svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-
-  /* ── notes markdown rendues ── */
-  .rel-notes{margin-top:14px;color:var(--txt);font-size:14.5px;line-height:1.62}
-  .rel-notes h2{font-size:15px;letter-spacing:.02em;color:var(--accent2);margin:20px 0 8px}
-  .rel-notes h2:first-child{margin-top:0}
-  .rel-notes ul{margin:8px 0;padding-left:4px;list-style:none}
-  .rel-notes li{padding:3px 0 3px 20px;position:relative}
-  .rel-notes li::before{content:'';position:absolute;left:4px;top:12px;width:6px;height:6px;border-radius:50%;
-    background:var(--accent);opacity:.75}
-  .rel-notes code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;
-    background:rgba(124,108,255,.12);border-radius:5px;padding:1.5px 6px;color:#c9c0ff}
-  .rel-notes pre{background:rgba(0,0,0,.35);border:1px solid var(--panel-brd);border-radius:12px;
-    padding:14px 16px;overflow-x:auto;margin:10px 0}
-  .rel-notes pre code{background:none;padding:0;color:#9fe8cf;font-size:12px;line-height:1.5}
-  .rel-notes table{width:100%;border-collapse:separate;border-spacing:0;margin:10px 0;
-    border:1px solid var(--panel-brd);border-radius:12px;overflow:hidden;font-size:13.5px}
-  .rel-notes th{text-align:left;background:rgba(255,255,255,.04);color:var(--muted);
-    font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;padding:9px 14px}
-  .rel-notes td{padding:9px 14px;border-top:1px solid rgba(255,255,255,.06)}
-  .rel-notes blockquote{margin:14px 0 0;padding:10px 16px;border-left:3px solid var(--amber);
-    background:rgba(245,168,60,.08);border-radius:0 10px 10px 0;color:var(--muted);font-size:13.5px}
-  .rel-notes blockquote p{margin:0}
-  .rel-notes a{color:var(--accent2)}
-
-  /* ── pied de page : toutes les versions ── */
   .rel-more{text-align:center;margin:34px 0 10px;color:var(--muted);font-size:14px}
   .rel-more a{color:var(--accent2)}
 
-  /* thème clair : code inline violet clair → accent plus sombre,
-     pré (checksums) déjà lisible via les vars du terminal */
-  html[data-theme="light"] .rel-notes code{color:var(--accent2)}
-
   @media (max-width:640px){
-    .release{padding:20px 18px}
-    .rel-actions{margin-left:0}
+    .rel-stats{grid-template-columns:1fr;gap:10px}
+    .stat{padding:14px 16px}
+    .featured-in{padding:22px 18px}
+    .feat-tag{font-size:24px}
+    .feat-dl a{padding:9px 15px;font-size:13px}
+    .timeline{padding-left:26px}
+    .tnode{left:-26px}
+    .tchips{margin-left:0}
+    .rel-notes table{display:block;overflow-x:auto}
   }
   @media (prefers-reduced-motion: reduce){
-    .release{transition:none;opacity:1;transform:none}
+    .featured,.feat-border,.feat-glow,.rel-latest{animation:none}
+    .stat,.featured,.titem{transition:none;opacity:1;transform:none}
+    .tnotes{transition:none}
     .rel-state.spinner svg{animation:none}
   }
 </style>
 </head>
 <body data-page="nouveautes">
+
+<div class="rel-aurora" aria-hidden="true"><i></i><i></i></div>
 
 <header class="page-head center" style="padding-top:calc(var(--nav-h) + 52px);max-width:1200px;margin:0 auto">
   <h1 class="sec-title">Nouveautés</h1>
@@ -103,6 +209,32 @@
     <p><b>Aucune version publiée pour l'instant.</b></p>
   </div>
 
+  <!-- carte vedette (dernière release, remplie par le script) -->
+  <section id="featured" class="featured" hidden>
+    <div class="featured-in">
+      <span class="feat-glow" aria-hidden="true"></span>
+      <div class="feat-head">
+        <span class="feat-tag" id="featTag"></span>
+        <span class="rel-latest"><i data-ico="sparkle"></i>dernière</span>
+        <span class="feat-date"><i data-ico="clock"></i><span id="featDate"></span></span>
+      </div>
+      <div class="feat-dl" id="featDl"></div>
+      <div class="rel-notes" id="featNotes"></div>
+    </div>
+  </section>
+
+  <!-- timeline des versions précédentes -->
+  <section id="timelineSec" hidden>
+    <div class="tl-head">
+      <h2>Versions précédentes</h2>
+      <div class="tl-toggle">
+        <button type="button" id="tlExpand">Tout déplier</button>
+        <button type="button" id="tlCollapse">Tout replier</button>
+      </div>
+    </div>
+    <div class="timeline" id="timeline"></div>
+  </section>
+
   <div id="relList"></div>
 
   <p class="rel-more">Historique complet sur
@@ -115,15 +247,16 @@
 <script src="site.js"></script>
 <script>
 /* ============================================================
-   Nouveautés — rendu des releases GitHub
+   Nouveautés — rendu visuel des releases GitHub
    API : https://api.github.com/repos/DmzGamingYT/nova/releases
-   Le corps de chaque release (release-notes.md généré par la CI,
-   poussé via body_path / gh release edit) est rendu par un mini
-   parser markdown : titres h2, listes, code, tableaux, citations.
+   Dernière version → carte vedette (téléchargements + notes) ;
+   les précédentes → timeline avec nœuds colorés par type de
+   version (majeure / évolutions / correctifs) et notes pliables.
    ============================================================ */
 (function(){
   const API = 'https://api.github.com/repos/DmzGamingYT/nova/releases?per_page=30';
-  const list = document.getElementById('relList');
+  const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   const elLoading = document.getElementById('relLoading');
   const elError = document.getElementById('relError');
   const elEmpty = document.getElementById('relEmpty');
@@ -139,6 +272,8 @@
       return new Date(iso).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
     } catch(_){ return ''; }
   }
+
+  function fmtN(n){ try { return Number(n||0).toLocaleString('fr-FR'); } catch(_){ return String(n||0); } }
 
   /* Mini rendu markdown — sûr (tout est échappé d'abord), limité volontairement
      au sous-ensemble produit par tools/gen-release-notes.sh + GitHub. */
@@ -207,33 +342,123 @@
     return html;
   }
 
-  function assetUrl(rel, ext){
-    const a = (rel.assets || []).find(a => a.name && a.name.toLowerCase().endsWith(ext));
-    return a ? a.browser_download_url : null;
+  function asset(rel, ext){
+    return (rel.assets || []).find(a => a.name && a.name.toLowerCase().endsWith(ext)) || null;
   }
+  function dlCount(rel, ext){ const a = asset(rel, ext); return a ? a.download_count : 0; }
 
-  function releaseCard(rel, isLatest){
-    const card = document.createElement('article');
-    card.className = 'release';
-    const dmg = assetUrl(rel, '.dmg');
-    let actions = '';
-    if (dmg){
-      actions += '<a class="dl" href="' + esc(dmg) + '"><i data-ico="download"></i>Télécharger le DMG</a>';
+  /* type de version : majeure (X.0.0), évolutions (X.Y.0), correctifs (X.Y.z, z>0) */
+  function kindOf(tag){
+    const m = String(tag||'').replace(/^v/i,'').match(/(\d+)\.(\d+)\.(\d+)/);
+    if (!m) return 'minor';
+    if (m[2] === '0' && m[3] === '0') return 'major';
+    if (m[3] !== '0') return 'patch';
+    return 'minor';
+  }
+  const KIND = {
+    major: { cls:'kind-major', ico:'sparkle', label:'version majeure' },
+    minor: { cls:'kind-minor', ico:'bolt',    label:'évolutions' },
+    patch: { cls:'kind-patch', ico:'shield',  label:'correctifs' },
+  };
+
+  /* compteur animé (stats de tête) */
+  function countUp(node, target){
+    if (REDUCED){ node.textContent = fmtN(target); return; }
+    const t0 = performance.now(), dur = 950;
+    function step(t){
+      const p = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+      node.textContent = fmtN(Math.round(target * e));
+      if (p < 1) requestAnimationFrame(step);
     }
-    actions += '<a href="' + esc(rel.html_url) + '" target="_blank" rel="noopener"><i data-ico="github"></i>Sur GitHub</a>';
-
-    card.innerHTML =
-      '<div class="rel-head">' +
-        '<span class="rel-tag">' + esc(rel.tag_name || '') + '</span>' +
-        (isLatest ? '<span class="rel-latest"><i data-ico="sparkle"></i>dernière</span>' : '') +
-        '<span class="rel-date">' + esc(fmtDate(rel.published_at)) + '</span>' +
-        '<span class="rel-actions">' + actions + '</span>' +
-      '</div>' +
-      '<div class="rel-notes">' + renderMd(rel.body || '') + '</div>';
-
-    if (window.NovaIcons) NovaIcons.hydrate(card);
-    return card;
+    requestAnimationFrame(step);
   }
+
+  function chipHtml(rel, ext, label, ico, cls){
+    const a = asset(rel, ext);
+    if (!a) return '';
+    return '<a class="' + (cls||'tchip') + '" href="' + esc(a.browser_download_url) + '">' +
+      '<i data-ico="' + ico + '"></i>' + label +
+      '<small>' + fmtN(a.download_count) + '</small></a>';
+  }
+
+  /* ── carte vedette : dernière release ── */
+  function renderFeatured(rel){
+    const sec = document.getElementById('featured');
+    document.getElementById('featTag').textContent = rel.tag_name || '';
+    document.getElementById('featDate').textContent = fmtDate(rel.published_at);
+    const dl = document.getElementById('featDl');
+    let h = '';
+    if (asset(rel, '.dmg')) h += chipHtml(rel, '.dmg', 'Télécharger pour macOS', 'apple', 'dl-main');
+    if (asset(rel, '.exe')) h += chipHtml(rel, '.exe', 'Télécharger pour Windows', 'windows', 'dl-alt');
+    if (asset(rel, '.txt')) h += chipHtml(rel, '.txt', 'Checksums SHA-256', 'shield', 'dl-ghost');
+    h += '<a class="dl-gh" href="' + esc(rel.html_url) + '" target="_blank" rel="noopener">' +
+         '<i data-ico="github"></i>Sur GitHub</a>';
+    dl.innerHTML = h;
+    document.getElementById('featNotes').innerHTML = renderMd(rel.body || '');
+    sec.hidden = false;
+    if (window.NovaIcons) NovaIcons.hydrate(sec);
+  }
+
+  /* ── timeline des versions précédentes ── */
+  function setOpen(item, open){
+    const notes = item.querySelector('.tnotes');
+    item.classList.toggle('open', open);
+    notes.style.maxHeight = open ? notes.scrollHeight + 'px' : '0px';
+  }
+
+  function renderTimeline(older){
+    const sec = document.getElementById('timelineSec');
+    const tl = document.getElementById('timeline');
+    tl.innerHTML = '';
+    older.forEach(rel => {
+      const kind = kindOf(rel.tag_name), k = KIND[kind];
+      const item = document.createElement('article');
+      item.className = 'titem is-' + kind;
+      let chips = '';
+      if (asset(rel, '.dmg')) chips += chipHtml(rel, '.dmg', 'DMG', 'apple');
+      if (asset(rel, '.exe')) chips += chipHtml(rel, '.exe', 'EXE', 'windows');
+      chips += '<a class="tchip" href="' + esc(rel.html_url) + '" target="_blank" rel="noopener">' +
+               '<i data-ico="github"></i>GitHub</a>' +
+               '<span class="tchev"><i data-ico="arrow"></i></span>';
+      item.innerHTML =
+        '<span class="tnode" aria-hidden="true"></span>' +
+        '<div class="tcard">' +
+          '<div class="trow" role="button" tabindex="0" aria-expanded="false">' +
+            '<span class="rel-tag">' + esc(rel.tag_name || '') + '</span>' +
+            '<span class="rel-kind ' + k.cls + '"><i data-ico="' + k.ico + '"></i>' + k.label + '</span>' +
+            '<span class="tdate">' + esc(fmtDate(rel.published_at)) + '</span>' +
+            '<span class="tchips">' + chips + '</span>' +
+          '</div>' +
+          '<div class="tnotes"><div class="tnotes-in"><div class="rel-notes">' + renderMd(rel.body || '') + '</div></div></div>' +
+        '</div>';
+      const row = item.querySelector('.trow');
+      row.addEventListener('click', (e) => {
+        if (e.target.closest('a')) return; /* les liens restent des liens */
+        setOpen(item, !item.classList.contains('open'));
+      });
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); row.click(); }
+      });
+      tl.appendChild(item);
+      if (window.NovaIcons) NovaIcons.hydrate(item);
+    });
+    sec.hidden = false;
+
+    /* reveal au scroll */
+    if ('IntersectionObserver' in window && !REDUCED){
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => { if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+      }, { threshold: 0.12 });
+      tl.querySelectorAll('.titem').forEach(n => io.observe(n));
+    } else {
+      tl.querySelectorAll('.titem').forEach(n => n.classList.add('in'));
+    }
+  }
+
+  document.getElementById('tlExpand').addEventListener('click', () =>
+    document.querySelectorAll('#timeline .titem').forEach(n => setOpen(n, true)));
+  document.getElementById('tlCollapse').addEventListener('click', () =>
+    document.querySelectorAll('#timeline .titem').forEach(n => setOpen(n, false)));
 
   fetch(API, { headers: { 'Accept': 'application/vnd.github+json' } })
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -241,14 +466,31 @@
       const published = (Array.isArray(rels) ? rels : []).filter(r => !r.draft);
       if (!published.length){ show(elEmpty); return; }
       show(null);
-      published.forEach((rel, idx) => {
-        const card = releaseCard(rel, idx === 0);
-        list.appendChild(card);
-      });
-      /* reveal en cascade */
+
+      /* stats de tête : versions, téléchargements cumulés, dernière version */
+      const totalDl = published.reduce((s, r) => s + (r.assets || []).reduce((x, a) => x + (a.download_count || 0), 0), 0);
+      const stats = document.createElement('div');
+      stats.className = 'rel-stats';
+      stats.innerHTML =
+        '<div class="stat"><b id="stReleases">0</b><span>versions publiées</span></div>' +
+        '<div class="stat"><b>' + esc(published[0].tag_name || '') + '</b><span>dernière version</span></div>' +
+        '<div class="stat"><b id="stDl">0</b><span>téléchargements</span></div>';
+      document.querySelector('.rel-wrap').insertBefore(stats, elLoading);
+
+      renderFeatured(published[0]);
+      renderTimeline(published.slice(1));
+
+      /* animations d'entrée */
       requestAnimationFrame(() => {
-        const cards = list.querySelectorAll('.release');
-        cards.forEach((c, i) => setTimeout(() => c.classList.add('in'), 60 * i));
+        if (!REDUCED){
+          stats.querySelectorAll('.stat').forEach((s, i) => setTimeout(() => s.classList.add('in'), 90 * i));
+          setTimeout(() => document.getElementById('featured').classList.add('in'), 240);
+        } else {
+          stats.querySelectorAll('.stat').forEach(s => s.classList.add('in'));
+          document.getElementById('featured').classList.add('in');
+        }
+        countUp(document.getElementById('stReleases'), published.length);
+        countUp(document.getElementById('stDl'), totalDl);
       });
     })
     .catch(() => show(elError));
