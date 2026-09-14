@@ -36,6 +36,16 @@ jobs:
     name: DMG macOS (arm64)
     runs-on: macos-latest
     needs: test
+    outputs:
+      signed: ${{ steps.flag.outputs.signed }}
+    env:
+      # Identité de signature (ex. "Developer ID Application: Prénom Nom (TEAMID)").
+      # Absente → build ad-hoc non signé (aucune erreur, artefact téléchargeable).
+      CSC_NAME: ${{ secrets.CSC_NAME }}
+      # Credentials de notarisation (App Store Connect / notarytool).
+      APPLE_ID: ${{ secrets.APPLE_ID }}
+      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
     steps:
       - uses: actions/checkout@v4
 
@@ -43,24 +53,80 @@ jobs:
         with:
           node-version: 20
 
+      - id: flag
+        name: Detect signing mode
+        run: |
+          if [ -n "$CSC_NAME" ]; then
+            echo "signed=true"  >> "$GITHUB_OUTPUT"
+            echo "🔐 Signature Developer ID + notarisation activées (CSC_NAME)"
+          else
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+            echo "🔓 Secret CSC_NAME absent — build ad-hoc non signé"
+            # Désactive l'auto-découverte de certificat : sans ça,
+            # electron-builder peut échouer s'il cherche une identité.
+            echo "CSC_IDENTITY_AUTO_DISCOVERY=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: Import Developer ID certificate
+        if: env.CSC_NAME != ''
+        env:
+          CERT_P12: ${{ secrets.MACOS_CERTIFICATE }}          # .p12 exporté, encodé base64
+          CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PWD }} # mot de passe du .p12
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD || 'nova-ci-keychain' }}
+        run: |
+          TMPDIR_CERT=$(mktemp -d)
+          KEYCHAIN_PATH="$RUNNER_TEMP/nova-build.keychain-db"
+
+          echo "$CERT_P12" | base64 --decode > "$TMPDIR_CERT/cert.p12"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$TMPDIR_CERT/cert.p12" \
+            -P "$CERT_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychain -d user -s "$KEYCHAIN_PATH" \
+            $(security list-keychains -d user | tr -d '"')
+
+          rm -rf "$TMPDIR_CERT"
+
       - name: Install desktop dependencies
         working-directory: desktop
         run: npm ci --no-audit --no-fund
 
-      - name: Build DMG (Apple Silicon)
+      # Tags v* → build + signature + notarisation + publication des
+      # artefacts (DMG, ZIP, latest-mac.yml) sur un brouillon de release
+      # GitHub : c'est ce que lit electron-updater. Publie le brouillon
+      # depuis la page Releases pour livrer la mise à jour à tout le monde.
+      - name: Build, sign & notarize
         working-directory: desktop
-        run: npm run dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} # publication electron-updater (tags)
+        run: |
+          # Publication electron-updater UNIQUEMENT si signé (le ZIP doit
+          # l'être pour que Squirrel accepte l'installation).
+          if [[ "$GITHUB_REF" == refs/tags/v* && -n "$CSC_NAME" ]]; then
+            npx electron-builder --mac --arm64 --config electron-builder.yml --publish always
+          else
+            npx electron-builder --mac --arm64 --config electron-builder.yml --publish never
+          fi
 
       - name: Upload artifact (every build)
         uses: actions/upload-artifact@v4
         with:
           name: Nova-macOS-arm64
-          path: desktop/release/*.dmg
+          path: |
+            desktop/release/*.dmg
+            desktop/release/*.zip
           if-no-files-found: error
           retention-days: 30
 
-      - name: Attach to GitHub Release (tags only)
-        if: startsWith(github.ref, 'refs/tags/v')
+      # Release « simple » (DMG seul) uniquement pour les builds non signés :
+      # quand electron-builder publie lui-même, il crée le brouillon complet
+      # (DMG + ZIP + latest-mac.yml) et softprops ne doit pas entrer en conflit.
+      - name: Attach to GitHub Release (unsigned tags only)
+        if: startsWith(github.ref, 'refs/tags/v') && steps.flag.outputs.signed == 'false'
         uses: softprops/action-gh-release@v2
         with:
           files: desktop/release/*.dmg

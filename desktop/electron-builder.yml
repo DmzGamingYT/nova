@@ -11,17 +11,43 @@ files:
   - preload.js
   - assets/**/*
 
+afterSign: build/notarize.js
+afterAllArtifactBuild: build/verify-signature.js
+
 mac:
   category: public.app-category.productivity
   icon: assets/icon.icns
+  darkModeSupport: true
+
+  # Deux cibles : le DMG pour l'installation, le ZIP pour l'auto-mise à jour
+  # (Squirrel.mac exige un ZIP signé — electron-updater vérifie sa signature).
   target:
     - target: dmg
-      arch:
-        - arm64
-  identity: null
-  hardenedRuntime: false
+      arch: [arm64]
+    - target: zip
+      arch: [arm64]
+
+  # ── Signature & notarisation ─────────────────────────────────────────
+  # 100 % pilotées par l'environnement (convention electron-builder) :
+  #   • CSC_NAME (identité "Developer ID Application: …") + secrets Apple
+  #     → signature + hardened runtime + entitlements, puis notarisation
+  #     via le hook afterSign (build/notarize.js)
+  #   • CSC_IDENTITY_AUTO_DISCOVERY=false (local, CI sans secrets)
+  #     → aucune signature, build ad-hoc (clic droit → Ouvrir)
+  # Pas de clé `identity:` ici : la laisser décider à electron-builder
+  # évite les comportements ambigus de la chaîne vide.
+  hardenedRuntime: true
   gatekeeperAssess: false
-  darkModeSupport: true
+  type: distribution
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.inherit.plist
+
+  # electron-updater (provider GitHub) lit ces champs pour trouver les releases
+  publish:
+    - provider: github
+      owner: DmzGamingYT
+      repo: nova
+
   extendInfo:
     LSUIElement: true
     NSMicrophoneUsageDescription: Nova a besoin du micro pour t'écouter.
