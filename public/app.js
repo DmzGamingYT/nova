@@ -92,7 +92,7 @@
   var STORAGE_KEY = 'nova.settings.v1';
   var settings = {
     apiKey: '',
-    model: 'llama-3.3-70b-versatile',
+    model: 'openai/gpt-oss-120b',
     voiceURI: '',
     rate: 1,
     pitch: 1,
@@ -105,6 +105,7 @@
     wakeWord: false,
     wakeStay: 12,
     lastTab: 'general',
+    onboardingDone: false,
   };
 
   try {
@@ -115,6 +116,26 @@
   function persist() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); } catch (_) {}
   }
+
+  /* Premier lancement : présenter les choix sans imposer Groq ni un profil. */
+  (function initOnboarding() {
+    var panel = $('onboarding');
+    if (!panel || settings.onboardingDone) return;
+    function finish(choice) {
+      settings.onboardingDone = true;
+      if (choice === 'demo') settings.model = 'openai/gpt-oss-120b';
+      persist();
+      panel.hidden = true;
+      if (choice === 'groq') openSettings('general');
+      else if (choice === 'local') openSettings('general');
+    }
+    Array.prototype.forEach.call(panel.querySelectorAll('[data-onboarding]'), function (button) {
+      button.addEventListener('click', function () { finish(button.getAttribute('data-onboarding')); });
+    });
+    $('onboarding-skip').addEventListener('click', function () { finish('demo'); });
+    $('onboarding-configure').addEventListener('click', function () { finish('groq'); });
+    panel.hidden = false;
+  })();
 
   /* -------------------------------------------------------- */
   /* Thème clair / sombre / auto                                */
@@ -2418,7 +2439,7 @@
         persist();
       }
     } catch (_) {
-      els.modelSelect.innerHTML = '<option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>';
+      els.modelSelect.innerHTML = '<option value="openai/gpt-oss-120b">openai/gpt-oss-120b</option>';
     }
   }
 

@@ -30,7 +30,39 @@ const SITE_GH = 'https://github.com/DmzGamingYT/nova';
    sur :8787 (start.command), workflow inchangé — NOVA_EMBEDDED=1 ou
    NOVA_URL permettent de tester l'embarqué / une autre instance. */
 let NOVA_URL = process.env.NOVA_URL
-  || (app.isPackaged || process.env.NOVA_EMBEDDED ? '' : 'http://localhost:8787');
+  || (app.isPackaged || process.env.NOVA_EMBEDDED ? '' : 'http://127.0.0.1:8787');
+
+function isNovaUrl(url) {
+  try {
+    const target = new URL(url);
+    const base = new URL(NOVA_URL);
+    return target.protocol === base.protocol &&
+      target.hostname === base.hostname &&
+      target.port === base.port;
+  } catch (_) {
+    return false;
+  }
+}
+
+function openExternalOrDeny(url) {
+  if (/^https?:/i.test(url)) shell.openExternal(url);
+}
+
+function secureContents(contents) {
+  const blockNavigation = (event, url) => {
+    if (!isNovaUrl(url)) {
+      event.preventDefault();
+      openExternalOrDeny(url);
+    }
+  };
+  contents.on('will-navigate', blockNavigation);
+  contents.on('will-redirect', blockNavigation);
+  contents.setWindowOpenHandler(({ url }) => {
+    if (isNovaUrl(url)) return { action: 'allow' };
+    openExternalOrDeny(url);
+    return { action: 'deny' };
+  });
+}
 
 function coreDir() {
   /* packagé : resources/core (posé par extraResources) ;
@@ -177,14 +209,7 @@ function createPanel() {
     if (win && win.isVisible()) win.hide();
   });
 
-  /* liens externes dans le navigateur */
-  win.webContents.setWindowOpenHandler(({ url }) => {
-    if (/^https?:/i.test(url) && !url.startsWith(NOVA_URL)) {
-      shell.openExternal(url);
-      return { action: 'deny' };
-    }
-    return { action: 'allow' };
-  });
+  secureContents(win.webContents);
 }
 
 function togglePanel() {
@@ -230,13 +255,7 @@ function openFullWindow() {
   });
   fullWin.once('ready-to-show', () => fullWin.show());
   fullWin.loadURL(novaUiUrl());
-  fullWin.webContents.setWindowOpenHandler(({ url }) => {
-    if (/^https?:/i.test(url) && !url.startsWith(NOVA_URL)) {
-      shell.openExternal(url);
-      return { action: 'deny' };
-    }
-    return { action: 'allow' };
-  });
+  secureContents(fullWin.webContents);
   fullWin.on('closed', () => { fullWin = null; });
 }
 
@@ -247,6 +266,8 @@ function openFullWindow() {
 /* Vrai seulement si l'app est signée + notarisée : Squirrel exige une
    signature valide pour remplacer l'app sur le disque. */
 function updatesSupported() {
+  /* electron-updater gère l'échec proprement sur un build ad-hoc ; on
+     conserve donc l'activation pour les apps packagées macOS signées. */
   return isMac && app.isPackaged && !process.mas;
 }
 

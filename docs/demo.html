@@ -104,8 +104,9 @@
   <div class="key-row" id="keyRow">
     <input id="keyInput" type="password" placeholder="gsk_… (console.groq.com/keys — gratuite)" autocomplete="off"/>
     <button id="keySave">Connecter</button>
+    <button id="keyForget" type="button">Oublier</button>
   </div>
-  <p class="key-hint" id="keyHint">Ta clé reste <b>dans ton navigateur</b> (stockage local) et ne part que vers
+  <p class="key-hint" id="keyHint">Ta clé reste <b>dans ton navigateur</b> (stockage local). Tu peux l'effacer avec « Oublier » à tout moment ; elle ne part que vers
   <a href="https://console.groq.com/keys" target="_blank" rel="noopener">api.groq.com</a> — jamais vers le site Nova.
   <a href="https://console.groq.com/keys" target="_blank" rel="noopener">Obtenir une clé gratuite →</a></p>
 
@@ -169,6 +170,7 @@
   const keyRow   = document.getElementById('keyRow');
   const keyInput = document.getElementById('keyInput');
   const keySave  = document.getElementById('keySave');
+  const keyForget = document.getElementById('keyForget');
   const keyHint  = document.getElementById('keyHint');
   const chips    = Array.from(document.querySelectorAll('.mode-chip'));
 
@@ -178,8 +180,8 @@
 
   const LS_MODE = 'nova.demo.mode', LS_KEY = 'nova.demo.groqKey';
   const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-  const GROQ_MODEL = 'llama-3.3-70b-versatile';
-  const LOCAL = 'http://localhost:8787';
+  const GROQ_MODEL = 'openai/gpt-oss-120b';
+  const LOCAL = 'http://127.0.0.1:8787';
 
   let mode     = localStorage.getItem(LS_MODE) || 'auto';
   let groqKey  = localStorage.getItem(LS_KEY) || '';
@@ -267,11 +269,11 @@
   function refreshBanner(){
     const eff = effectiveMode();
     if (eff === 'local'){
-      bannerHTML('local', 'Connecté à <b>ta Nova locale</b> (localhost:8787) — vraies données, vraie mémoire.');
+      bannerHTML('local', 'Connecté à <b>ta Nova locale</b> (127.0.0.1:8787) — vraies données, vraie mémoire.');
     } else if (eff === 'groq'){
       bannerHTML('groq', 'Le <b>vrai modèle</b> répond via ta clé Groq — clé stockée dans ton navigateur uniquement.');
     } else if (mode === 'local'){
-      bannerHTML('err', 'Aucune Nova détectée sur localhost:8787 — <b>lance l\'app</b> ou choisis un autre mode.');
+      bannerHTML('err', 'Aucune Nova détectée sur 127.0.0.1:8787 — <b>lance l\'app</b> ou choisis un autre mode.');
     } else if (mode === 'groq'){
       bannerHTML('err', 'Colle ta clé Groq ci-dessus pour activer ce mode.');
     } else {
@@ -541,6 +543,14 @@
     localStorage.setItem(LS_KEY, v);
     keyInput.value = '';
     refreshBanner();
+  });
+
+  keyForget.addEventListener('click', () => {
+    groqKey = '';
+    localStorage.removeItem(LS_KEY);
+    keyInput.value = '';
+    refreshBanner();
+    bannerHTML('local', 'Clé Groq supprimée de ce navigateur.');
   });
 
   /* ---------- accueil ---------- */

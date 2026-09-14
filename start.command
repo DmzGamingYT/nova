@@ -17,12 +17,12 @@ SERVER_PID=$!
 
 # Attendre que le port réponde, puis ouvrir le navigateur
 for i in $(seq 1 30); do
-  if curl -s -o /dev/null "http://localhost:${PORT_NUM}/api/status"; then
-    open "http://localhost:${PORT_NUM}"
+  if curl -s -o /dev/null "http://127.0.0.1:${PORT_NUM}/api/status"; then
+    open "http://127.0.0.1:${PORT_NUM}"
     break
   fi
   sleep 0.3
 done
 
-echo "✦ Nova tourne sur http://localhost:${PORT_NUM}  (Ctrl+C pour arrêter)"
+echo "✦ Nova tourne sur http://127.0.0.1:${PORT_NUM}  (Ctrl+C pour arrêter)"
 wait $SERVER_PID

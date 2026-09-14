@@ -18,7 +18,7 @@ const DESKTOP = path.join(__dirname, '..');
 const ROOT = path.join(DESKTOP, '..');
 const DEST = path.join(DESKTOP, 'core');
 
-const PUBLIC_KEEP = new Set(['index.html', 'app.js', 'style.css', 'wake.js']);
+const PUBLIC_KEEP = new Set(['index.html', 'app.js', 'style.css', 'wake.js', 'markdown.js', 'orb.js']);
 
 function rmrf(p) {
   fs.rmSync(p, { recursive: true, force: true });

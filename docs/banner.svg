@@ -100,11 +100,11 @@
 
   <!-- pastilles -->
   <g font-family="-apple-system, 'SF Pro Text', 'Segoe UI', Helvetica, Arial, sans-serif" font-size="19" fill="#ded9ff">
-    <rect x="446" y="300" width="152" height="40" rx="20" fill="#7c6cff" fill-opacity="0.16" stroke="#7c6cff" stroke-opacity="0.45"/>
-    <text x="466" y="326" fill="#cfc7ff">🎤 Voix macOS</text>
-    <rect x="612" y="300" width="196" height="40" rx="20" fill="#7c6cff" fill-opacity="0.16" stroke="#7c6cff" stroke-opacity="0.45"/>
-    <text x="632" y="326" fill="#cfc7ff">⚡ 0 dépendance npm</text>
-    <rect x="822" y="300" width="192" height="40" rx="20" fill="#7c6cff" fill-opacity="0.16" stroke="#7c6cff" stroke-opacity="0.45"/>
-    <text x="842" y="326" fill="#cfc7ff">🛡️ Sandbox Mac</text>
+    <rect x="446" y="300" width="156" height="40" rx="20" fill="#7c6cff" fill-opacity="0.16" stroke="#7c6cff" stroke-opacity="0.45"/>
+    <text x="466" y="326" fill="#cfc7ff">Voix macOS</text>
+    <rect x="612" y="300" width="200" height="40" rx="20" fill="#7c6cff" fill-opacity="0.16" stroke="#7c6cff" stroke-opacity="0.45"/>
+    <text x="632" y="326" fill="#cfc7ff">0 dépendance npm</text>
+    <rect x="822" y="300" width="206" height="40" rx="20" fill="#7c6cff" fill-opacity="0.16" stroke="#7c6cff" stroke-opacity="0.45"/>
+    <text x="842" y="326" fill="#cfc7ff">Sandbox sécurisée</text>
   </g>
 </svg>

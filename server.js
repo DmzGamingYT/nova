@@ -285,10 +285,10 @@ loadMemory();
 const PROFILE_FILE = path.join(DATA_DIR, 'profile.json');
 
 const DEFAULT_PROFILE = {
-  name: 'Alessio Innangi',
-  age: 23,
-  physique: 'athlétique',
-  studies: 'étudiant à EICA Auvelais, formation Technicien en informatique',
+  name: '',
+  age: '',
+  physique: '',
+  studies: '',
   notes: '',
 };
 
@@ -538,7 +538,6 @@ function execMacAction(action, arg) {
           else fail((r && r.error) || 'action impossible');
         });
       } else if (skills.SKILLS[a]) {
-      } else if (skills.SKILLS[a]) {
         /* Compétences de lecture : utilisables aussi via la ligne ACTION */
         skills.runSkill(a, s, skillCtx()).then((r) => {
           if (r && r.ok) done(r.output);
@@ -651,7 +650,7 @@ function demoReply(userText) {
     return "Bonjour ! Moi c'est Nova, ton assistante vocale. Je fonctionne pour l'instant en mode démonstration : mes réponses sont pré-écrites. Ajoute ta clé Groq dans le panneau de réglages, en haut à droite, et je deviendrai vraiment intelligente.";
   }
   if (/qui es[- ]tu|t'appelles|c'est quoi nova|présente[- ]toi/.test(t)) {
-    return "Je m'appelle Nova. Je suis une assistante qui s'écoute et se parle : tu m'addresses la voix, je te réponds de même. En mode démonstration, je répète mes réponses favorites, mais avec une clé API Groq, je serai propulsée par Llama 3.3, un modèle de 70 milliards de paramètres.";
+    return "Je m'appelle Nova. Je suis une assistante qui s'écoute et se parle : tu m'adresses la voix, je te réponds de même. En mode démonstration, je répète mes réponses favorites, mais avec une clé API Groq, je serai propulsée par GPT-OSS 120B.";
   }
   if (/merci/.test(t)) {
     return "Avec grand plaisir ! N'hésite pas à me reparler dès que tu veux. Et pense à la clé API pour débloquer le mode complet.";
@@ -1722,7 +1721,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && url === '/api/training/done') return void (await handleTrainingDone(req, res));
     if (req.method === 'POST' && url === '/api/training/import') return void (await handleTrainingImport(req, res));
     if (req.method === 'POST' && url === '/api/training/reset') return void (await handleTrainingReset(req, res));
-    if (req.method === 'GET' && url === '/api/profile') return void sendJson(res, 200, { profile });
+    if (req.method === 'GET' && url === '/api/profile') return void sendJson(res, 200, { profile: profile || { ...DEFAULT_PROFILE } });
     if (req.method === 'PUT' && url === '/api/profile') return void (await handleProfilePut(req, res));
     if (req.method === 'POST' && url === '/api/mac/exec') return void (await handleMacExec(req, res));
     if (req.method === 'GET' && url === '/api/mac/status') return void sendJson(res, 200, { enabled: MAC_CONTROL_ENABLED, host: os.hostname(), actions: MAC_ACTION_LIST, readonly: skills.READONLY_SKILLS });

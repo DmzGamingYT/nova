@@ -2,9 +2,9 @@
 'use strict';
 /* Captures d'écran automatiques de la vraie interface Nova — via Electron
    offscreen (rendu réel, aucune dépendance npm à installer).
-   Prérequis : serveur Nova lancé (http://localhost:8787) + desktop/node_modules
+   Prérequis : serveur Nova lancé (http://127.0.0.1:8787) + desktop/node_modules
    (Electron y est déjà installé pour l'app).
-   Usage : node tools/capture-screenshots.js [--base http://localhost:8787] [--out docs]
+   Usage : node tools/capture-screenshots.js [--base http://127.0.0.1:8787] [--out docs]
 
    ⚠️ Un thème = un processus Electron. Capturer les deux thèmes dans un
    même processus plante sur macOS (conflit de mach-ports au deuxième
@@ -36,7 +36,7 @@ function argOf(name, def) {
   return i !== -1 && argv[i + 1] ? argv[i + 1] : def;
 }
 const WORKER_THEME = argv.includes('--worker') ? argOf('--theme', '') : '';
-const BASE = argOf('--base', 'http://localhost:8787');
+const BASE = argOf('--base', 'http://127.0.0.1:8787');
 const OUT = path.resolve(argOf('--out', path.join(__dirname, '..', 'docs')));
 
 function ping() {

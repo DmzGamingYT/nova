@@ -96,6 +96,8 @@ test('la page contient les six sections de réglages et le catalogue', async () 
     assert.ok(html.includes('data-tab="' + t + '"'), 'onglet manquant : ' + t);
     assert.ok(html.includes('data-pane="' + t + '"'), 'panneau manquant : ' + t);
   }
+  assert.ok(html.includes('Content-Security-Policy'), 'une CSP doit protéger la page Electron');
+  assert.ok(html.includes('id="onboarding"'), 'l’onboarding doit être présent au premier lancement');
   /* Chaque compteur d'onglet doit avoir son panneau : sinon un onglet vide. */
   assert.strictEqual((html.match(/data-tab=/g) || []).length, (html.match(/data-pane=/g) || []).length);
   /* Le catalogue de compétences reste cliquable et documenté */
@@ -207,20 +209,22 @@ test('GET /api/mac/status liste les actions et les lectures', async () => {
 test('le profil est validé, enregistré et relu', async () => {
   const avant = await srv.json('/api/profile');
   assert.strictEqual(avant.status, 200);
+  assert.strictEqual(avant.body.profile.name, '', 'aucune identité personnelle ne doit être préremplie');
+  assert.strictEqual(avant.body.profile.studies, '', 'aucune donnée personnelle ne doit être préremplie');
 
   const mise = await srv.json('/api/profile', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: '  Alessio    Innangi ', age: 'abc', studies: 'EICA Auvelais' }),
+    body: JSON.stringify({ name: '  Test utilisateur ', age: 'abc', studies: 'formation informatique' }),
   });
   assert.strictEqual(mise.status, 200);
   assert.strictEqual(mise.body.ok, true);
-  assert.strictEqual(mise.body.profile.name, 'Alessio Innangi', 'les espaces multiples doivent être réduits');
+  assert.strictEqual(mise.body.profile.name, 'Test utilisateur', 'les espaces multiples doivent être réduits');
   assert.strictEqual(mise.body.profile.age, '', 'un âge non numérique ne doit pas être inventé');
 
   const relu = await srv.json('/api/profile');
-  assert.strictEqual(relu.body.profile.name, 'Alessio Innangi');
-  assert.strictEqual(relu.body.profile.studies, 'EICA Auvelais');
+  assert.strictEqual(relu.body.profile.name, 'Test utilisateur');
+  assert.strictEqual(relu.body.profile.studies, 'formation informatique');
 
   assert.ok(fs.existsSync(path.join(srv.dataDir, 'profile.json')), 'le profil doit être écrit sur le disque');
 });

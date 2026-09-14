@@ -1,6 +1,6 @@
 {
   "name": "nova",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "private": true,
   "description": "Nova — assistante IA vocale locale (Groq, voix macOS, mot d'activation, sandbox Mac)",
   "main": "server.js",

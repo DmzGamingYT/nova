@@ -413,12 +413,12 @@ function __sportState(url, opts) {
 window.fetch = function (url, opts) {
   const u = String(url);
   if (u === '/api/status') {
-    return jsonResp({ hasKey: true, model: 'qwen/qwen3.6-27b', sttModel: 'whisper-large-v3-turbo' });
+    return jsonResp({ hasKey: true, model: 'openai/gpt-oss-120b', sttModel: 'whisper-large-v3-turbo' });
   }
   if (u === '/api/models') {
     return jsonResp({ models: [
-      { id: 'qwen/qwen3.6-27b', label: 'qwen/qwen3.6-27b' },
-      { id: 'qwen/qwen3.8-27b', label: 'qwen/qwen3.8-27b' },
+      { id: 'openai/gpt-oss-120b', label: 'GPT-OSS 120B (recommandé)' },
+      { id: 'qwen/qwen3.6-27b', label: 'Qwen 3.6 27B (rapide)' },
     ] });
   }
   if (u === '/api/profile') {
@@ -430,7 +430,7 @@ window.fetch = function (url, opts) {
     let p = null;
     try { p = JSON.parse(localStorage.getItem('nova.mock.profile') || 'null'); } catch (e) {}
     if (!p) {
-      p = { name: 'Alessio Innangi', age: 23, physique: 'athlétique', studies: 'étudiant à EICA Auvelais, formation Technicien en informatique', notes: '' };
+      p = { name: '', age: '', physique: '', studies: '', notes: '' };
     }
     return jsonResp({ profile: p });
   }
@@ -450,7 +450,7 @@ window.fetch = function (url, opts) {
     return jsonResp({
       ok: true,
       server: { node: 'v22.0.0 (aperçu)', platform: 'darwin · arm64', host: 'macbook-aperçu', uptime: 41, port: 8787 },
-      groq: { keyConfigured: true, keySource: 'serveur (.env)', model: 'qwen/qwen3.6-27b', sttModel: 'whisper-large-v3-turbo', maxTokens: 900 },
+      groq: { keyConfigured: true, keySource: 'serveur (.env)', model: 'openai/gpt-oss-120b', sttModel: 'whisper-large-v3-turbo', maxTokens: 900 },
       data: {
         dir: '(aperçu) data/',
         writable: true,
@@ -530,7 +530,7 @@ window.fetch = function (url, opts) {
       m.lastSessionId = sess.id;
       __memSave(m);
       const pre = 'data: ' + JSON.stringify({ nova_session: sess.id }) + '\\n\\n';
-      const prof = (() => { try { return JSON.parse(localStorage.getItem('nova.mock.profile') || 'null'); } catch (e) { return null; } })() || { name: 'Alessio Innangi', age: 23, physique: 'athlétique', studies: 'étudiant à EICA Auvelais, formation Technicien en informatique', notes: '' };
+      const prof = (() => { try { return JSON.parse(localStorage.getItem('nova.mock.profile') || 'null'); } catch (e) { return null; } })() || { name: '', age: '', physique: '', studies: '', notes: '' };
       const pre2 = 'data: ' + JSON.stringify({ nova_profile: prof }) + '\\n\\n';
       const pre3 = 'data: ' + JSON.stringify({ nova_mac: { host: 'macbook-aperçu', platform: 'darwin' } }) + '\\n\\n';
       const events = [pre, pre2, pre3].concat(raw.split('\\n\\n').filter(function (e) { return e.trim(); }));
@@ -639,7 +639,7 @@ html = html.replace(
   () => `<script>
   window.NovaConv.simulateLevel = function () { return Number(window.__vadLevel || 0); };
   </script>
-  <div id="preview-badge" title="Ce fichier est une simulation hors serveur — les réponses sont des répliques pré-écrites. Ouvre http://localhost:8787 pour la vraie Nova.">🎭 Aperçu — réponses simulées</div>
+  <div id="preview-badge" title="Ce fichier est une simulation hors serveur — les réponses sont des répliques pré-écrites. Ouvre http://127.0.0.1:8787 pour la vraie Nova.">🎭 Aperçu — réponses simulées</div>
   <style>
     #preview-badge { position: fixed; bottom: 12px; right: 12px; z-index: 99999; padding: 6px 12px; border-radius: 999px;
       background: rgba(124,108,255,.92); color: #fff; font: 600 12px -apple-system, system-ui, sans-serif;

@@ -141,7 +141,7 @@
       <div class="card">
         <div class="ico"><i data-ico="package"></i></div>
         <h3>Zéro dépendance</h3>
-        <p>Le serveur est du Node.js pur : pas de <code>npm install</code>, pas de framework — et 77 tests.</p>
+        <p>Le serveur est du Node.js pur : pas de <code>npm install</code>, pas de framework — et 95 tests.</p>
       </div>
       <div class="card">
         <div class="ico"><i data-ico="moon"></i></div>
@@ -175,7 +175,7 @@
       <div class="step-card">
         <span class="n">3</span>
         <h4>Lance</h4>
-        <p><code>./start.command</code> — double-clic possible. L'interface s'ouvre sur <b>localhost:8787</b>.</p>
+        <p><code>./start.command</code> — double-clic possible. L'interface s'ouvre sur <b>127.0.0.1:8787</b>.</p>
       </div>
     </div>
 
@@ -184,7 +184,7 @@
       <pre>git clone https://github.com/DmzGamingYT/nova.git &amp;&amp; cd nova
 <span class="c"># 2. ta clé Groq (gratuite — console.groq.com/keys)</span>
 cp .env.example .env      <span class="c"># puis GROQ_API_KEY=gsk_…</span>
-./start.command           <span class="c"># → http://localhost:8787</span></pre>
+./start.command           <span class="c"># → http://127.0.0.1:8787</span></pre>
     </div>
 
     <div class="rdm-note">
@@ -317,7 +317,7 @@ cp .env.example .env      <span class="c"># puis GROQ_API_KEY=gsk_…</span>
       </div>
       <div class="card">
         <h3><code>test/</code></h3>
-        <p>77 tests sur un vrai serveur avec dossier temporaire : sandbox, traversée de répertoire, mémoire corrompue, moteur sport.</p>
+        <p>95 tests sur un vrai serveur avec dossier temporaire : sandbox, traversée de répertoire, parité Windows, moteur sport.</p>
       </div>
       <div class="card">
         <h3><code>data/</code></h3>
@@ -339,7 +339,7 @@ cp .env.example .env      <span class="c"># puis GROQ_API_KEY=gsk_…</span>
     <p class="sec-sub"><code>npm test</code> lance tout sur un vrai serveur, dossier temporaire, zéro appel réseau.</p>
 
     <div class="rdm-tests">
-      <span class="rdm-test"><i data-ico="shield"></i><b>77</b> tests — passent en ~2,5 s</span>
+      <span class="rdm-test"><i data-ico="shield"></i><b>95</b> tests — passent en ~2,5 s</span>
       <span class="rdm-test"><i data-ico="shield"></i>Sandbox : toute action hors liste blanche est rejetée</span>
       <span class="rdm-test"><i data-ico="shield"></i>Traversée de répertoire refusée</span>
       <span class="rdm-test"><i data-ico="dumbbell"></i>Moteur sport : 70 jours comparés aux formules exactes</span>
@@ -348,7 +348,7 @@ cp .env.example .env      <span class="c"># puis GROQ_API_KEY=gsk_…</span>
 
     <div class="term" style="max-width:820px;margin-top:26px">
       <div class="term-bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
-      <pre>npm test              <span class="c"># 77 tests — vrai serveur, dossier temporaire</span>
+      <pre>npm test              <span class="c"># 95 tests — vrai serveur, dossier temporaire</span>
 npm run check:sport   <span class="c"># vérification manuelle du sport (vraie clé)</span></pre>
     </div>
   </section>

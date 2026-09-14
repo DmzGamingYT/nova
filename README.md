@@ -12,7 +12,7 @@ Elle t'écoute, réfléchit avec Groq, et te répond **à voix haute** — le to
 ![node](https://img.shields.io/badge/Node.js-%E2%89%A520-339933?logo=nodedotjs&logoColor=white)
 ![deps](https://img.shields.io/badge/dépendances_npm-0-success)
 ![ia](https://img.shields.io/badge/IA-Groq%20·%20GPT--OSS%20120B-f55036)
-![tests](https://img.shields.io/badge/tests-68%20%2B%20sport-7c6cff)
+![tests](https://img.shields.io/badge/tests-95-7c6cff)
 ![licence](https://img.shields.io/badge/licence-MIT-blue)
 
 [🚀 Démarrage rapide](#-démarrage-rapide) · [📱 App native](#-applications-natives--macos--windows) · [🧰 Dépannage](#-dépannage) · [🎙️ Ce qu'elle sait faire](#-ce-quelle-sait-faire) · [🖼️ **Le README en visuel**](https://dmzgamingyt.github.io/nova/readme.html) · [🗣️ Commandes vocales](https://dmzgamingyt.github.io/nova/commandes.html) · [⚡ **Démo live**](https://dmzgamingyt.github.io/nova/demo.html) · [📰 Nouveautés](https://dmzgamingyt.github.io/nova/nouveautes.html) · [🌐 Site web](https://dmzgamingyt.github.io/nova/) · [🏗️ Architecture](#-architecture)
@@ -28,7 +28,7 @@ Elle t'écoute, réfléchit avec Groq, et te répond **à voix haute** — le to
 | 🗣️ **Voix naturelle** | Parle, elle répond — voix françaises de macOS, lecture phrase par phrase pendant que le modèle écrit |
 | 🧠 **Mémoire réelle** | Elle se souvient de tes conversations, de ton profil, de ton programme de sport — même après redémarrage |
 | 🛡️ **Sandbox sécurisée** | Liste blanche d'actions, exécution sans shell, **carte de confirmation** avant toute action sur le Mac |
-| ⚡ **Zéro dépendance** | Le serveur est du Node.js pur : aucun `npm install`, aucun framework, 68 tests |
+| ⚡ **Zéro dépendance** | Le serveur est du Node.js pur : aucun `npm install`, aucun framework, 95 tests |
 | 🌙 **Mot d'activation** | Dis « Nova » comme tu dirais « Siri » — elle s'éveille, écoute, répond, se rendort |
 | 🏋️ **Coach sportif** | Elle lit ton programme Pulse : séance du jour, technique, progression, validation vocale |
 
@@ -47,19 +47,18 @@ git clone https://github.com/DmzGamingYT/nova.git && cd nova
 cp .env.example .env      # puis GROQ_API_KEY=gsk_…
 
 # 3. Lance
-./start.command           # → http://localhost:8787
+./start.command           # → http://127.0.0.1:8787
 ```
 
-> 💡 **Sans clé API**, Nova tourne en *mode démo* : interface, voix et streaming fonctionnent,
-> mais les réponses sont pré-écrites. Avec une clé, elle devient pleinement intelligente —
-> tu peux aussi la coller dans les **Réglages** (⚙️ ou `⌘,`), elle reste sur ta machine.
+> 🔐 **Confidentialité** : le profil est vide au premier lancement. Nova ne contient aucune identité préremplie ; complète uniquement les informations que tu souhaites lui confier.
+
 
 <div align="center">
 
 ```text
         ╭──────────────────────────────────────────╮
         │  ✦  Nova — Assistant IA vocal            │
-        │  Adresse locale : http://localhost:8787  │
+        │  Adresse locale : http://127.0.0.1:8787  │
         │  Clé Groq       : ✓ trouvée (gsk_KB…)    │
         │  Modèle         : openai/gpt-oss-120b    │
         ╰──────────────────────────────────────────╯
@@ -330,7 +329,7 @@ node tools/capture-screenshots.js   # serveur Nova lancé + Electron dans deskto
 ```bash
 GROQ_API_KEY=gsk_…          # ta clé (inutile avec un modèle local)
 PORT=8787                   # port du serveur
-GROQ_MODEL=qwen/qwen3.6-27b # modèle par défaut (optionnel)
+GROQ_MODEL=openai/gpt-oss-120b # modèle par défaut (optionnel)
 GROQ_STT_MODEL=whisper-large-v3-turbo
 GROQ_MAX_TOKENS=900         # sort du plafond OTPM des comptes gratuits
 MAC_CONTROL=on              # "off" coupe toute exécution d'actions
@@ -347,7 +346,7 @@ disponible (et prévenue) · plafond OTPM → retry avec moins de tokens · mod�
 ## 🧪 Tests
 
 ```bash
-npm test              # 77 tests — vrai serveur, dossier temporaire, zéro appel réseau
+npm test              # 95 tests — vrai serveur, dossier temporaire, zéro appel réseau
 npm run check:sport   # vérification manuelle du sport (vraie clé, vraie donnée)
 ```
 
@@ -377,8 +376,8 @@ desktop/             📱 Application macOS (Electron)
   main.js            Barre de menus : Tray, panneau flottant, raccourci global ⌘⇧Espace
   electron-builder.yml   Build DMG arm64 (M1→M4) et universel
   tools/make-icon.py Génération de l'icône (orbe violette)
-test/                68 tests + suite sport (fixtures, vrai serveur isolé)
-tools/               build-preview.js (UI seule + mock API), check-sport.js
+test/                95 tests (sandbox, traversée de répertoire, sport, parité Windows…)
+tools/               build-preview.js (UI seule + mock API), capture-screenshots.js
 start.command        Double-clic pour tout lancer
 data/                memory.json, profile.json, training.json (gitignored)
 ```

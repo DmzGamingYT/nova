@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="color-scheme" content="dark light" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' http://127.0.0.1:* http://localhost:* https://api.groq.com https://api.github.com;">
   <title>Nova — Assistant IA vocal</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g' cx='35%25' cy='30%25' r='75%25'%3E%3Cstop offset='0%25' stop-color='%23a5b4fc'/%3E%3Cstop offset='55%25' stop-color='%236366f1'/%3E%3Cstop offset='100%25' stop-color='%232e1065'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='30' fill='url(%23g)'/%3E%3Ccircle cx='23' cy='22' r='7' fill='%23ffffff' opacity='0.55'/%3E%3C/svg%3E" />
   <link rel="stylesheet" href="style.css" />
@@ -94,6 +95,30 @@
         <div id="messages"></div>
       </div>
     </section>
+
+    <!-- Première utilisation : choix rapide du moteur et des réglages essentiels. -->
+    <div class="onboarding-backdrop" id="onboarding" hidden>
+      <section class="onboarding glass" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+        <div class="onboarding-kicker">✦ Bienvenue dans Nova</div>
+        <h2 id="onboarding-title">Choisissons comment elle va réfléchir.</h2>
+        <p class="onboarding-lead">Tu peux changer ce choix à tout moment dans les réglages. Rien n'est envoyé sans ton action.</p>
+        <div class="onboarding-options">
+          <button type="button" class="onboarding-option" data-onboarding="groq">
+            <strong>Utiliser Groq</strong><span>Réponses intelligentes avec une clé API gratuite.</span>
+          </button>
+          <button type="button" class="onboarding-option" data-onboarding="local">
+            <strong>Utiliser un modèle local</strong><span>Ollama ou LM Studio, sans requête cloud.</span>
+          </button>
+          <button type="button" class="onboarding-option" data-onboarding="demo">
+            <strong>Commencer en mode démo</strong><span>Interface et voix, sans clé API pour l'instant.</span>
+          </button>
+        </div>
+        <div class="onboarding-actions">
+          <button type="button" class="btn primary" id="onboarding-configure">Configurer les réglages</button>
+          <button type="button" class="onboarding-skip" id="onboarding-skip">Plus tard</button>
+        </div>
+      </section>
+    </div>
 
     <!-- Minuteurs en cours -->
     <div class="timers" id="timers" hidden></div>
