@@ -6,6 +6,36 @@
 <title>Nova — Assistante IA vocale sur Mac</title>
 <meta name="description" content="Nova : une assistante vocale française 100 % locale sur Mac. Groq, voix macOS, mémoire persistante, sandbox sécurisée. Open source."/>
 <link rel="stylesheet" href="style.css"/>
+<style>
+  /* Badge « nouveau » — release de moins de 7 jours */
+  .new-badge{
+    display:inline-flex;align-items:center;gap:5px;
+    margin-left:10px;padding:3px 11px 3px 9px;
+    border-radius:999px;vertical-align:2px;
+    background:linear-gradient(135deg,#2fbf9b,#1d9e80);color:#04241d;
+    font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    position:relative;overflow:hidden;
+    animation:new-pulse 2.2s ease-in-out infinite;
+  }
+  .new-badge svg{width:11px;height:11px;stroke:#04241d;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .new-badge::after{ /* balayage lumineux */
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 50%,transparent 70%);
+    transform:translateX(-120%);
+    animation:new-shine 2.2s ease-in-out infinite;
+  }
+  @keyframes new-pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(47,191,155,.45)}
+    50%{box-shadow:0 0 0 6px rgba(47,191,155,0)}
+  }
+  @keyframes new-shine{
+    0%,55%{transform:translateX(-120%)}
+    75%,100%{transform:translateX(120%)}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .new-badge,.new-badge::after{animation:none}
+  }
+</style>
 </head>
 <body data-page="index">
 
@@ -38,7 +68,7 @@
     <div style="display:flex;align-items:center;gap:16px;min-width:0">
       <div class="ico" style="flex:none"><i data-ico="package"></i></div>
       <div style="min-width:0">
-        <h3 style="margin:0 0 3px;font-size:16px">Dernière version <span id="lvVer" style="color:var(--accent2)">…</span></h3>
+        <h3 style="margin:0 0 3px;font-size:16px">Dernière version <span id="lvVer" style="color:var(--accent2)">…</span><span class="new-badge" id="lvNew" hidden title="Publiée il y a moins de 7 jours"><i data-ico="sparkle"></i>nouveau</span></h3>
         <p style="margin:0;color:var(--muted);font-size:13.5px" id="lvMeta">interrogation des releases GitHub…</p>
       </div>
     </div>
@@ -85,6 +115,11 @@
     .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
     .then(rel => {
       ver.textContent = rel.tag_name || '';
+      /* badge « nouveau » : release publiée il y a moins de 7 jours */
+      if (rel.published_at){
+        const ageJours = (Date.now() - new Date(rel.published_at).getTime()) / 864e5;
+        if (ageJours >= 0 && ageJours <= 7) document.getElementById('lvNew').hidden = false;
+      }
       const dmg = (rel.assets || []).find(a => /\.dmg$/i.test(a.name));
       if (dmg){
         btn.href = dmg.browser_download_url;
