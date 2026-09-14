@@ -31,6 +31,33 @@ test('GET /api/status annonce l\'absence de clé et le modèle', async () => {
   assert.ok(r.body.sttModel);
 });
 
+test('CORS : préflight accepté pour le site officiel, refusé ailleurs', async () => {
+  const ok = await fetch(srv.base + '/api/chat', {
+    method: 'OPTIONS',
+    headers: {
+      Origin: 'https://dmzgamingyt.github.io',
+      'Access-Control-Request-Method': 'POST',
+      'Access-Control-Request-Headers': 'content-type,x-nova-key',
+    },
+  });
+  assert.strictEqual(ok.status, 204);
+  assert.strictEqual(ok.headers.get('access-control-allow-origin'), 'https://dmzgamingyt.github.io');
+  assert.ok((ok.headers.get('access-control-allow-headers') || '').toLowerCase().includes('x-nova-key'));
+
+  const ko = await fetch(srv.base + '/api/chat', {
+    method: 'OPTIONS',
+    headers: { Origin: 'https://site-pirate.example', 'Access-Control-Request-Method': 'POST' },
+  });
+  assert.strictEqual(ko.status, 403);
+  assert.strictEqual(ko.headers.get('access-control-allow-origin'), null);
+
+  /* Requête simple : l'en-tête n'est posé que pour l'origine autorisée. */
+  const get = await fetch(srv.base + '/api/status', { headers: { Origin: 'https://dmzgamingyt.github.io' } });
+  assert.strictEqual(get.headers.get('access-control-allow-origin'), 'https://dmzgamingyt.github.io');
+  const get2 = await fetch(srv.base + '/api/status', { headers: { Origin: 'https://site-pirate.example' } });
+  assert.strictEqual(get2.headers.get('access-control-allow-origin'), null);
+});
+
 test('GET /api/diag décrit serveur, données et sandbox', async () => {
   const r = await srv.json('/api/diag');
   assert.strictEqual(r.status, 200);

@@ -46,6 +46,9 @@
   function initDemo(){
     const log = document.getElementById('demoLog');
     if (!log) return;
+    /* demo.html embarque son propre moteur (local/Groq/offline) :
+       ce moteur de repli ne doit pas s'y brancher aussi. */
+    if (document.body.getAttribute('data-live-demo')) return;
     const input = document.getElementById('demoText');
     const send = document.getElementById('demoSend');
     const clearBtn = document.getElementById('demoClear');

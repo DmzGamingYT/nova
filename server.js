@@ -1535,9 +1535,46 @@ function serveStatic(req, res, urlPath) {
 /* Serveur                                                             */
 /* ------------------------------------------------------------------ */
 
+/* CORS strict : uniquement pour le site officiel du projet et le local
+   (développement du site lui-même). Le site (dmzgamingyt.github.io) peut
+   détecter une Nova qui tourne sur la machine du visiteur et lui parler ;
+   le reste du web, non. */
+const CORS_ALLOW = new Set([
+  'https://dmzgamingyt.github.io',
+  'http://localhost:5020',
+  'http://127.0.0.1:5020',
+]);
+
+function corsHeaders(origin) {
+  if (!origin || !CORS_ALLOW.has(origin)) return null;
+  return {
+    'Access-Control-Allow-Origin': origin,
+    'Vary': 'Origin',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Nova-Key',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
 const server = http.createServer(async (req, res) => {
   const url = req.url || '/';
   try {
+    /* Préflight CORS (site officiel uniquement). */
+    if (req.method === 'OPTIONS') {
+      const cors = corsHeaders(req.headers.origin);
+      if (cors) {
+        res.writeHead(204, cors);
+        res.end();
+      } else {
+        res.writeHead(403);
+        res.end();
+      }
+      return;
+    }
+    const cors = corsHeaders(req.headers.origin);
+    if (cors) {
+      for (const [k, v] of Object.entries(cors)) res.setHeader(k, v);
+    }
     if (req.method === 'GET' && url === '/api/status') return void (await handleStatus(res));
     if (req.method === 'GET' && url === '/api/models') return void (await handleModels(res));
     if (req.method === 'POST' && url === '/api/chat') return void (await handleChat(req, res));

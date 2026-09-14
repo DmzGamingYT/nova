@@ -3,27 +3,76 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Démo — Nova</title>
-<meta name="description" content="Essaye Nova directement dans ton navigateur : démo hors-ligne avec réponses pré-écrites et streaming réel."/>
+<title>Démo live — Nova</title>
+<meta name="description" content="Parle vraiment à Nova depuis ton navigateur : elle utilise ta Nova locale si elle tourne, ou ta clé Groq (restée dans ton navigateur), sinon le mode hors-ligne."/>
 <link rel="stylesheet" href="style.css"/>
+<style>
+  .demo-modes{max-width:780px;margin:0 auto 14px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;align-items:center}
+  .mode-chip{
+    border:1px solid var(--panel-brd);background:var(--panel);color:var(--muted);
+    border-radius:999px;padding:8px 16px;font:inherit;font-size:13.5px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;transition:all .18s;
+  }
+  .mode-chip .led{width:7px;height:7px;border-radius:50%;background:var(--muted);opacity:.5;flex:none;transition:all .2s}
+  .mode-chip:hover{color:var(--txt);border-color:var(--accent)}
+  .mode-chip.active{background:rgba(124,108,255,.16);border-color:var(--accent);color:var(--txt)}
+  .mode-chip.active .led{background:var(--accent);opacity:1;box-shadow:0 0 8px var(--accent)}
+  .mode-chip .led.ok{background:#2fbf9b;box-shadow:0 0 8px #2fbf9b}
+  .mode-chip:disabled{opacity:.45;cursor:not-allowed}
+
+  .key-row{max-width:780px;margin:0 auto 16px;display:none;gap:10px;align-items:center}
+  .key-row.show{display:flex}
+  .key-row input{
+    flex:1;background:var(--panel);border:1px solid var(--panel-brd);border-radius:14px;
+    padding:11px 16px;color:var(--txt);font:inherit;font-size:14px;outline:none;
+  }
+  .key-row input:focus{border-color:var(--accent)}
+  .key-row button{
+    background:var(--accent);border:none;color:#fff;border-radius:14px;
+    padding:11px 20px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap;
+  }
+  .key-row button:hover{filter:brightness(1.12)}
+  .key-hint{max-width:780px;margin:-6px auto 16px;color:var(--muted);font-size:12.5px;text-align:center;display:none}
+  .key-hint.show{display:block}
+  .key-hint a{color:var(--accent2)}
+
+  .mode-banner{
+    max-width:780px;margin:0 auto 16px;padding:9px 16px;border-radius:12px;font-size:13px;
+    background:var(--panel);border:1px solid var(--panel-brd);color:var(--muted);text-align:center;
+  }
+  .mode-banner b{color:var(--txt)}
+  .mode-banner.local b{color:#6fe0c3}
+  .mode-banner.groq b{color:#b3a7ff}
+  .mode-banner.err b{color:#f5a83c}
+</style>
 </head>
-<body data-page="demo">
+<body data-page="demo" data-live-demo="1">
 
 <header class="page-head center" style="padding-top:calc(var(--nav-h) + 52px);max-width:1200px;margin:0 auto">
-  <h1 class="sec-title">Essaye-la tout de suite</h1>
-  <p class="sec-sub" style="max-width:620px;margin:0 auto 30px">Démo hors-ligne — les réponses sont pré-écrites,
-  mais le streaming, les états et l'orbe sont les vrais.</p>
+  <h1 class="sec-title">Parle à Nova, pour de vrai</h1>
+  <p class="sec-sub" style="max-width:680px;margin:0 auto 26px">Pas une vidéo, pas un mock : cette page cherche
+  <b>ta Nova locale</b> (si l'app tourne sur cette machine), sinon elle parle à <b>Groq</b> avec ta clé —
+  ou retombe sur un mode hors-ligne.</p>
 </header>
 
 <main class="section" style="padding-top:0">
-  <div class="suggest" role="group" aria-label="Suggestions">
-    <button data-say="Bonjour Nova">Bonjour</button>
-    <button data-say="Quelle heure est-il ?">Quelle heure est-il ?</button>
-    <button data-say="Parle-moi du sport">Parle-moi du sport</button>
-    <button data-say="Qui es-tu ?">Qui es-tu ?</button>
-    <button data-say="Peux-tu contrôler mon Mac ?">Contrôler mon Mac ?</button>
-    <button data-say="Il fait quel temps ?">La météo</button>
+
+  <div class="demo-modes" role="group" aria-label="Mode de connexion">
+    <button class="mode-chip active" data-mode="auto"><span class="led"></span>Auto</button>
+    <button class="mode-chip" data-mode="local"><span class="led"></span>Ma Nova locale</button>
+    <button class="mode-chip" data-mode="groq"><span class="led"></span>Ma clé Groq</button>
+    <button class="mode-chip" data-mode="offline"><span class="led"></span>Hors ligne</button>
   </div>
+
+  <div class="key-row" id="keyRow">
+    <input id="keyInput" type="password" placeholder="gsk_… (console.groq.com/keys — gratuite)" autocomplete="off"/>
+    <button id="keySave">Connecter</button>
+  </div>
+  <p class="key-hint" id="keyHint">Ta clé reste <b>dans ton navigateur</b> (stockage local) et ne part que vers
+  <a href="https://console.groq.com/keys" target="_blank" rel="noopener">api.groq.com</a> — jamais vers le site Nova.
+  <a href="https://console.groq.com/keys" target="_blank" rel="noopener">Obtenir une clé gratuite →</a></p>
+
+  <div class="mode-banner" id="modeBanner">Détection de ta Nova locale…</div>
 
   <div class="demo-wrap">
     <div class="demo-head">
@@ -32,22 +81,348 @@
     </div>
     <div class="demo-log" id="demoLog"></div>
     <div class="demo-input">
-      <input id="demoText" type="text" placeholder="Écris à Nova… (Entrée pour envoyer)" autocomplete="off"/>
+      <input id="demoText" type="text" placeholder="Écris à Nova… (Entrée pour envoyer, Échap pour interrompre)" autocomplete="off"/>
       <button id="demoSend" aria-label="Envoyer">➤</button>
     </div>
   </div>
-  <p class="demo-note">Sur ton Mac, elle répondrait à voix haute — avec de vraies données (heure, météo, batterie…).
-  Toutes ses commandes vocales sont référencées <a href="commandes.html">ici</a>.
-  L'orbe ci-dessous suit la conversation : clique-la pour la voir changer d'état.</p>
 
-  <div class="orb-stage" id="orbStage" style="min-height:340px;margin-top:26px">
+  <div class="orb-stage" id="orbStage" style="min-height:300px;margin-top:30px">
     <div class="orb-state" id="orbState">prête</div>
-    <canvas id="orbCanvas" width="840" height="840" style="width:min(300px,70vw);height:min(300px,70vw)"></canvas>
+    <canvas id="orbCanvas" width="840" height="840" style="width:min(230px,60vw);height:min(230px,60vw)"></canvas>
+    <div class="orb-hint">✦ l'orbe suit la conversation — clique-la pour changer d'état</div>
   </div>
+
+  <p class="demo-note" style="max-width:680px;margin:26px auto 0">
+    En mode <b style="color:var(--txt)">local</b>, c'est la vraie app qui répond (heure, météo, mémoire, sport).
+    En mode <b style="color:var(--txt)">clé Groq</b>, le vrai modèle répond depuis ton navigateur.
+    Sur ton Mac, Nova dirait aussi tout cela <b>à voix haute</b>.
+  </p>
 </main>
 
 <script src="icons.js"></script>
 <script src="orb.js"></script>
 <script src="site.js"></script>
+<script>
+/* ============================================================
+   Démo live — trois moteurs : local (ta Nova), groq (ta clé),
+   offline (réponses pré-écrites). Même rendu de conversation.
+   ============================================================ */
+(function(){
+  const log      = document.getElementById('demoLog');
+  const input    = document.getElementById('demoText');
+  const send     = document.getElementById('demoSend');
+  const clearBtn = document.getElementById('demoClear');
+  const stateEl  = document.getElementById('demoState');
+  const banner   = document.getElementById('modeBanner');
+  const keyRow   = document.getElementById('keyRow');
+  const keyInput = document.getElementById('keyInput');
+  const keySave  = document.getElementById('keySave');
+  const keyHint  = document.getElementById('keyHint');
+  const chips    = Array.from(document.querySelectorAll('.mode-chip'));
+
+  const orbCanvas = document.getElementById('orbCanvas');
+  const orbState  = document.getElementById('orbState');
+  const orb = (window.NovaOrb && orbCanvas) ? window.NovaOrb.init(orbCanvas, orbState) : null;
+
+  const LS_MODE = 'nova.demo.mode', LS_KEY = 'nova.demo.groqKey';
+  const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+  const GROQ_MODEL = 'llama-3.3-70b-versatile';
+  const LOCAL = 'http://localhost:8787';
+
+  let mode     = localStorage.getItem(LS_MODE) || 'auto';
+  let groqKey  = localStorage.getItem(LS_KEY) || '';
+  let localOK  = null;          // null = pas encore testé
+  let history  = [];            // [{role, content}]
+  let busy     = false;
+  let aborter  = null;
+
+  /* ---------- état visuel ---------- */
+  function setState(txt, color){
+    stateEl.textContent = txt;
+    stateEl.style.color = color || '';
+  }
+
+  function bannerHTML(kind, html){
+    banner.className = 'mode-banner' + (kind ? ' ' + kind : '');
+    banner.innerHTML = html;
+  }
+
+  function refreshBanner(){
+    const eff = effectiveMode();
+    if (eff === 'local'){
+      bannerHTML('local', 'Connecté à <b>ta Nova locale</b> (localhost:8787) — vraies données, vraie mémoire.');
+    } else if (eff === 'groq'){
+      bannerHTML('groq', 'Le <b>vrai modèle</b> répond via ta clé Groq — clé stockée dans ton navigateur uniquement.');
+    } else if (mode === 'local' && localOK === false){
+      bannerHTML('err', 'Aucune Nova détectée sur localhost:8787 — <b>lance l\'app</b> ou choisis un autre mode.');
+    } else if (mode === 'groq' && !groqKey){
+      bannerHTML('err', 'Colle ta clé Groq ci-dessus pour activer ce mode.');
+    } else {
+      bannerHTML('', 'Mode <b>hors ligne</b> : réponses pré-écrites. Lance Nova sur ton Mac, ou branche une clé Groq, pour du vrai.');
+    }
+    /* LED de la pastille « Ma Nova locale » */
+    chips.forEach(c => {
+      const led = c.querySelector('.led');
+      if (c.dataset.mode === 'local') led.classList.toggle('ok', localOK === true);
+    });
+  }
+
+  function effectiveMode(){
+    if (mode === 'local')  return localOK ? 'local' : (groqKey ? 'groq' : 'offline');
+    if (mode === 'groq')   return groqKey ? 'groq' : 'offline';
+    if (mode === 'offline')return 'offline';
+    /* auto */
+    if (localOK) return 'local';
+    if (groqKey) return 'groq';
+    return 'offline';
+  }
+
+  function refreshChips(){
+    chips.forEach(c => c.classList.toggle('active', c.dataset.mode === mode));
+    keyRow.classList.toggle('show', mode === 'groq');
+    keyHint.classList.toggle('show', mode === 'groq');
+    refreshBanner();
+  }
+
+  /* ---------- détection de la Nova locale ---------- */
+  function detectLocal(){
+    const ctl = new AbortController();
+    const to = setTimeout(() => ctl.abort(), 1500);
+    return fetch(LOCAL + '/api/status', { signal: ctl.signal })
+      .then(r => (r.ok ? r.json() : null))
+      .then(j => { clearTimeout(to); localOK = !!(j && typeof j.hasKey === 'boolean'); })
+      .catch(() => { clearTimeout(to); localOK = false; })
+      .then(() => { refreshBanner(); return localOK; });
+  }
+
+  /* ---------- rendu des bulles ---------- */
+  function bubble(cls, txt){
+    const d = document.createElement('div');
+    d.className = 'msg ' + cls;
+    if (txt) d.textContent = txt;
+    log.appendChild(d);
+    log.scrollTop = log.scrollHeight;
+    return d;
+  }
+
+  function scrollLog(){ log.scrollTop = log.scrollHeight; }
+
+  /* ---------- moteur hors ligne (réponses pré-écrites) ---------- */
+  const OFFLINE = [
+    { re:/bonjour|salut|hello|coucou|hey/i,
+      txt:"Bonjour ! Ici je suis en mode hors ligne — sur ton Mac, je répondrais à voix haute, avec de vraies réponses." },
+    { re:/heure|il est/i,
+      txt:"Ici je n'ai pas d'horloge — mais en mode local, « quelle heure est-il ? » te donne l'heure exacte de ta machine, en une passe." },
+    { re:/m[ée]t[ée]o/i,
+      txt:"En mode local : « il fait quel temps à Namur ? » interroge wttr.in en direct — sans clé d'API." },
+    { re:/sport|s[ée]ance|muscu|programme/i,
+      txt:"Je connais ton programme Pulse : « Quelle séance j'ai aujourd'hui ? » donne exercices, séries et repos. Et « Nova, séance terminée » valide la séance." },
+    { re:/qui es[- ]tu|pr[ée]sente/i,
+      txt:"Je suis une assistante vocale qui vit sur ta machine : ma voix est celle de ton Mac, ma mémoire est un fichier local, mes actions passent par une sandbox avec ta confirmation." },
+    { re:/volume|lumi[èe]re|capture|[ée]cran|ouvre/i,
+      txt:"Je peux régler le volume, ouvrir une app, afficher une notification, prendre une capture d'écran… toujours avec une carte « Autoriser » avant d'agir." },
+    { re:/merci/i,
+      txt:"Avec grand plaisir ! Passe en mode local ou clé Groq pour de vraies réponses." },
+  ];
+  const OFFLINE_FALLBACK = "Mode hors ligne : je n'ai que quelques réponses pré-écrites ici. Lance Nova sur ton Mac (mode local) ou colle une clé Groq gratuite pour que je réponde vraiment à tout.";
+
+  function offlineReply(userTxt){
+    const hit = OFFLINE.find(s => s.re.test(userTxt));
+    streamInto(bubble('nova streaming',''), hit ? hit.txt : OFFLINE_FALLBACK, 'offline');
+  }
+
+  /* streaming caractère par caractère (offline), avec fin propre */
+  function streamInto(el, full, kind){
+    return new Promise(resolve => {
+      let i = 0;
+      const tick = setInterval(() => {
+        i += 1 + Math.floor(Math.random()*3);
+        el.textContent = full.slice(0, i);
+        scrollLog();
+        if (i >= full.length){
+          clearInterval(tick);
+          el.classList.remove('streaming');
+          resolve(full);
+        }
+      }, 20);
+    });
+  }
+
+  /* ---------- parsing SSE OpenAI/Groq (partagé) ---------- */
+  function consumeSSE(res, onDelta){
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '', acc = '';
+    function pump(){
+      return reader.read().then(r => {
+        if (r.done) return acc;
+        buf += decoder.decode(r.value, { stream:true });
+        let idx;
+        while ((idx = buf.indexOf('\n')) !== -1){
+          const line = buf.slice(0, idx).trim();
+          buf = buf.slice(idx + 1);
+          if (!line || line.indexOf('data:') !== 0) continue;
+          const data = line.slice(5).trim();
+          if (data === '[DONE]') return acc;
+          let j = null;
+          try { j = JSON.parse(data); } catch(_) {}
+          if (!j) continue;
+          if (j.error) throw new Error(j.error.message || j.error);
+          const d = j.choices && j.choices[0] && (j.choices[0].delta || j.choices[0].deltas);
+          const piece = d && d.content ? d.content : '';
+          if (piece){ acc += piece; onDelta(acc); }
+        }
+        return pump();
+      });
+    }
+    return pump();
+  }
+
+  /* ---------- moteur local (ta Nova) ---------- */
+  function localReply(){
+    aborter = new AbortController();
+    const el = bubble('nova streaming','');
+    let acc = '';
+    return fetch(LOCAL + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: history, sessionId: 'site-demo' }),
+      signal: aborter.signal,
+    })
+    .then(res => {
+      if (!res.ok) return res.json().catch(() => ({})).then(j => { throw new Error(j.error || 'HTTP ' + res.status); });
+      return consumeSSE(res, (acc2) => {
+        acc = acc2;
+        el.textContent = acc;
+        scrollLog();
+      });
+    })
+    .then((final) => {
+      el.classList.remove('streaming');
+      return final || acc;
+    });
+  }
+
+  /* ---------- moteur Groq (ta clé, depuis le navigateur) ---------- */
+  function groqReply(){
+    aborter = new AbortController();
+    const el = bubble('nova streaming','');
+    let acc = '';
+    const messages =
+      [{ role:'system', content:"Tu es Nova, une assistante vocale française chaleureuse et concise qui vit sur le Mac de l'utilisateur. Réponds en français, en 2 à 5 phrases maximum, sans markdown lourd." }]
+      .concat(history);
+    return fetch(GROQ_URL, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + groqKey },
+      body: JSON.stringify({ model: GROQ_MODEL, messages: messages, stream: true, temperature: 0.7, max_tokens: 400 }),
+      signal: aborter.signal,
+    })
+    .then(res => {
+      if (!res.ok){
+        return res.json().catch(() => ({})).then(j => {
+          const msg = (j.error && j.error.message) || ('HTTP ' + res.status);
+          throw new Error(msg);
+        });
+      }
+      return consumeSSE(res, (acc2) => { acc = acc2; el.textContent = acc; scrollLog(); });
+    })
+    .then((final) => {
+      el.classList.remove('streaming');
+      return final || acc;
+    });
+  }
+
+  /* ---------- orchestration ---------- */
+  function respond(userTxt){
+    const eff = effectiveMode();
+    setState('— réfléchit…', '#cdc6ff');
+    if (orb) orb.set('think');
+
+    const job =
+      (eff === 'local') ? localReply().catch(err => {
+        bubble('nova', '⚠️ Ta Nova locale n\'a pas répondu (' + err.message + '). Repasse en Auto ou vérifie que l\'app tourne.');
+        return null;
+      })
+    : (eff === 'groq') ? groqReply().catch(err => {
+        bubble('nova', '⚠️ Groq a refusé : ' + err.message);
+        return null;
+      })
+    : new Promise(res => setTimeout(() => res(offlineReply(userTxt)), 300 + Math.random()*400));
+
+    job.then((answer) => {
+      if (answer === null){ /* erreur déjà affichée */ }
+      else if (typeof answer === 'string' && answer){
+        history.push({ role:'assistant', content: answer });
+      }
+      if (orb) orb.set('ready');
+      setState('— prête', '');
+      busy = false;
+      aborter = null;
+    });
+  }
+
+  function submit(v){
+    v = (v !== undefined ? v : input.value).trim();
+    if (!v || busy) return;
+    input.value = '';
+    bubble('user', v);
+    history.push({ role:'user', content: v });
+    if (orb) orb.set('listen');
+    setState('— écoute', '#9defd8');
+    busy = true;
+    respond(v);
+  }
+
+  /* ---------- interactions ---------- */
+  send.addEventListener('click', () => submit());
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  clearBtn.addEventListener('click', () => { log.innerHTML = ''; history = []; input.focus(); });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && busy && aborter){
+      aborter.abort();
+      busy = false;
+      setState('— interrompu', '#f5a83c');
+      if (orb) orb.set('ready');
+    }
+  });
+
+  chips.forEach(c => c.addEventListener('click', () => {
+    mode = c.dataset.mode;
+    localStorage.setItem(LS_MODE, mode);
+    refreshChips();
+  }));
+
+  keySave.addEventListener('click', () => {
+    const v = keyInput.value.trim();
+    if (!/^gsk_[A-Za-z0-9_-]{20,}$/.test(v)){
+      keyInput.style.borderColor = '#f5a83c';
+      setTimeout(() => keyInput.style.borderColor = '', 1200);
+      return;
+    }
+    groqKey = v;
+    localStorage.setItem(LS_KEY, v);
+    keyInput.value = '';
+    refreshBanner();
+  });
+
+  /* ---------- accueil ---------- */
+  setTimeout(() => {
+    const b = bubble('nova','');
+    const hello = "Bonjour — écris-moi ! Je cherche d'abord ta Nova locale ; sinon je parle avec ta clé Groq, ou je reste en mode démo.";
+    let i = 0;
+    const tk = setInterval(() => {
+      b.textContent = hello.slice(0, i += 2);
+      if (i >= hello.length) clearInterval(tk);
+    }, 22);
+  }, 500);
+
+  /* ---------- démarrage ---------- */
+  if (groqKey && mode === 'groq') keyInput.placeholder = 'clé enregistrée ✓ — colle-en une autre pour la remplacer';
+  refreshChips();
+  detectLocal();
+  setInterval(detectLocal, 20000); /* l'app peut démarrer pendant la visite */
+})();
+</script>
 </body>
 </html>
